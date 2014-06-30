@@ -18,7 +18,7 @@ else
 fi
 
 rm -rf $WORKSPACE/*
-download_file "https://github.com/PocketMine/php-build-scripts/archive/master.tar.gz" | tar -xzf > /dev/null
+download_file "https://github.com/PocketMine/php-build-scripts/archive/master.tar.gz" | tar -xz > /dev/null
 mv -f $WORKSPACE/php-build-scripts-master/* $WORKSPACE/
 chmod +x $WORKSPACE/compile.sh
 TESTS="$WORKSPACE/tests/test.sh"
