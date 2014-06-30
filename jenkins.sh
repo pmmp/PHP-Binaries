@@ -17,9 +17,11 @@ else
 	fi
 fi
 
-rm -rf $WORKSPACE/compile.sh
-download_file "https://github.com/PocketMine/php-build-scripts/raw/$BRANCH/src/build/compile.sh" > $WORKSPACE/compile.sh
+rm -rf $WORKSPACE/*
+download_file "https://github.com/PocketMine/php-build-scripts/archive/master.tar.gz" | tar -xzf > /dev/null
+mv -f $WORKSPACE/php-build-scripts-master/* $WORKSPACE/
 chmod +x $WORKSPACE/compile.sh
+TESTS="$WORKSPACE/tests/test.sh"
 SCRIPT="$WORKSPACE/compile.sh"
 ARCHIVE="$WORKSPACE/archive"
 COMPILEDIR="$WORKSPACE/compile"
@@ -39,6 +41,8 @@ then
 	if [ ! -f $COMPILEDIR/linux/32bit/bin/php5/bin/php ]; then
 		exit 1
 	fi
+	
+	$TESTS generic
 fi
 
 if [ "$COMPILE_LINUX_64BIT" = "true" ];
@@ -53,6 +57,8 @@ then
 	if [ ! -f $COMPILEDIR/linux/64bit/bin/php5/bin/php ]; then
 		exit 1
 	fi
+	
+	$TESTS generic
 fi
 
 if [ "$COMPILE_MAC_32" = "true" ];
@@ -76,6 +82,8 @@ then
 	if [ ! -f $COMPILEDIR/mac32/bin/php5/bin/php ]; then
 		exit 1
 	fi
+	
+	$TESTS generic
 fi
 
 if [ "$COMPILE_MAC_64" = "true" ];
@@ -99,6 +107,8 @@ then
 	if [ ! -f $COMPILEDIR/mac64/bin/php5/bin/php ]; then
 		exit 1
 	fi
+	
+	$TESTS generic
 fi
 
 if [ "$COMPILE_RPI" = "true" ];
@@ -113,6 +123,8 @@ then
 	if [ ! -f $COMPILEDIR/rpi/bin/php5/bin/php ]; then
 		exit 1
 	fi
+	
+	$TESTS generic
 fi
 
 if [ "$CROSSCOMPILE_ANDROID_ARMV6" = "true" ];
@@ -127,6 +139,8 @@ then
 	if [ ! -f $COMPILEDIR/crosscompile/android-armv6/bin/php5/bin/php ]; then
 		exit 1
 	fi
+	
+	$TESTS android
 fi
 
 if [ "$CROSSCOMPILE_ANDROID_ARMV7" = "true" ];
@@ -141,6 +155,8 @@ then
 	if [ ! -f $COMPILEDIR/crosscompile/android-armv7/bin/php5/bin/php ]; then
 		exit 1
 	fi
+	
+	$TESTS android
 fi
 
 if [ "$CROSSCOMPILE_IOS_ARMV6" = "true" ];
@@ -162,6 +178,8 @@ then
 	if [ ! -f $COMPILEDIR/crosscompile/ios-armv6/bin/php5/bin/php ]; then
 		exit 1
 	fi
+	
+	$TESTS arm
 fi
 
 if [ "$CROSSCOMPILE_IOS_ARMV7" = "true" ];
@@ -183,6 +201,8 @@ then
 	if [ ! -f $COMPILEDIR/crosscompile/ios-armv7/bin/php5/bin/php ]; then
 		exit 1
 	fi
+	
+	$TESTS arm
 fi
 
 if [ "$CROSSCOMPILE_RPI" = "true" ];
@@ -197,6 +217,8 @@ then
 	if [ ! -f $COMPILEDIR/crosscompile/rpi/bin/php5/bin/php ]; then
 		exit 1
 	fi
+	
+	$TESTS arm
 fi
 
 if [ "$CROSSCOMPILE_MAC" = "true" ];

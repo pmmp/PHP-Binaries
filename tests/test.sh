@@ -10,6 +10,7 @@ TEST_NUMBER=${#TEST_NUMBER[@]}
 set +e
 
 INCREMENT=1
+FAILED=0
 for f in "$TEST_DIR"*; do
 	echo -n "[$INCREMENT/$TEST_NUMBER] $f ... "
 	chmod +x "$f"
@@ -17,11 +18,13 @@ for f in "$TEST_DIR"*; do
 	STATUS=$?
 	if [ $STATUS != 0 ]; then
 		echo "FAILED!"
-		exit 1
+		FAILED=$((FAILED+1))
 	else
 		echo "OK"
 	fi
 	INCREMENT=$((INCREMENT+1))
 done
+
+echo "Ran $INCREMENT tests, $FAILED failed."
 
 exit 0
