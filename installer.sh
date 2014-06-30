@@ -76,7 +76,7 @@ if ! [ -s "PocketMine-MP.phar" ] || [ "$(head -n 1 PocketMine-MP.phar)" == '<!DO
 	if [ -s "./src/build/compile.sh" ]; then
 		COMPILE_SCRIPT="./src/build/compile.sh"
 	else
-		download_file "https://raw.githubusercontent.com/PocketMine/php-build-scripts/master/src/build/compile.sh" > compile.sh
+		download_file "https://raw.githubusercontent.com/PocketMine/php-build-scripts/master/compile.sh" > compile.sh
 		COMPILE_SCRIPT="./compile.sh"	
 	fi
 	mv -f PocketMine-MP-$PMMP_VERSION/* ./
@@ -84,7 +84,7 @@ if ! [ -s "PocketMine-MP.phar" ] || [ "$(head -n 1 PocketMine-MP.phar)" == '<!DO
 	rm -f ./start.cmd
 else
 	download_file "https://raw.githubusercontent.com/PocketMine/PocketMine-MP/$PMMP_VERSION/start.sh" > start.sh
-	download_file "https://raw.githubusercontent.com/PocketMine/php-build-scripts/master/src/build/compile.sh" > compile.sh
+	download_file "https://raw.githubusercontent.com/PocketMine/php-build-scripts/master/compile.sh" > compile.sh
 	COMPILE_SCRIPT="./compile.sh"
 fi
 
