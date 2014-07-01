@@ -498,8 +498,8 @@ if [ "$COMPILE_OPENSSL" == "yes" ] || ([ "$COMPILE_CURL" != "no" ] && [ "$IS_CRO
 	--openssldir="$DIR/bin/php5" \
 	zlib \
 	zlib-dynamic \
-	--with-zlib-lib="$DIR/bin/php5/lib"
-	--with-zlib-include="$DIR/bin/php5/include"
+	--with-zlib-lib="$DIR/bin/php5/lib" \
+	--with-zlib-include="$DIR/bin/php5/include" \
 	no-ssl2 \
 	no-asm \
 	no-hw \
