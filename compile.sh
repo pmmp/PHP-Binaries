@@ -493,7 +493,7 @@ if [ "$COMPILE_OPENSSL" == "yes" ] || ([ "$COMPILE_CURL" != "no" ] && [ "$IS_CRO
 	export PKG_CONFIG_PATH="$DIR/bin/php5/lib/pkgconfig"
 	WITH_SSL="--with-ssl"
 	
-	WITH_OPENSSL="--with-openssl=shared,$DIR/bin/php5"
+	WITH_OPENSSL="--with-openssl=$DIR/bin/php5"
 	echo -n "[OpenSSL] downloading $OPENSSL_VERSION..."
 	download_file "http://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 	mv openssl-$OPENSSL_VERSION openssl
@@ -521,9 +521,6 @@ if [ "$COMPILE_OPENSSL" == "yes" ] || ([ "$COMPILE_CURL" != "no" ] && [ "$IS_CRO
 	echo -n " cleaning..."
 	cd ..
 	rm -r -f ./openssh
-	if [ "$DO_STATIC" != "yes" ]; then
-		rm -f "$DIR/bin/php5/lib/libcrypto.a" "$DIR/bin/php5/lib/libssl.a"
-	fi
 	echo " done!"
 else
 	WITH_SSL="--with-ssl"
@@ -735,7 +732,7 @@ RANLIB=$RANLIB ./configure $PHP_OPTIMIZATION --prefix="$DIR/bin/php5" \
 --with-yaml="$DIR/bin/php5" \
 --with-mcrypt="$DIR/bin/php5" \
 --with-gmp="$DIR/bin/php5" \
---with-libdir="$DIR/bin/php5/lib" \
+$WITH_OPENSSL \
 $HAVE_NCURSES \
 $HAVE_READLINE \
 $HAS_POCKETMINE \
