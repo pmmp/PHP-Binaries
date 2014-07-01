@@ -492,7 +492,7 @@ if [ "$COMPILE_OPENSSL" == "yes" ] || ([ "$COMPILE_CURL" != "no" ] && [ "$IS_CRO
 	echo -n " checking..."
 	cd openssl
 	RANLIB=$RANLIB ./config \
-	shared
+	shared \
 	--prefix="$DIR/bin/php5" \
 	--openssldir="$DIR/bin/php5" \
 	-zlib \
