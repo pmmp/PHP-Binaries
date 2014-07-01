@@ -119,6 +119,7 @@ done
 GMP_ABI=""
 
 if [ "$IS_CROSSCOMPILE" == "yes" ]; then
+	export CROSS_COMPILER="$PATH"
 	if [ "$COMPILE_TARGET" == "win" ] || [ "$COMPILE_TARGET" == "win32" ]; then
 		TOOLCHAIN_PREFIX="i686-w64-mingw32"
 		[ -z "$march" ] && march=i686;
