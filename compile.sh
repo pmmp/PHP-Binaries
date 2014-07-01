@@ -487,11 +487,6 @@ if [ "$COMPILE_OPENSSL" == "yes" ] || ([ "$COMPILE_CURL" != "no" ] && [ "$IS_CRO
 	WITH_SSL="--with-ssl=$DIR/bin/php5"
 	WITH_OPENSSL="--with-openssl=shared,$DIR/bin/php5"
 	echo -n "[OpenSSL] downloading $OPENSSL_VERSION..."
-	#zlib 
-	#zlib-dynamic
-	#--with-zlib-lib="$DIR/bin/php5/lib"
-	#--with-zlib-include="$DIR/bin/php5/include"
-	
 	download_file "http://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 	mv openssl-$OPENSSL_VERSION openssl
 	echo -n " checking..."
@@ -499,13 +494,16 @@ if [ "$COMPILE_OPENSSL" == "yes" ] || ([ "$COMPILE_CURL" != "no" ] && [ "$IS_CRO
 	RANLIB=$RANLIB ./Configure \
 	$OPENSSL_TARGET \
 	shared \
-	no-hw \
-	no-zlib \
-	no-asm \
-	no-engines \
 	--prefix="$DIR/bin/php5" \
 	--openssldir="$DIR/bin/php5" \
-	$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
+	zlib \
+	zlib-dynamic \
+	--with-zlib-lib="$DIR/bin/php5/lib"
+	--with-zlib-include="$DIR/bin/php5/include"
+	no-ssl2 \
+	no-asm \
+	no-hw \
+	no-engines >> "$DIR/install.log" 2>&1
 	echo -n " compiling..."
 	make depend >> "$DIR/install.log" 2>&1
 	make >> "$DIR/install.log" 2>&1
