@@ -499,10 +499,9 @@ if [ "$COMPILE_OPENSSL" == "yes" ] || ([ "$COMPILE_CURL" != "no" ] && [ "$IS_CRO
 	RANLIB=$RANLIB ./Configure \
 	$OPENSSL_TARGET \
 	shared \
-	no-zlib \
-	no-ssl2 \
-	no-asm \
 	no-hw \
+	no-zlib \
+	no-asm \
 	no-engines \
 	--prefix="$DIR/bin/php5" \
 	--openssldir="$DIR/bin/php5" \
