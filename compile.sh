@@ -305,6 +305,7 @@ fi
 rm test.* >> "$DIR/install.log" 2>&1
 rm test >> "$DIR/install.log" 2>&1
 
+export CC="$CC"
 export CFLAGS="-O2 -fPIC $CFLAGS"
 export LDFLAGS="$LDFLAGS"
 
@@ -506,8 +507,9 @@ if [ "$COMPILE_OPENSSL" == "yes" ] || ([ "$COMPILE_CURL" != "no" ] && [ "$IS_CRO
 	no-hw \
 	no-engines >> "$DIR/install.log" 2>&1
 	echo -n " compiling..."
-	make depend >> "$DIR/install.log" 2>&1
-	make >> "$DIR/install.log" 2>&1
+	#make depend >> "$DIR/install.log" 2>&1
+	#make >> "$DIR/install.log" 2>&1
+	make build_libs >> "$DIR/install.log" 2>&1
 	echo -n " installing..."
 	make install >> "$DIR/install.log" 2>&1
 	echo -n " cleaning..."
