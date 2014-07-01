@@ -474,7 +474,7 @@ cd ..
 rm -r -f ./gmp
 echo " done!"
 
-if [ "$COMPILE_OPENSSL" == "yes" ] || [[ "$COMPILE_CURL" != "no" ] && [ "$IS_CROSSCOMPILE" != "yes" ]]; then
+if [ "$COMPILE_OPENSSL" == "yes" ] || ([ "$COMPILE_CURL" != "no" ] && [ "$IS_CROSSCOMPILE" != "yes" ]); then
 	#if [ "$DO_STATIC" == "yes" ]; then
 	#	EXTRA_FLAGS=""
 	#else
@@ -485,7 +485,7 @@ if [ "$COMPILE_OPENSSL" == "yes" ] || [[ "$COMPILE_CURL" != "no" ] && [ "$IS_CRO
 
 	#OpenSSL
 	WITH_SSL="--with-ssl=shared,$DIR/bin/php5"
-	WITH_OPENSSL="--with-openssl=$DIR/bin/php5"
+	WITH_OPENSSL="--with-openssl=shared,$DIR/bin/php5"
 	echo -n "[OpenSSL] downloading $OPENSSL_VERSION..."
 	download_file "http://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 	mv openssl-$OPENSSL_VERSION openssl
@@ -727,6 +727,7 @@ RANLIB=$RANLIB ./configure $PHP_OPTIMIZATION --prefix="$DIR/bin/php5" \
 --with-yaml="$DIR/bin/php5" \
 --with-mcrypt="$DIR/bin/php5" \
 --with-gmp="$DIR/bin/php5" \
+$WITH_OPENSSL \
 $HAVE_NCURSES \
 $HAVE_READLINE \
 $HAS_POCKETMINE \
