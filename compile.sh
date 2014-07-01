@@ -117,7 +117,6 @@ while getopts "::t:oj:srcxzff:" OPTION; do
 done
 
 GMP_ABI=""
-export PKG_CONFIG_PATH="$DIR/bin/php5/lib"
 
 if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 	export CROSS_COMPILER="$PATH"
@@ -489,7 +488,11 @@ if [ "$COMPILE_OPENSSL" == "yes" ] || ([ "$COMPILE_CURL" != "no" ] && [ "$IS_CRO
 
 
 	#OpenSSL
-	WITH_SSL="--with-ssl=$DIR/bin/php5"
+	#WITH_SSL="--with-ssl=$DIR/bin/php5"
+	
+	export PKG_CONFIG_PATH="$DIR/bin/php5/lib/pkgconfig"
+	WITH_SSL="--with-ssl"
+	
 	WITH_OPENSSL="--with-openssl=shared,$DIR/bin/php5"
 	echo -n "[OpenSSL] downloading $OPENSSL_VERSION..."
 	download_file "http://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
