@@ -117,6 +117,7 @@ while getopts "::t:oj:srcxzff:" OPTION; do
 done
 
 GMP_ABI=""
+export PKG_CONFIG_PATH="$DIR/bin/php5/lib"
 
 if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 	export CROSS_COMPILER="$PATH"
@@ -152,7 +153,8 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		CFLAGS="-uclibc -static $CFLAGS"
 		LDFLAGS="-static"
 		echo "[INFO] Cross-compiling for Android ARMv6"
-		OPENSSL_TARGET="android"
+		#OPENSSL_TARGET="android"
+		OPENSSL_TARGET="linux-armv4"
 	elif [ "$COMPILE_TARGET" == "android-armv7" ]; then
 		COMPILE_FOR_ANDROID=yes
 		[ -z "$march" ] && march=armv7-a;
@@ -163,7 +165,8 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		CFLAGS="-uclibc -static $CFLAGS"
 		LDFLAGS="-static"
 		echo "[INFO] Cross-compiling for Android ARMv7"
-		OPENSSL_TARGET="android-armv7"
+		#OPENSSL_TARGET="android-armv7"		
+		OPENSSL_TARGET="linux-armv4"
 	elif [ "$COMPILE_TARGET" == "rpi" ]; then
 		TOOLCHAIN_PREFIX="arm-linux-gnueabihf"
 		[ -z "$march" ] && march=armv6zk;
@@ -729,6 +732,7 @@ RANLIB=$RANLIB ./configure $PHP_OPTIMIZATION --prefix="$DIR/bin/php5" \
 --with-yaml="$DIR/bin/php5" \
 --with-mcrypt="$DIR/bin/php5" \
 --with-gmp="$DIR/bin/php5" \
+--with=libdir="$DIR/bin/php5/lib" \
 $HAVE_NCURSES \
 $HAVE_READLINE \
 $HAS_POCKETMINE \
