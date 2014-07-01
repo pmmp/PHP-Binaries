@@ -495,14 +495,14 @@ if [ "$COMPILE_OPENSSL" == "yes" ] || ([ "$COMPILE_CURL" != "no" ] && [ "$IS_CRO
 	shared \
 	--prefix="$DIR/bin/php5" \
 	--openssldir="$DIR/bin/php5" \
-	-zlib \
-	-zlib-dynamic \
+	zlib \
+	zlib-dynamic \
 	--with-zlib-lib="$DIR/bin/php5/lib" \
 	--with-zlib-include="$DIR/bin/php5/include" \
-	-no-ssl2 \
-	-no-asm \
-	-no-hw \
-	-no-engines \
+	no-ssl2 \
+	no-asm \
+	no-hw \
+	no-engines \
 	$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
 	echo -n " compiling..."
 	make depend >> "$DIR/install.log" 2>&1
