@@ -735,7 +735,7 @@ RANLIB=$RANLIB ./configure $PHP_OPTIMIZATION --prefix="$DIR/bin/php5" \
 --with-yaml="$DIR/bin/php5" \
 --with-mcrypt="$DIR/bin/php5" \
 --with-gmp="$DIR/bin/php5" \
---with=libdir="$DIR/bin/php5/lib" \
+--with-libdir="$DIR/bin/php5/lib" \
 $HAVE_NCURSES \
 $HAVE_READLINE \
 $HAS_POCKETMINE \
