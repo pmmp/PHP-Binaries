@@ -61,6 +61,8 @@ IS_CROSSCOMPILE="no"
 IS_WINDOWS="no"
 DO_OPTIMIZE="no"
 DO_STATIC="no"
+LD_PRELOAD=""
+
 while getopts "::t:oj:srcxzff:" OPTION; do
 
 	case $OPTION in
@@ -288,7 +290,7 @@ type $CC >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"$CC\
 [ -z "$march" ] && march=native;
 [ -z "$mtune" ] && mtune=native;
 [ -z "$CFLAGS" ] && CFLAGS="";
-[ -z "$LDFLAGS" ] && LDFLAGS="-Wl,-rpath='\$\$ORIGIN/../lib'";
+[ -z "$LDFLAGS" ] && LDFLAGS="-Wl,-rpath='\$\$ORIGIN/../lib' -Wl,-rpath-link='\$\$ORIGIN/../lib'";
 [ -z "$CONFIGURE_FLAGS" ] && CONFIGURE_FLAGS="";
 
 
@@ -724,7 +726,7 @@ if [ "$(uname -s)" == "Darwin" ] && [ "$IS_CROSSCOMPILE" != "yes" ]; then
 	export EXTRA_CFLAGS=-lresolv
 fi
 
-RANLIB=$RANLIB ./configure $PHP_OPTIMIZATION --prefix="$DIR/bin/php5" \
+RANLIB=$RANLIB LD_LIBRARY_PATH="$DIR/bin/php5/lib" ./configure $PHP_OPTIMIZATION --prefix="$DIR/bin/php5" \
 --exec-prefix="$DIR/bin/php5" \
 --with-curl="$HAVE_CURL" \
 --with-zlib="$DIR/bin/php5" \
