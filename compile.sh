@@ -522,7 +522,7 @@ if [ "$COMPILE_OPENSSL" == "yes" ] || ([ "$COMPILE_CURL" != "no" ] && [ "$IS_CRO
 	make install >> "$DIR/install.log" 2>&1
 	echo -n " cleaning..."
 	cd ..
-	rm -r -f ./openssh
+	rm -r -f ./openssl
 	echo " done!"
 else
 	WITH_SSL="--with-ssl"
