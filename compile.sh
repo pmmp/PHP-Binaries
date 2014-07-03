@@ -504,6 +504,7 @@ if [ "$COMPILE_OPENSSL" == "yes" ] || ([ "$COMPILE_CURL" != "no" ] && [ "$IS_CRO
 	RANLIB=$RANLIB ./Configure \
 	$OPENSSL_TARGET \
 	shared \
+	no-static \
 	--prefix="$DIR/bin/php5" \
 	--openssldir="$DIR/bin/php5" \
 	zlib \
