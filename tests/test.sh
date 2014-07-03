@@ -13,12 +13,13 @@ INCREMENT=0
 FAILED=0
 
 cd "$TEST_DIR"
+echo "Doing tests on $TEST_DIR"
 
 for f in *; do
 	INCREMENT=$((INCREMENT+1))
 	echo -n "[$INCREMENT/$TEST_NUMBER] $f ... "
 	chmod +x "$f"
-	"$f"
+	"./$f"
 	STATUS=$?
 	if [ $STATUS != 0 ]; then
 		echo "FAILED!"
