@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export PHP_BINARIES="$2"
-DIR="$(pwd)"
+DIR="$(cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd)"
 export TEST_DIR="$DIR/$1/"
 
 TEST_NUMBER=("$TEST_DIR"*)
