@@ -1,8 +1,8 @@
 #!/bin/bash
 
-export PHP_BINARIES="$1"
+export PHP_BINARIES="$2"
 DIR="$(pwd)"
-export TEST_DIR="$DIR/$0/"
+export TEST_DIR="$DIR/$1/"
 
 TEST_NUMBER=("$TEST_DIR"*)
 TEST_NUMBER=${#TEST_NUMBER[@]}
