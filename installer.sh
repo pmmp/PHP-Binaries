@@ -52,13 +52,13 @@ done
 
 VERSION_DATA=$(download_file "http://www.pocketmine.net/api/?channel=$CHANNEL")
 
-VERSION=$(echo "$VERSION_DATA" | grep '"version": "[A-Za-z0-9_\.\-]*",' | head -1 | sed -r 's/[ ]*"version": "([A-Za-z0-9_\.\-]*)",[ ]*/\1/')
-BASE_VERSION=$(echo "$VERSION_DATA" | grep '"version": "[A-Za-z0-9_\.\-]*",' | head -1 | sed -r 's/[ ]*"version": "([A-Za-z0-9_\.]*).*",[ ]*/\1/')
-BUILD=$(echo "$VERSION_DATA" | grep '"build": [0-9]*,' | head -1 | sed -r 's/[ ]*"build": ([0-9]*),[ ]*/\1/')
-API_VERSION=$(echo "$VERSION_DATA" | grep '"api_version": "[0-9_\.]*",' | head -1 | sed -r 's/[ ]*"api_version": "([0-9_\.]*)",[ ]*/\1/')
-VERSION_DATE=$(echo "$VERSION_DATA" | grep '"date": [0-9]*,' | head -1 | sed -r 's/[ ]*"date": ([0-9]*),[ ]*/\1/')
+VERSION=$(echo "$VERSION_DATA" | grep '"version"' | cut -d ':' -f2- | tr -d ' ",')
+BASE_VERSION=$(echo "$VERSION" | sed -r 's/([A-Za-z0-9_\.]*).*/\1/')
+BUILD=$(echo "$VERSION_DATA" | grep build | cut -d ':' -f2- | tr -d ' ",')
+API_VERSION=$(echo "$VERSION_DATA" | grep api_version | cut -d ':' -f2- | tr -d ' ",')
+VERSION_DATE=$(echo "$VERSION_DATA" | grep date | cut -d ':' -f2- | tr -d ' ",')
 VERSION_DATE_STRING=$(date --date="@$VERSION_DATE")
-VERSION_DOWNLOAD=$(echo "$VERSION_DATA" | grep '"download_url": ".*"' | head -1 | sed -r 's/[ ]*"download_url": "(.*)"[ ]*/\1/')
+VERSION_DOWNLOAD=$(echo "$VERSION_DATA" | grep download_url | cut -d ':' -f2- | tr -d ' ",')
 
 if [ "$VERSION" == "" ]; then
 	echo "[ERROR] Couldn't get the latest PocketMine-MP version"
@@ -80,7 +80,7 @@ rm -f CONTRIBUTING.md
 rm -f LICENSE
 rm -f start.sh
 rm -f start.bat
-echo -n "[2/3] Downloading PocketMine-MP $VERSION..."
+echo -n "[2/3] Downloading PocketMine-MP $VERSION phar..."
 set +e
 download_file "$VERSION_DOWNLOAD" > PocketMine-MP.phar
 if ! [ -s "PocketMine-MP.phar" ] || [ "$(head -n 1 PocketMine-MP.phar)" == '<!DOCTYPE html>' ]; then
