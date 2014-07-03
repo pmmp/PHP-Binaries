@@ -252,7 +252,7 @@ else
 			download_file "http://sourceforge.net/projects/pocketmine/files/builds/$LINUX_BUILD.tar.gz" | tar -zx > /dev/null 2>&1
 			chmod +x ./bin/php5/bin/*
 			echo -n " checking..."
-			if [ $(./bin/php5/bin/php -r 'echo "yes";' 2>/dev/null) == "yes" ]; then
+			if [ "$(./bin/php5/bin/php -r 'echo \"yes\";' 2>/dev/null)" == "yes" ]; then
 				echo -n " regenerating php.ini..."
 				OPCACHE_PATH="$(find $(pwd) -name opcache.so)"
 				echo "" > "./bin/php5/bin/php.ini"
