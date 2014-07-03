@@ -1,5 +1,4 @@
-#!/bin/bash
-PMMP_VERSION=""
+CHANNEL="stable"
 LINUX_32_BUILD="PHP_5.5.14_x86_Linux"
 LINUX_64_BUILD="PHP_5.5.14_x86-64_Linux"
 MAC_32_BUILD="PHP_5.5.14_x86_MacOS"
@@ -12,6 +11,8 @@ IOS_BUILD="PHP_5.5.13_ARMv6_iOS"
 update=off
 forcecompile=off
 alldone=no
+
+INSTALL_DIRECTORY="./"
 
 #Needed to use aliases
 shopt -s expand_aliases
@@ -28,7 +29,7 @@ else
 fi
 
 
-while getopts "ucdv:" opt; do
+while getopts "ucd:v:" opt; do
   case $opt in
     u)
 	  update=on
@@ -37,10 +38,10 @@ while getopts "ucdv:" opt; do
 	  forcecompile=on
       ;;
 	d)
-	  PMMP_VERSION="master"
+	  INSTALL_DIRECTORY="$OPTARG"
       ;;
 	v)
-	  PMMP_VERSION="$OPTARG"
+	  CHANNEL="$OPTARG"
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -49,47 +50,57 @@ while getopts "ucdv:" opt; do
   esac
 done
 
-if [ "$PMMP_VERSION" == "" ]; then
-	PMMP_VERSION=$(download_file "https://api.github.com/repos/PocketMine/PocketMine-MP/tags" | grep '"name": "[A-Za-z0-9_\.]*",' | head -1 | sed -r 's/[ ]*"name": "([A-Za-z0-9_\.]*)",[ ]*/\1/')
-	if [ "$PMMP_VERSION" == "" ]; then
-		echo "[ERROR] Couldn't get the latest PocketMine-MP version"
-		exit 1
-	fi
+VERSION_DATA=$(download_file "http://www.pocketmine.net/api/?channel=$CHANNEL")
+
+VERSION=$(echo "$VERSION_DATA" | grep '"version": "[A-Za-z0-9_\.\-]*",' | head -1 | sed -r 's/[ ]*"version": "([A-Za-z0-9_\.\-]*)",[ ]*/\1/')
+BASE_VERSION=$(echo "$VERSION_DATA" | grep '"version": "[A-Za-z0-9_\.\-]*",' | head -1 | sed -r 's/[ ]*"version": "([A-Za-z0-9_\.]*).*",[ ]*/\1/')
+BUILD=$(echo "$VERSION_DATA" | grep '"build": [0-9]*,' | head -1 | sed -r 's/[ ]*"build": ([0-9]*),[ ]*/\1/')
+API_VERSION=$(echo "$VERSION_DATA" | grep '"api_version": "[0-9_\.]*",' | head -1 | sed -r 's/[ ]*"api_version": "([0-9_\.]*)",[ ]*/\1/')
+VERSION_DATE=$(echo "$VERSION_DATA" | grep '"date": [0-9]*,' | head -1 | sed -r 's/[ ]*"date": ([0-9]*),[ ]*/\1/')
+VERSION_DATE_STRING=$(date --date="@$VERSION_DATE")
+VERSION_DOWNLOAD=$(echo "$VERSION_DATA" | grep '"download_url": ".*"' | head -1 | sed -r 's/[ ]*"download_url": "(.*)"[ ]*/\1/')
+
+if [ "$VERSION" == "" ]; then
+	echo "[ERROR] Couldn't get the latest PocketMine-MP version"
+	exit 1
 fi
 
-echo "[INFO] PocketMine-MP $PMMP_VERSION downloader & installer for Linux & Mac"
+echo "[INFO] Found PocketMine-MP $BASE_VERSION (build $BUILD) using API $API_VERSION"
+echo "[INFO] This $CHANNEL build was released on $VERSION_DATE_STRING"
 
+echo "[INFO] Installing/updating PocketMine-MP on directory $INSTALL_DIRECTORY"
+mkdir -m 0777 "$INSTALL_DIRECTORY" 2> /dev/null
+cd "$INSTALL_DIRECTORY"
 echo "[1/3] Cleaning..."
 rm -r -f src/
+rm -f PocketMine-MP.phar
 rm -f PocketMine-MP.php
 rm -f README.md
 rm -f CONTRIBUTING.md
 rm -f LICENSE
 rm -f start.sh
 rm -f start.bat
-echo "[2/3] Downloading PocketMine-MP $PMMP_VERSION..."
+echo -n "[2/3] Downloading PocketMine-MP $VERSION..."
 set +e
-download_file "https://github.com/PocketMine/PocketMine-MP/releases/download/$PMMP_VERSION/PocketMine-MP.phar" > PocketMine-MP.phar
+download_file "$VERSION_DOWNLOAD" > PocketMine-MP.phar
 if ! [ -s "PocketMine-MP.phar" ] || [ "$(head -n 1 PocketMine-MP.phar)" == '<!DOCTYPE html>' ]; then
-	rm "PocketMine-MP.phar" > /dev/null
-	download_file "https://github.com/PocketMine/PocketMine-MP/archive/$PMMP_VERSION.tar.gz" | tar -zx > /dev/null
-	if [ -s "./src/build/compile.sh" ]; then
-		COMPILE_SCRIPT="./src/build/compile.sh"
-	else
-		download_file "https://raw.githubusercontent.com/PocketMine/php-build-scripts/master/compile.sh" > compile.sh
-		COMPILE_SCRIPT="./compile.sh"	
-	fi
-	mv -f PocketMine-MP-$PMMP_VERSION/* ./
-	rm -f -r PocketMine-MP-$PMMP_VERSION/
-	rm -f ./start.cmd
+	rm "PocketMine-MP.phar" 2> /dev/null
+	echo " failed!"
+	echo "[ERROR] Couldn't download PocketMine-MP automatically from $VERSION_DOWNLOAD"
+	exit 1
 else
-	download_file "https://raw.githubusercontent.com/PocketMine/PocketMine-MP/$PMMP_VERSION/start.sh" > start.sh
+	download_file "https://raw.githubusercontent.com/PocketMine/PocketMine-MP/master/start.sh" > start.sh
+	download_file "https://raw.githubusercontent.com/PocketMine/PocketMine-MP/master/LICENSE" > LICENSE
+	download_file "https://raw.githubusercontent.com/PocketMine/PocketMine-MP/master/README.md" > README.md
+	download_file "https://raw.githubusercontent.com/PocketMine/PocketMine-MP/master/CONTRIBUTING.md" > CONTRIBUTING.md
 	download_file "https://raw.githubusercontent.com/PocketMine/php-build-scripts/master/compile.sh" > compile.sh
-	COMPILE_SCRIPT="./compile.sh"
 fi
 
-chmod +x "$COMPILE_SCRIPT"
-chmod +x ./start.sh
+chmod +x compile.sh
+chmod +x start.sh
+
+echo " done!"
+
 if [ "$update" == "on" ]; then
 	echo "[3/3] Skipping PHP recompilation due to user request"
 else
@@ -270,12 +281,12 @@ else
 		if [ "$alldone" == "no" ]; then
 			set -e
 			echo "[3/3] no build found, compiling PHP"
-			exec "$COMPILE_SCRIPT"
+			exec "./compile.sh"
 		fi
 	fi
 fi
-if [ "$COMPILE_SCRIPT" == "./compile.sh" ]; then
-	rm "$COMPILE_SCRIPT"
-fi
+
+rm compile.sh
+
 echo "[INFO] Everything done! Run ./start.sh to start PocketMine-MP"
 exit 0
