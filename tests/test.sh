@@ -1,6 +1,7 @@
 #!/bin/bash
 
 export PHP_BINARIES="$2"
+chmod +x "$PHP_BINARIES"
 DIR="$(cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd)"
 export TEST_DIR="$DIR/$1/"
 

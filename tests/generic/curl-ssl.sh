@@ -24,7 +24,7 @@ if($ret === false){
 
 EOF
 
-OUTPUT=$("$PHP_BINARIES/bin/php" curl-ssl.php)
+OUTPUT=$("$PHP_BINARIES" curl-ssl.php)
 
 rm curl-ssl.php
 
