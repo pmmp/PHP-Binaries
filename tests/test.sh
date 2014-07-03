@@ -12,8 +12,9 @@ set +e
 INCREMENT=0
 FAILED=0
 
-TEST_FILES="$TEST_DIR"*
-for f in $TEST_FILES; do
+cd "$TEST_DIR"
+
+for f in *; do
 	INCREMENT=$((INCREMENT+1))
 	echo -n "[$INCREMENT/$TEST_NUMBER] $f ... "
 	chmod +x "$f"
