@@ -105,6 +105,8 @@ if [ "$update" == "on" ]; then
 	echo "[3/3] Skipping PHP recompilation due to user request"
 else
 	echo -n "[3/3] Obtaining PHP:"
+	SECONDS_10=$(date --date="10 seconds" -u +%s)
+	EXTRA_URL="?r=&ts=$SECONDS_10"
 	echo " detecting if build is available..."
 	if [ "$forcecompile" == "off" ] && [ "$(uname -s)" == "Darwin" ]; then
 		set +e
@@ -114,7 +116,7 @@ else
 		if [[ "$IS_IOS" -gt 0 ]]; then
 			rm -r -f bin/ >> /dev/null 2>&1
 			echo -n "[3/3] iOS PHP build available, downloading $IOS_BUILD.tar.gz..."
-			download_file "http://sourceforge.net/projects/pocketmine/files/builds/$IOS_BUILD.tar.gz" | tar -zx > /dev/null 2>&1
+			download_file "https://downloads.sourceforge.net/project/pocketmine/builds/$IOS_BUILD.tar.gz$EXTRA_URL" | tar -zx > /dev/null 2>&1
 			chmod +x ./bin/php5/bin/*
 			echo -n " checking..."
 			if [ $(./bin/php5/bin/php -r 'echo "yes";' 2>/dev/null) == "yes" ]; then
@@ -142,7 +144,7 @@ else
 				echo -n "[3/3] MacOS 32-bit PHP build available, downloading $MAC_32_BUILD.tar.gz..."
 				MAC_BUILD="$MAC_32_BUILD"
 			fi
-			download_file "http://sourceforge.net/projects/pocketmine/files/builds/$MAC_BUILD.tar.gz" | tar -zx > /dev/null 2>&1
+			download_file "https://downloads.sourceforge.net/project/pocketmine/builds/$MAC_BUILD.tar.gz$EXTRA_URL" | tar -zx > /dev/null 2>&1
 			chmod +x ./bin/php5/bin/*
 			echo -n " checking..."
 			if [ $(./bin/php5/bin/php -r 'echo "yes";' 2>/dev/null) == "yes" ]; then
@@ -180,7 +182,7 @@ else
 		if [ "$IS_RPI" -eq 0 ] && [ "$forcecompile" == "off" ]; then
 			rm -r -f bin/ >> /dev/null 2>&1
 			echo -n "[3/3] Raspberry Pi PHP build available, downloading $RPI_BUILD.tar.gz..."
-			download_file "http://sourceforge.net/projects/pocketmine/files/builds/$RPI_BUILD.tar.gz" | tar -zx > /dev/null 2>&1
+			download_file "https://downloads.sourceforge.net/project/pocketmine/builds/$RPI_BUILD.tar.gz$EXTRA_URL" | tar -zx > /dev/null 2>&1
 			chmod +x ./bin/php5/bin/*
 			echo -n " checking..."
 			if [ $(./bin/php5/bin/php -r 'echo "yes";' 2>/dev/null) == "yes" ]; then
@@ -212,7 +214,7 @@ else
 		elif [ "$IS_ODROID" -eq 0 ] && [ "$forcecompile" == "off" ]; then
 			rm -r -f bin/ >> /dev/null 2>&1
 			echo -n "[3/3] ODROID PHP build available, downloading $ODROID_BUILD.tar.gz..."
-			download_file "http://sourceforge.net/projects/pocketmine/files/builds/$ODROID_BUILD.tar.gz" | tar -zx > /dev/null 2>&1
+			download_file "https://downloads.sourceforge.net/project/pocketmine/builds/$ODROID_BUILD.tar.gz$EXTRA_URL" | tar -zx > /dev/null 2>&1
 			chmod +x ./bin/php5/bin/*
 			echo -n " checking..."
 			if [ $(./bin/php5/bin/php -r 'echo "yes";' 2>/dev/null) == "yes" ]; then
@@ -249,10 +251,10 @@ else
 				echo -n "[3/3] Linux 32-bit PHP build available, downloading $LINUX_32_BUILD.tar.gz..."
 				LINUX_BUILD="$LINUX_32_BUILD"
 			fi
-			download_file "http://sourceforge.net/projects/pocketmine/files/builds/$LINUX_BUILD.tar.gz" | tar -zx > /dev/null 2>&1
+			download_file "https://downloads.sourceforge.net/project/pocketmine/builds/$LINUX_BUILD.tar.gz$EXTRA_URL" | tar -zx > /dev/null 2>&1
 			chmod +x ./bin/php5/bin/*
 			echo -n " checking..."
-			if [ "$(./bin/php5/bin/php -r 'echo \"yes\";' 2>/dev/null)" == "yes" ]; then
+			if [ $(./bin/php5/bin/php -r 'echo "yes";' 2>/dev/null) == "yes" ]; then
 				echo -n " regenerating php.ini..."
 				OPCACHE_PATH="$(find $(pwd) -name opcache.so)"
 				echo "" > "./bin/php5/bin/php.ini"
