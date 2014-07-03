@@ -42,7 +42,7 @@ then
 		exit 1
 	fi
 	
-	$TESTS generic
+	$TESTS generic $COMPILEDIR/linux/32bit/bin/php5/bin/php
 fi
 
 if [ "$COMPILE_LINUX_64BIT" = "true" ];
@@ -58,7 +58,7 @@ then
 		exit 1
 	fi
 	
-	$TESTS generic
+	$TESTS generic $COMPILEDIR/linux/64bit/bin/php5/bin/php
 fi
 
 if [ "$COMPILE_MAC_32" = "true" ];
@@ -83,7 +83,7 @@ then
 		exit 1
 	fi
 	
-	$TESTS generic
+	$TESTS generic $COMPILEDIR/mac32/bin/php5/bin/php
 fi
 
 if [ "$COMPILE_MAC_64" = "true" ];
@@ -108,7 +108,7 @@ then
 		exit 1
 	fi
 	
-	$TESTS generic
+	$TESTS generic $COMPILEDIR/mac64/bin/php5/bin/php
 fi
 
 if [ "$COMPILE_RPI" = "true" ];
@@ -124,7 +124,7 @@ then
 		exit 1
 	fi
 	
-	$TESTS generic
+	$TESTS generic $COMPILEDIR/rpi/bin/php5/bin/php
 fi
 
 if [ "$CROSSCOMPILE_ANDROID_ARMV6" = "true" ];
@@ -140,7 +140,7 @@ then
 		exit 1
 	fi
 	
-	$TESTS android
+	$TESTS android $COMPILEDIR/crosscompile/android-armv6/bin/php5/bin/php
 fi
 
 if [ "$CROSSCOMPILE_ANDROID_ARMV7" = "true" ];
@@ -156,7 +156,7 @@ then
 		exit 1
 	fi
 	
-	$TESTS android
+	$TESTS android $COMPILEDIR/crosscompile/android-armv7/bin/php5/bin/php
 fi
 
 if [ "$CROSSCOMPILE_IOS_ARMV6" = "true" ];
@@ -179,7 +179,7 @@ then
 		exit 1
 	fi
 	
-	$TESTS arm
+	$TESTS arm $COMPILEDIR/crosscompile/ios-armv6/bin/php5/bin/php
 fi
 
 if [ "$CROSSCOMPILE_IOS_ARMV7" = "true" ];
@@ -202,7 +202,7 @@ then
 		exit 1
 	fi
 	
-	$TESTS arm
+	$TESTS arm $COMPILEDIR/crosscompile/ios-armv7/bin/php5/bin/php
 fi
 
 if [ "$CROSSCOMPILE_RPI" = "true" ];
@@ -218,7 +218,7 @@ then
 		exit 1
 	fi
 	
-	$TESTS arm
+	$TESTS arm $COMPILEDIR/crosscompile/rpi/bin/php5/bin/php
 fi
 
 if [ "$CROSSCOMPILE_MAC" = "true" ];

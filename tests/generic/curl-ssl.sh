@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cat <<'EOF'
+cat > curl-ssl.php <<'EOF'
 <?php
 
 $ch = curl_init("https://www.google.com/");
@@ -23,7 +23,6 @@ if($ret === false){
 }
 
 EOF
-) > curl-ssl.php
 
 OUTPUT=$("$PHP_BINARIES/bin/php" curl-ssl.php)
 
