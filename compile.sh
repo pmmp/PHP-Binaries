@@ -3,7 +3,7 @@ PHP_VERSION="5.5.14"
 ZEND_VM="GOTO"
 
 ZLIB_VERSION="1.2.8"
-OPENSSL_VERSION="1.0.1h"
+POLARSSL_VERSION="1.3.7"
 LIBMCRYPT_VERSION="2.5.8"
 GMP_VERSION="6.0.0a"
 GMP_VERSION_DIR="6.0.0"
@@ -53,7 +53,6 @@ COMPILE_FOR_ANDROID=no
 RANLIB=ranlib
 HAVE_MYSQLI="--enable-embedded-mysqli --enable-mysqlnd --with-mysqli=mysqlnd"
 COMPILE_TARGET=""
-COMPILE_OPENSSL="no"
 COMPILE_CURL="default"
 COMPILE_FANCY="no"
 HAS_ZEPHIR="no"
@@ -73,10 +72,6 @@ while getopts "::t:oj:srcxzff:" OPTION; do
 		j)
 			echo "[opt] Set make threads to $OPTARG"
 			THREADS="$OPTARG"
-			;;
-		o)
-			echo "[opt] Will compile OpenSSL"
-			COMPILE_OPENSSL="yes"
 			;;
 		r)
 			echo "[opt] Will compile readline and ncurses"
@@ -129,7 +124,6 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		CFLAGS="$CFLAGS -mconsole"
 		export CC="$TOOLCHAIN_PREFIX-gcc"
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --target=$TOOLCHAIN_PREFIX --build=$TOOLCHAIN_PREFIX"
-		OPENSSL_TARGET="mingw"
 		IS_WINDOWS="yes"
 		GMP_ABI="32"
 		echo "[INFO] Cross-compiling for Windows 32-bit"
@@ -140,7 +134,6 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		CFLAGS="$CFLAGS -mconsole"
 		export CC="$TOOLCHAIN_PREFIX-gcc"
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --target=$TOOLCHAIN_PREFIX --build=$TOOLCHAIN_PREFIX"
-		OPENSSL_TARGET="mingw"
 		IS_WINDOWS="yes"
 		GMP_ABI="64"
 		echo "[INFO] Cross-compiling for Windows 64-bit"
@@ -154,8 +147,6 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		CFLAGS="-uclibc -static $CFLAGS"
 		LDFLAGS="-static"
 		echo "[INFO] Cross-compiling for Android ARMv6"
-		#OPENSSL_TARGET="android"
-		OPENSSL_TARGET="linux-armv4"
 	elif [ "$COMPILE_TARGET" == "android-armv7" ]; then
 		COMPILE_FOR_ANDROID=yes
 		[ -z "$march" ] && march=armv7-a;
@@ -166,8 +157,6 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		CFLAGS="-uclibc -static $CFLAGS"
 		LDFLAGS="-static"
 		echo "[INFO] Cross-compiling for Android ARMv7"
-		#OPENSSL_TARGET="android-armv7"		
-		OPENSSL_TARGET="linux-armv4"
 	elif [ "$COMPILE_TARGET" == "rpi" ]; then
 		TOOLCHAIN_PREFIX="arm-linux-gnueabihf"
 		[ -z "$march" ] && march=armv6zk;
@@ -179,7 +168,6 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		export CC="$TOOLCHAIN_PREFIX-gcc"
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX"
 		[ -z "$CFLAGS" ] && CFLAGS="-uclibc";
-		OPENSSL_TARGET="linux-armv4"
 		echo "[INFO] Cross-compiling for Raspberry Pi ARMv6zk hard float"
 	elif [ "$COMPILE_TARGET" == "mac" ]; then
 		[ -z "$march" ] && march=prescott;
@@ -190,7 +178,6 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX"
 		#zlib doesn't use the correct ranlib
 		RANLIB=$TOOLCHAIN_PREFIX-ranlib
-		OPENSSL_TARGET="darwin64-x86_64-cc"
 		CFLAGS="$CFLAGS -Qunused-arguments -Wno-error=unused-command-line-argument-hard-error-in-future"
 		ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
 		GMP_ABI="32"
@@ -201,14 +188,12 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		TOOLCHAIN_PREFIX="arm-apple-darwin10"
 		export CC="$TOOLCHAIN_PREFIX-gcc"
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --target=$TOOLCHAIN_PREFIX -miphoneos-version-min=4.2"
-		OPENSSL_TARGET="BSD-generic32"
 	elif [ "$COMPILE_TARGET" == "ios-armv7" ]; then
 		[ -z "$march" ] && march=armv7-a;
 		[ -z "$mtune" ] && mtune=cortex-a8;
 		TOOLCHAIN_PREFIX="arm-apple-darwin10"
 		export CC="$TOOLCHAIN_PREFIX-gcc"
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --target=$TOOLCHAIN_PREFIX -miphoneos-version-min=4.2"
-		OPENSSL_TARGET="BSD-generic32"
 		if [ "$DO_OPTIMIZE" == "yes" ]; then
 			CFLAGS="$CFLAGS -mfpu=neon"
 		fi
@@ -220,21 +205,18 @@ elif [ "$COMPILE_TARGET" == "linux" ] || [ "$COMPILE_TARGET" == "linux32" ]; the
 	[ -z "$march" ] && march=i686;
 	[ -z "$mtune" ] && mtune=pentium4;
 	CFLAGS="$CFLAGS -m32";
-	OPENSSL_TARGET="linux-generic32"
 	GMP_ABI="32"
 	echo "[INFO] Compiling for Linux x86"
 elif [ "$COMPILE_TARGET" == "linux64" ]; then
 	[ -z "$march" ] && march=x86-64;
 	[ -z "$mtune" ] && mtune=nocona;
 	CFLAGS="$CFLAGS -m64"
-	OPENSSL_TARGET="linux-x86_64"
 	GMP_ABI="64"
 	echo "[INFO] Compiling for Linux x86_64"
 elif [ "$COMPILE_TARGET" == "rpi" ]; then
 	[ -z "$march" ] && march=armv6zk;
 	[ -z "$mtune" ] && mtune=arm1176jzf-s;
 	CFLAGS="$CFLAGS -mfloat-abi=hard -mfpu=vfp";
-	OPENSSL_TARGET="linux-armv4"
 	echo "[INFO] Compiling for Raspberry Pi ARMv6zk hard float"
 elif [ "$COMPILE_TARGET" == "mac" ] || [ "$COMPILE_TARGET" == "mac32" ]; then
 	[ -z "$march" ] && march=prescott;
@@ -242,7 +224,6 @@ elif [ "$COMPILE_TARGET" == "mac" ] || [ "$COMPILE_TARGET" == "mac32" ]; then
 	CFLAGS="$CFLAGS -m32 -arch i386 -fomit-frame-pointer -mmacosx-version-min=10.5";
 	LDFLAGS="$LDFLAGS -Wl,-rpath,@loader_path/../lib";
 	export DYLD_LIBRARY_PATH="@loader_path/../lib"
-	OPENSSL_TARGET="darwin-i386-cc"
 	CFLAGS="$CFLAGS -Qunused-arguments -Wno-error=unused-command-line-argument-hard-error-in-future"
 	ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
 	GMP_ABI="32"
@@ -253,7 +234,6 @@ elif [ "$COMPILE_TARGET" == "mac64" ]; then
 	CFLAGS="$CFLAGS -m64 -arch x86_64 -fomit-frame-pointer -mmacosx-version-min=10.5";
 	LDFLAGS="$LDFLAGS -Wl,-rpath,@loader_path/../lib";
 	export DYLD_LIBRARY_PATH="@loader_path/../lib"
-	OPENSSL_TARGET="darwin64-x86_64-cc"
 	CFLAGS="$CFLAGS -Qunused-arguments -Wno-error=unused-command-line-argument-hard-error-in-future"
 	ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
 	GMP_ABI="64"
@@ -262,17 +242,14 @@ elif [ "$COMPILE_TARGET" == "ios" ]; then
 	[ -z "$march" ] && march=armv7-a;
 	[ -z "$mtune" ] && mtune=cortex-a8;
 	echo "[INFO] Compiling for iOS ARMv7"
-	OPENSSL_TARGET="linux-armv4"
 elif [ -z "$CFLAGS" ]; then
 	if [ `getconf LONG_BIT` == "64" ]; then
 		echo "[INFO] Compiling for current machine using 64-bit"
 		CFLAGS="-m64 $CFLAGS"
-		OPENSSL_TARGET="linux-x86_64"
 		GMP_ABI="64"
 	else
 		echo "[INFO] Compiling for current machine using 32-bit"
 		CFLAGS="-m32 $CFLAGS"
-		OPENSSL_TARGET="linux-generic32"
 		GMP_ABI="32"
 	fi
 fi
@@ -480,57 +457,29 @@ cd ..
 rm -r -f ./gmp
 echo " done!"
 
-if [ "$COMPILE_OPENSSL" == "yes" ] || ([ "$COMPILE_CURL" != "no" ] && [ "$IS_CROSSCOMPILE" != "yes" ]); then
+if [ "$(uname -s)" != "Darwin" ] || [ "$IS_CROSSCOMPILE" == "yes" ] || [ "$COMPILE_CURL" == "yes" ]; then
 	#if [ "$DO_STATIC" == "yes" ]; then
 	#	EXTRA_FLAGS=""
 	#else
 	#	EXTRA_FLAGS="shared no-static"
 	#fi
-	#EXTRA_FLAGS="shared no-static"
 
 
-	#OpenSSL
-	#WITH_SSL="--with-ssl=$DIR/bin/php5"
-	
-	export PKG_CONFIG_PATH="$DIR/bin/php5/lib/pkgconfig"
-	WITH_SSL="--with-ssl"
-	
-	WITH_OPENSSL="--with-openssl=$DIR/bin/php5"
-	echo -n "[OpenSSL] downloading $OPENSSL_VERSION..."
-	download_file "http://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv openssl-$OPENSSL_VERSION openssl
+	#PolarSSL
+	echo -n "[PolarSSL] downloading $POLARSSL_VERSION..."
+	download_file "https://polarssl.org/download/polarssl-${POLARSSL_VERSION}-gpl.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv polarssl-${POLARSSL_VERSION} polarssl
 	echo -n " checking..."
-	cd openssl
-	RANLIB=$RANLIB ./Configure \
-	$OPENSSL_TARGET \
-	shared \
-	no-static \
-	--prefix="$DIR/bin/php5" \
-	--openssldir="$DIR/bin/php5" \
-	zlib \
-	zlib-dynamic \
-	--with-zlib-lib="$DIR/bin/php5/lib" \
-	--with-zlib-include="$DIR/bin/php5/include" \
-	no-ssl2 \
-	no-asm \
-	no-hw \
-	no-engines >> "$DIR/install.log" 2>&1
+	cd polarssl
+	sed -i=".backup" 's,DESTDIR=/usr/local,,g' Makefile
 	echo -n " compiling..."
-	#make depend >> "$DIR/install.log" 2>&1
-	#make >> "$DIR/install.log" 2>&1
-	make build_libs >> "$DIR/install.log" 2>&1
+	DESTDIR="$DIR/bin/php5" RANLIB=$RANLIB make -j $THREADS lib >> "$DIR/install.log" 2>&1
 	echo -n " installing..."
-	make install >> "$DIR/install.log" 2>&1
+	DESTDIR="$DIR/bin/php5" make install >> "$DIR/install.log" 2>&1
 	echo -n " cleaning..."
 	cd ..
-	rm -r -f ./openssl
+	rm -r -f ./polarssl
 	echo " done!"
-else
-	WITH_SSL="--with-ssl"
-	WITH_OPENSSL="--without-ssl"
-	if [ "$(uname -s)" == "Darwin" ] && [ "$COMPILE_TARGET" != "crosscompile" ]; then
-		WITH_SSL="--with-darwinssl"	
-	fi
 fi
 
 if [ "$(uname -s)" == "Darwin" ] && [ "$IS_CROSSCOMPILE" != "yes" ] && [ "$COMPILE_CURL" != "yes" ]; then
@@ -570,7 +519,8 @@ else
 	--disable-ldaps \
 	--without-libidn \
 	--with-zlib="$DIR/bin/php5" \
-	$WITH_SSL \
+	--without-ssl \
+	--with-polarssl="$DIR/bin/php5" \
 	--enable-threaded-resolver \
 	--prefix="$DIR/bin/php5" \
 	$EXTRA_FLAGS \
@@ -796,13 +746,13 @@ if [ "$(uname -s)" == "Darwin" ] && [ "$IS_CROSSCOMPILE" != "yes" ]; then
 	install_name_tool -change "$DIR/bin/php5/lib/libmenu.6.0.dylib" "@loader_path/../lib/libmenu.6.0.dylib" "$DIR/bin/php5/bin/php" >> "$DIR/install.log" 2>&1
 	install_name_tool -change "$DIR/bin/php5/lib/libncurses.6.0.dylib" "@loader_path/../lib/libncurses.6.0.dylib" "$DIR/bin/php5/bin/php" >> "$DIR/install.log" 2>&1
 	install_name_tool -change "$DIR/bin/php5/lib/libpanel.6.0.dylib" "@loader_path/../lib/libpanel.6.0.dylib" "$DIR/bin/php5/bin/php" >> "$DIR/install.log" 2>&1
-	install_name_tool -change "$DIR/bin/php5/lib/libssl.1.0.0.dylib" "@loader_path/../lib/libssl.1.0.0.dylib" "$DIR/bin/php5/bin/php" >> "$DIR/install.log" 2>&1
-	install_name_tool -change "$DIR/bin/php5/lib/libssl.1.0.0.dylib" "@loader_path/../lib/libssl.1.0.0.dylib" "$DIR/bin/php5/lib/libcurl.4.dylib" >> "$DIR/install.log" 2>&1
-	install_name_tool -change "$DIR/bin/php5/lib/libcrypto.1.0.0.dylib" "@loader_path/../lib/libcrypto.1.0.0.dylib" "$DIR/bin/php5/bin/php" >> "$DIR/install.log" 2>&1
-	install_name_tool -change "$DIR/bin/php5/lib/libcrypto.1.0.0.dylib" "@loader_path/../lib/libcrypto.1.0.0.dylib" "$DIR/bin/php5/lib/libcurl.4.dylib" >> "$DIR/install.log" 2>&1
-	chmod 0777 "$DIR/bin/php5/lib/libssl.1.0.0.dylib" >> "$DIR/install.log" 2>&1
-	install_name_tool -change "$DIR/bin/php5/lib/libcrypto.1.0.0.dylib" "@loader_path/libcrypto.1.0.0.dylib" "$DIR/bin/php5/lib/libssl.1.0.0.dylib" >> "$DIR/install.log" 2>&1
-	chmod 0755 "$DIR/bin/php5/lib/libssl.1.0.0.dylib" >> "$DIR/install.log" 2>&1
+	#install_name_tool -change "$DIR/bin/php5/lib/libssl.1.0.0.dylib" "@loader_path/../lib/libssl.1.0.0.dylib" "$DIR/bin/php5/bin/php" >> "$DIR/install.log" 2>&1
+	#install_name_tool -change "$DIR/bin/php5/lib/libssl.1.0.0.dylib" "@loader_path/../lib/libssl.1.0.0.dylib" "$DIR/bin/php5/lib/libcurl.4.dylib" >> "$DIR/install.log" 2>&1
+	#install_name_tool -change "$DIR/bin/php5/lib/libcrypto.1.0.0.dylib" "@loader_path/../lib/libcrypto.1.0.0.dylib" "$DIR/bin/php5/bin/php" >> "$DIR/install.log" 2>&1
+	#install_name_tool -change "$DIR/bin/php5/lib/libcrypto.1.0.0.dylib" "@loader_path/../lib/libcrypto.1.0.0.dylib" "$DIR/bin/php5/lib/libcurl.4.dylib" >> "$DIR/install.log" 2>&1
+	#chmod 0777 "$DIR/bin/php5/lib/libssl.1.0.0.dylib" >> "$DIR/install.log" 2>&1
+	#install_name_tool -change "$DIR/bin/php5/lib/libcrypto.1.0.0.dylib" "@loader_path/libcrypto.1.0.0.dylib" "$DIR/bin/php5/lib/libssl.1.0.0.dylib" >> "$DIR/install.log" 2>&1
+	#chmod 0755 "$DIR/bin/php5/lib/libssl.1.0.0.dylib" >> "$DIR/install.log" 2>&1
 	set -e
 fi
 
