@@ -1,6 +1,8 @@
 CHANNEL="stable"
 LINUX_32_BUILD="PHP_5.5.14_x86_Linux"
 LINUX_64_BUILD="PHP_5.5.14_x86-64_Linux"
+CENTOS_32_BUILD="PHP_5.5.14_x86_CentOS"
+CENTOS_64_BUILD="PHP_5.5.14_x86-64_CentOS"
 MAC_32_BUILD="PHP_5.5.14_x86_MacOS"
 MAC_64_BUILD="PHP_5.5.14_x86-64_MacOS"
 RPI_BUILD="PHP_5.5.14_ARM_Raspbian_hard"
@@ -244,13 +246,25 @@ else
 			fi
 		elif [ "$forcecompile" == "off" ] && [ "$(uname -s)" == "Linux" ]; then
 			rm -r -f bin/ >> /dev/null 2>&1
-			if [ `getconf LONG_BIT` = "64" ]; then
-				echo -n "[3/3] Linux 64-bit PHP build available, downloading $LINUX_64_BUILD.tar.gz..."
-				LINUX_BUILD="$LINUX_64_BUILD"
+			
+			if [[ "$(cat /etc/redhat-release 2>/dev/null)" == *CentOS* ]]; then
+				if [ `getconf LONG_BIT` = "64" ]; then
+					echo -n "[3/3] CentOS 64-bit PHP build available, downloading $CENTOS_64_BUILD.tar.gz..."
+					LINUX_BUILD="$CENTOS_64_BUILD"
+				else
+					echo -n "[3/3] CentOS 32-bit PHP build available, downloading $CENTOS_32_BUILD.tar.gz..."
+					LINUX_BUILD="$CENTOS_32_BUILD"
+				fi
 			else
-				echo -n "[3/3] Linux 32-bit PHP build available, downloading $LINUX_32_BUILD.tar.gz..."
-				LINUX_BUILD="$LINUX_32_BUILD"
+				if [ `getconf LONG_BIT` = "64" ]; then
+					echo -n "[3/3] Linux 64-bit PHP build available, downloading $LINUX_64_BUILD.tar.gz..."
+					LINUX_BUILD="$LINUX_64_BUILD"
+				else
+					echo -n "[3/3] Linux 32-bit PHP build available, downloading $LINUX_32_BUILD.tar.gz..."
+					LINUX_BUILD="$LINUX_32_BUILD"
+				fi
 			fi
+			
 			download_file "https://downloads.sourceforge.net/project/pocketmine/builds/$LINUX_BUILD.tar.gz$EXTRA_URL" | tar -zx > /dev/null 2>&1
 			chmod +x ./bin/php5/bin/*
 			echo -n " checking..."
