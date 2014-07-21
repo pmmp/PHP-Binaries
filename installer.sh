@@ -112,7 +112,11 @@ if [ "$update" == "on" ]; then
 	echo "[3/3] Skipping PHP recompilation due to user request"
 else
 	echo -n "[3/3] Obtaining PHP:"
-	SECONDS_10=$(date --date="10 seconds" -u +%s)
+	if [ "$(uname -s)" == "Darwin" ]; then
+		SECONDS_10=$(date -v+10S +%s)
+	else
+		SECONDS_10=$(date --date="10 seconds" -u +%s)
+	fi
 	EXTRA_URL="?r=&ts=$SECONDS_10"
 	echo " detecting if build is available..."
 	if [ "$forcecompile" == "off" ] && [ "$(uname -s)" == "Darwin" ]; then
