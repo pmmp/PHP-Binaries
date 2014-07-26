@@ -29,7 +29,7 @@ rm -rf "$ARCHIVE" "$COMPILEDIR"
 mkdir -p "$ARCHIVE"
 mkdir -p "$COMPILEDIR"
 
-PHP_VERSION=$(grep 'PHP_VERSION="' $SCRIPT | sed 's/.*"\(.*\)";/\1/g')
+PHP_VERSION=$(grep 'PHP_VERSION="' $SCRIPT | cut -d '=' -f2- | tr -d ' ",')
 
 if [ "$COMPILE_LINUX_32BIT" = "true" ];
 then
