@@ -2,7 +2,6 @@
 export PATH="/opt/arm-2013.05/bin:/opt/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin:/opt/arm-unknown-linux-uclibcgnueabi/bin:$PATH"
 export THREADS=2
 export LD_PRELOAD=""
-PHP_VERSION="5.5.14"
 
 #Needed to use aliases
 shopt -s expand_aliases
@@ -29,6 +28,8 @@ COMPILEDIR="$WORKSPACE/compile"
 rm -rf "$ARCHIVE" "$COMPILEDIR"
 mkdir -p "$ARCHIVE"
 mkdir -p "$COMPILEDIR"
+
+PHP_VERSION=$(grep 'PHP_VERSION="' $SCRIPT | sed 's/.*"\(.*\)";/\1/g')
 
 if [ "$COMPILE_LINUX_32BIT" = "true" ];
 then
