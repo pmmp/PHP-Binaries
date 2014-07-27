@@ -12,6 +12,7 @@ READLINE_VERSION="6.3"
 NCURSES_VERSION="5.9"
 PHPNCURSES_VERSION="1.0.2"
 PTHREADS_VERSION="2.0.7"
+XDEBUG_VERSION="2.2.5"
 PHP_POCKETMINE_VERSION="0.0.6"
 UOPZ_VERSION="2.0.4"
 WEAKREF_VERSION="0.2.4"
@@ -538,6 +539,12 @@ fi
 
 # PECL libraries
 
+#xdebug
+echo -n "[PHP xdebug] downloading $XDEBUG_VERSION..."
+download_file "http://pecl.php.net/get/xdebug-$XDEBUG_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+mv xdebug-$XDEBUG_VERSION "$DIR/install_data/php/ext/xdebug"
+echo " done!"
+
 #pthreads
 echo -n "[PHP pthreads] downloading $PTHREADS_VERSION..."
 download_file "http://pecl.php.net/get/pthreads-$PTHREADS_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
@@ -688,6 +695,7 @@ LIBRARY_PATH="$DIR/bin/php5/lib:$DIR/bin/php5/lib:$LIBRARY_PATH" RANLIB=$RANLIB 
 $HAVE_NCURSES \
 $HAVE_READLINE \
 $HAS_POCKETMINE \
+--enable-xdebug \
 --enable-mbstring \
 --enable-calendar \
 --enable-weakref \
@@ -766,6 +774,7 @@ echo "phar.readonly=0" >> "$DIR/bin/php5/bin/php.ini"
 echo "phar.require_hash=1" >> "$DIR/bin/php5/bin/php.ini"
 #echo "zend_extension=uopz.so" >> "$DIR/bin/php5/bin/php.ini"
 if [ "$IS_CROSSCOMPILE" != "crosscompile" ]; then
+	echo "zend_extension=xdebug.so" >> "$DIR/bin/php5/bin/php.ini"
 	echo "zend_extension=opcache.so" >> "$DIR/bin/php5/bin/php.ini"
 	echo "opcache.enable=1" >> "$DIR/bin/php5/bin/php.ini"
 	echo "opcache.enable_cli=1" >> "$DIR/bin/php5/bin/php.ini"
