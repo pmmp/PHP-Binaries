@@ -546,7 +546,7 @@ if [ "$DO_STATIC" != "yes" ]; then
 	download_file "http://pecl.php.net/get/xdebug-$XDEBUG_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
 	mv xdebug-$XDEBUG_VERSION "$DIR/install_data/php/ext/xdebug"
 	echo " done!"
-	HAS_XDEBUG="--with-xdebug=shared"
+	HAS_XDEBUG="--enable-xdebug=shared"
 else
 	HAS_XDEBUG=""
 fi
