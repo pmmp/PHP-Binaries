@@ -539,11 +539,17 @@ fi
 
 # PECL libraries
 
-#xdebug
-echo -n "[PHP xdebug] downloading $XDEBUG_VERSION..."
-download_file "http://pecl.php.net/get/xdebug-$XDEBUG_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-mv xdebug-$XDEBUG_VERSION "$DIR/install_data/php/ext/xdebug"
-echo " done!"
+
+if [ "$DO_STATIC" != "yes" ]; then
+	#xdebug
+	echo -n "[PHP xdebug] downloading $XDEBUG_VERSION..."
+	download_file "http://pecl.php.net/get/xdebug-$XDEBUG_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv xdebug-$XDEBUG_VERSION "$DIR/install_data/php/ext/xdebug"
+	echo " done!"
+	HAS_XDEBUG="--with-xdebug=shared"
+else
+	HAS_XDEBUG=""
+fi
 
 #pthreads
 echo -n "[PHP pthreads] downloading $PTHREADS_VERSION..."
@@ -695,7 +701,7 @@ LIBRARY_PATH="$DIR/bin/php5/lib:$DIR/bin/php5/lib:$LIBRARY_PATH" RANLIB=$RANLIB 
 $HAVE_NCURSES \
 $HAVE_READLINE \
 $HAS_POCKETMINE \
---enable-xdebug \
+$HAS_XDEBUG \
 --enable-mbstring \
 --enable-calendar \
 --enable-weakref \
@@ -773,7 +779,7 @@ echo "asp_tags=0" >> "$DIR/bin/php5/bin/php.ini"
 echo "phar.readonly=0" >> "$DIR/bin/php5/bin/php.ini"
 echo "phar.require_hash=1" >> "$DIR/bin/php5/bin/php.ini"
 #echo "zend_extension=uopz.so" >> "$DIR/bin/php5/bin/php.ini"
-if [ "$IS_CROSSCOMPILE" != "crosscompile" ]; then
+if [ "$IS_CROSSCOMPILE" != "yes" ]; then
 	echo "zend_extension=xdebug.so" >> "$DIR/bin/php5/bin/php.ini"
 	echo "zend_extension=opcache.so" >> "$DIR/bin/php5/bin/php.ini"
 	echo "opcache.enable=1" >> "$DIR/bin/php5/bin/php.ini"
