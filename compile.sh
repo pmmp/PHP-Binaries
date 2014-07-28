@@ -18,6 +18,8 @@ UOPZ_VERSION="2.0.4"
 WEAKREF_VERSION="0.2.4"
 PHPYAML_VERSION="1.1.1"
 YAML_VERSION="0.1.4"
+PHPLEVELDB_VERSION="0.1.4"
+LEVELDB_VERSION="1.15.0"
 LIBXML_VERSION="2.9.1"
 BCOMPILER_VERSION="1.0.2"
 
@@ -537,6 +539,94 @@ else
 	HAVE_CURL="$DIR/bin/php5"
 fi
 
+#bcompiler
+#echo -n "[bcompiler] downloading $BCOMPILER_VERSION..."
+#download_file "http://pecl.php.net/get/bcompiler-$BCOMPILER_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+#mv bcompiler-$BCOMPILER_VERSION "$DIR/install_data/php/ext/bcompiler"
+#echo " done!"
+
+#PHP ncurses
+#echo -n "[PHP ncurses] downloading $PHPNCURSES_VERSION..."
+#download_file "http://pecl.php.net/get/ncurses-$PHPNCURSES_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+#mv ncurses-$PHPNCURSES_VERSION "$DIR/install_data/php/ext/ncurses"
+#echo " done!"
+
+
+if [ "$DO_STATIC" == "yes" ]; then
+	EXTRA_FLAGS="--disable-shared --enable-static"
+else
+	EXTRA_FLAGS="--enable-shared --disable-static"
+fi
+#YAML
+echo -n "[YAML] downloading $YAML_VERSION..."
+download_file "http://pyyaml.org/download/libyaml/yaml-$YAML_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+mv yaml-$YAML_VERSION yaml
+echo -n " checking..."
+cd yaml
+RANLIB=$RANLIB ./configure \
+--prefix="$DIR/bin/php5" \
+$EXTRA_FLAGS \
+$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
+sed -i=".backup" 's/ tests win32/ win32/g' Makefile
+echo -n " compiling..."
+make -j $THREADS >> "$DIR/install.log" 2>&1
+echo -n " installing..."
+make install >> "$DIR/install.log" 2>&1
+echo -n " cleaning..."
+cd ..
+rm -r -f ./yaml
+echo " done!"
+
+if [ "$COMPILE_FOR_ANDROID" != "yes" ]; then
+	#LevelDB
+	echo -n "[LevelDB] downloading $LEVELDB_VERSION..."
+	download_file "https://leveldb.googlecode.com/files/leveldb-$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv leveldb-$LEVELDB_VERSION leveldb
+	echo -n " checking..."
+	cd leveldb
+	echo -n " compiling..."
+	make -j $THREADS >> "$DIR/install.log" 2>&1
+	echo -n " installing..."
+	cp libleveldb.a "$DIR/bin/php5/lib/libleveldb.a"
+	cp -r include/leveldb "$DIR/bin/php5/include/"
+	echo -n " cleaning..."
+	cd ..
+	rm -r -f ./leveldb
+	echo " done!"
+fi
+
+if [ "$DO_STATIC" == "yes" ]; then
+	EXTRA_FLAGS="--enable-shared=no --enable-static=yes"
+else
+	EXTRA_FLAGS="--enable-shared=yes --enable-static=no"
+fi
+
+#libxml2
+#echo -n "[libxml2] downloading $LIBXML_VERSION..."
+#download_file "ftp://xmlsoft.org/libxml2/libxml2-$LIBXML_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+#mv libxml2-$LIBXML_VERSION yaml
+#echo -n " checking..."
+#cd libxml2
+#RANLIB=$RANLIB ./configure \
+#--disable-ipv6 \
+#--with-libz="$DIR/bin/php5" \
+#--prefix="$DIR/bin/php5" \
+#$EXTRA_FLAGS \
+#$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
+#echo -n " compiling..."
+#make -j $THREADS >> "$DIR/install.log" 2>&1
+#echo -n " installing..."
+#make install >> "$DIR/install.log" 2>&1
+#echo -n " cleaning..."
+#cd ..
+#rm -r -f ./libxml2
+#echo " done!"
+
+
+
+
+
+
 # PECL libraries
 
 
@@ -585,70 +675,16 @@ download_file "http://pecl.php.net/get/yaml-$PHPYAML_VERSION.tgz" | tar -zx >> "
 mv yaml-$PHPYAML_VERSION "$DIR/install_data/php/ext/yaml"
 echo " done!"
 
-#bcompiler
-#echo -n "[bcompiler] downloading $BCOMPILER_VERSION..."
-#download_file "http://pecl.php.net/get/bcompiler-$BCOMPILER_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-#mv bcompiler-$BCOMPILER_VERSION "$DIR/install_data/php/ext/bcompiler"
-#echo " done!"
-
-#PHP ncurses
-#echo -n "[PHP ncurses] downloading $PHPNCURSES_VERSION..."
-#download_file "http://pecl.php.net/get/ncurses-$PHPNCURSES_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-#mv ncurses-$PHPNCURSES_VERSION "$DIR/install_data/php/ext/ncurses"
-#echo " done!"
-
-
-if [ "$DO_STATIC" == "yes" ]; then
-	EXTRA_FLAGS="--disable-shared --enable-static"
+if [ "$COMPILE_FOR_ANDROID" != "yes" ]; then
+	#PHP LevelDB
+	echo -n "[PHP LevelDB] downloading $PHPLEVELDB_VERSION..."
+	download_file "http://pecl.php.net/get/leveldb-$PHPLEVELDB_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv leveldb-$PHPLEVELDB_VERSION "$DIR/install_data/php/ext/leveldb"
+	echo " done!"
+	WITH_LEVELDB="--with-leveldb=\"$DIR/bin/php5\"" 
 else
-	EXTRA_FLAGS="--enable-shared --disable-static"
+	WITH_LEVELDB=""
 fi
-#YAML
-echo -n "[YAML] downloading $YAML_VERSION..."
-download_file "http://pyyaml.org/download/libyaml/yaml-$YAML_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-mv yaml-$YAML_VERSION yaml
-echo -n " checking..."
-cd yaml
-RANLIB=$RANLIB ./configure \
---prefix="$DIR/bin/php5" \
-$EXTRA_FLAGS \
-$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
-sed -i=".backup" 's/ tests win32/ win32/g' Makefile
-echo -n " compiling..."
-make -j $THREADS >> "$DIR/install.log" 2>&1
-echo -n " installing..."
-make install >> "$DIR/install.log" 2>&1
-echo -n " cleaning..."
-cd ..
-rm -r -f ./yaml
-echo " done!"
-
-if [ "$DO_STATIC" == "yes" ]; then
-	EXTRA_FLAGS="--enable-shared=no --enable-static=yes"
-else
-	EXTRA_FLAGS="--enable-shared=yes --enable-static=no"
-fi
-
-#libxml2
-#echo -n "[libxml2] downloading $LIBXML_VERSION..."
-#download_file "ftp://xmlsoft.org/libxml2/libxml2-$LIBXML_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-#mv libxml2-$LIBXML_VERSION yaml
-#echo -n " checking..."
-#cd libxml2
-#RANLIB=$RANLIB ./configure \
-#--disable-ipv6 \
-#--with-libz="$DIR/bin/php5" \
-#--prefix="$DIR/bin/php5" \
-#$EXTRA_FLAGS \
-#$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
-#echo -n " compiling..."
-#make -j $THREADS >> "$DIR/install.log" 2>&1
-#echo -n " installing..."
-#make install >> "$DIR/install.log" 2>&1
-#echo -n " cleaning..."
-#cd ..
-#rm -r -f ./libxml2
-#echo " done!"
 
 echo -n "[PHP]"
 
@@ -690,6 +726,10 @@ if [ "$(uname -s)" == "Darwin" ] && [ "$IS_CROSSCOMPILE" != "yes" ]; then
 	export EXTRA_CFLAGS=-lresolv
 fi
 
+if [ "$COMPILE_FOR_ANDROID" != "yes" ]; then
+	export LDFLAGS="$LDFLAGS -lstdc++"
+fi
+
 LIBRARY_PATH="$DIR/bin/php5/lib:$DIR/bin/php5/lib:$LIBRARY_PATH" RANLIB=$RANLIB ./configure $PHP_OPTIMIZATION --prefix="$DIR/bin/php5" \
 --exec-prefix="$DIR/bin/php5" \
 --with-curl="$HAVE_CURL" \
@@ -698,6 +738,7 @@ LIBRARY_PATH="$DIR/bin/php5/lib:$DIR/bin/php5/lib:$LIBRARY_PATH" RANLIB=$RANLIB 
 --with-yaml="$DIR/bin/php5" \
 --with-mcrypt="$DIR/bin/php5" \
 --with-gmp="$DIR/bin/php5" \
+$WITH_LEVELDB \
 $HAVE_NCURSES \
 $HAVE_READLINE \
 $HAS_POCKETMINE \
