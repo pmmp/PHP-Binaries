@@ -188,11 +188,13 @@ else
 			fi
 		fi
 	else
-		grep -q sun7i /proc/cpuinfo > /dev/null 2>&1
+		grep -q BCM2708 /proc/cpuinfi > /dev/null 2&1
 		IS_RPI=$?
+		grep -q sun7i /proc/cpuinfo > /dev/null 2>&1
+		IS_BPI=$?
 		grep -q ODROID /proc/cpuinfo > /dev/null 2>&1
 		IS_ODROID=$?
-		if [ "$IS_RPI" -eq 0 ] && [ "$forcecompile" == "off" ]; then
+		if ([ "$IS_RPI" -eq 0 ] || [ "$IS_BPI" -eq 0 ]) && [ "$forcecompile" == "off" ]; then
 			rm -r -f bin/ >> /dev/null 2>&1
 			echo -n "[3/3] Raspberry Pi PHP build available, downloading $RPI_BUILD.tar.gz..."
 			download_file "https://downloads.sourceforge.net/project/pocketmine/builds/$RPI_BUILD.tar.gz$EXTRA_URL" | tar -zx > /dev/null 2>&1
