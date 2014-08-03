@@ -18,7 +18,8 @@ UOPZ_VERSION="2.0.4"
 WEAKREF_VERSION="0.2.4"
 PHPYAML_VERSION="1.1.1"
 YAML_VERSION="0.1.4"
-PHPLEVELDB_VERSION="0.1.4"
+#PHPLEVELDB_VERSION="0.1.4"
+PHPLEVELDB_VERSION="master"
 LEVELDB_VERSION="1.15.0"
 LIBXML_VERSION="2.9.1"
 BCOMPILER_VERSION="1.0.2"
@@ -680,8 +681,10 @@ echo " done!"
 if [ "$COMPILE_FOR_ANDROID" != "yes" ]; then
 	#PHP LevelDB
 	echo -n "[PHP LevelDB] downloading $PHPLEVELDB_VERSION..."
-	download_file "http://pecl.php.net/get/leveldb-$PHPLEVELDB_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv leveldb-$PHPLEVELDB_VERSION "$DIR/install_data/php/ext/leveldb"
+	#download_file "http://pecl.php.net/get/leveldb-$PHPLEVELDB_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+	#mv leveldb-$PHPLEVELDB_VERSION "$DIR/install_data/php/ext/leveldb"
+	download_file "hhttps://github.com/shoghicp/php-leveldb/archive/$PHPLEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv php-leveldb-$PHPLEVELDB_VERSION "$DIR/install_data/php/ext/leveldb"
 	echo " done!"
 	WITH_LEVELDB="--with-leveldb=\"$DIR/bin/php5\"" 
 else
