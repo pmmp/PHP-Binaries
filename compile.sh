@@ -684,12 +684,10 @@ echo " done!"
 if [ "$COMPILE_FOR_ANDROID" != "yes" ]; then
 	#PHP LevelDB
 	echo -n "[PHP LevelDB] downloading $PHPLEVELDB_VERSION..."
-	#download_file "http://pecl.php.net/get/leveldb-$PHPLEVELDB_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-	#mv leveldb-$PHPLEVELDB_VERSION "$DIR/install_data/php/ext/leveldb"
-	download_file "https://github.com/shoghicp/php-leveldb/archive/$PHPLEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv php-leveldb-$PHPLEVELDB_VERSION "$DIR/install_data/php/ext/leveldb"
+	download_file "http://pecl.php.net/get/leveldb-$PHPLEVELDB_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv leveldb-$PHPLEVELDB_VERSION "$DIR/install_data/php/ext/leveldb"
 	echo " done!"
-	WITH_LEVELDB="--with-leveldb=\"$DIR/bin/php5\"" 
+	WITH_LEVELDB="--with-leveldb='$DIR/bin/php5'" 
 else
 	WITH_LEVELDB=""
 fi
