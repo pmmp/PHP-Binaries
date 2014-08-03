@@ -568,7 +568,7 @@ download_file "https://github.com/yaml/libyaml/archive/$YAML_VERSION.tar.gz" | t
 mv libyaml-$YAML_VERSION yaml
 echo -n " checking..."
 cd yaml
-./bootstrap
+./bootstrap >> "$DIR/install.log" 2>&1
 RANLIB=$RANLIB ./configure \
 --prefix="$DIR/bin/php5" \
 $EXTRA_FLAGS \
@@ -686,7 +686,7 @@ if [ "$COMPILE_FOR_ANDROID" != "yes" ]; then
 	echo -n "[PHP LevelDB] downloading $PHPLEVELDB_VERSION..."
 	#download_file "http://pecl.php.net/get/leveldb-$PHPLEVELDB_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
 	#mv leveldb-$PHPLEVELDB_VERSION "$DIR/install_data/php/ext/leveldb"
-	download_file "hhttps://github.com/shoghicp/php-leveldb/archive/$PHPLEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	download_file "https://github.com/shoghicp/php-leveldb/archive/$PHPLEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 	mv php-leveldb-$PHPLEVELDB_VERSION "$DIR/install_data/php/ext/leveldb"
 	echo " done!"
 	WITH_LEVELDB="--with-leveldb=\"$DIR/bin/php5\"" 
