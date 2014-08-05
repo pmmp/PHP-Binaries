@@ -686,7 +686,7 @@ if [ "$COMPILE_FOR_ANDROID" != "yes" ]; then
 	download_file "http://pecl.php.net/get/leveldb-$PHPLEVELDB_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
 	mv leveldb-$PHPLEVELDB_VERSION "$DIR/install_data/php/ext/leveldb"
 	echo " done!"
-	WITH_LEVELDB="--with-leveldb='$DIR/bin/php5'" 
+	WITH_LEVELDB="--with-leveldb=$DIR/bin/php5" 
 else
 	WITH_LEVELDB=""
 fi
