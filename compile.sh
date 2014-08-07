@@ -502,9 +502,7 @@ else
 	mv curl-$CURL_VERSION curl
 	echo -n " checking..."
 	cd curl
-	if [ ! -f ./configure ]; then
-		./buildconf --force >> "$DIR/install.log" 2>&1
-	fi
+	./buildconf --force >> "$DIR/install.log" 2>&1
 	RANLIB=$RANLIB ./configure --disable-dependency-tracking \
 	--enable-ipv6 \
 	--enable-optimize \
