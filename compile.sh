@@ -146,20 +146,20 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		COMPILE_FOR_ANDROID=yes
 		[ -z "$march" ] && march=armv6;
 		[ -z "$mtune" ] && mtune=arm1136jf-s;
-		TOOLCHAIN_PREFIX="arm-unknown-linux-uclibcgnueabi"
+		TOOLCHAIN_PREFIX="arm-linux-musleabi"
 		export CC="$TOOLCHAIN_PREFIX-gcc"
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --enable-static-link --disable-ipv6"
-		CFLAGS="-uclibc -static $CFLAGS"
+		CFLAGS="-static $CFLAGS"
 		LDFLAGS="-static"
 		echo "[INFO] Cross-compiling for Android ARMv6"
 	elif [ "$COMPILE_TARGET" == "android-armv7" ]; then
 		COMPILE_FOR_ANDROID=yes
 		[ -z "$march" ] && march=armv7-a;
 		[ -z "$mtune" ] && mtune=cortex-a8;
-		TOOLCHAIN_PREFIX="arm-unknown-linux-uclibcgnueabi"
+		TOOLCHAIN_PREFIX="arm-linux-musleabi"
 		export CC="$TOOLCHAIN_PREFIX-gcc"
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --enable-static-link --disable-ipv6"
-		CFLAGS="-uclibc -static $CFLAGS"
+		CFLAGS="-static $CFLAGS"
 		LDFLAGS="-static"
 		echo "[INFO] Cross-compiling for Android ARMv7"
 	elif [ "$COMPILE_TARGET" == "rpi" ]; then
