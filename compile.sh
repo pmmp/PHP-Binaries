@@ -3,11 +3,11 @@ PHP_VERSION="5.5.15"
 ZEND_VM="GOTO"
 
 ZLIB_VERSION="1.2.8"
-POLARSSL_VERSION="1.3.7"
+POLARSSL_VERSION="1.3.8"
 LIBMCRYPT_VERSION="2.5.8"
 GMP_VERSION="6.0.0a"
 GMP_VERSION_DIR="6.0.0"
-CURL_VERSION="curl-7_37_0"
+CURL_VERSION="curl-7_37_1"
 READLINE_VERSION="6.3"
 NCURSES_VERSION="5.9"
 PHPNCURSES_VERSION="1.0.2"
@@ -54,6 +54,7 @@ else
 fi
 
 export CC="gcc"
+export CXX="gcc"
 COMPILE_FOR_ANDROID=no
 RANLIB=ranlib
 HAVE_MYSQLI="--enable-embedded-mysqli --enable-mysqlnd --with-mysqli=mysqlnd"
@@ -128,6 +129,7 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		[ -z "$mtune" ] && mtune=pentium4;
 		CFLAGS="$CFLAGS -mconsole"
 		export CC="$TOOLCHAIN_PREFIX-gcc"
+		export CXX="$TOOLCHAIN_PREFIX-g++"
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --target=$TOOLCHAIN_PREFIX --build=$TOOLCHAIN_PREFIX"
 		IS_WINDOWS="yes"
 		GMP_ABI="32"
@@ -138,6 +140,7 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		[ -z "$mtune" ] && mtune=nocona;
 		CFLAGS="$CFLAGS -mconsole"
 		export CC="$TOOLCHAIN_PREFIX-gcc"
+		export CXX="$TOOLCHAIN_PREFIX-g++"
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --target=$TOOLCHAIN_PREFIX --build=$TOOLCHAIN_PREFIX"
 		IS_WINDOWS="yes"
 		GMP_ABI="64"
@@ -148,6 +151,7 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		[ -z "$mtune" ] && mtune=arm1136jf-s;
 		TOOLCHAIN_PREFIX="arm-linux-musleabi"
 		export CC="$TOOLCHAIN_PREFIX-gcc"
+		export CXX="$TOOLCHAIN_PREFIX-g++"
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --enable-static-link --disable-ipv6"
 		CFLAGS="-static $CFLAGS"
 		LDFLAGS="-static"
@@ -158,6 +162,7 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		[ -z "$mtune" ] && mtune=cortex-a8;
 		TOOLCHAIN_PREFIX="arm-linux-musleabi"
 		export CC="$TOOLCHAIN_PREFIX-gcc"
+		export CXX="$TOOLCHAIN_PREFIX-g++"
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --enable-static-link --disable-ipv6"
 		CFLAGS="-static $CFLAGS"
 		LDFLAGS="-static"
@@ -171,6 +176,7 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 			CFLAGS="$CFLAGS -mfloat-abi=hard -mfpu=vfp"
 		fi
 		export CC="$TOOLCHAIN_PREFIX-gcc"
+		export CXX="$TOOLCHAIN_PREFIX-g++"
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX"
 		[ -z "$CFLAGS" ] && CFLAGS="-uclibc";
 		echo "[INFO] Cross-compiling for Raspberry Pi ARMv6zk hard float"
@@ -180,6 +186,7 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		CFLAGS="$CFLAGS -fomit-frame-pointer";
 		TOOLCHAIN_PREFIX="i686-apple-darwin10"
 		export CC="$TOOLCHAIN_PREFIX-gcc"
+		export CXX="$TOOLCHAIN_PREFIX-g++"
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX"
 		#zlib doesn't use the correct ranlib
 		RANLIB=$TOOLCHAIN_PREFIX-ranlib
@@ -192,12 +199,14 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		[ -z "$mtune" ] && mtune=arm1176jzf-s;
 		TOOLCHAIN_PREFIX="arm-apple-darwin10"
 		export CC="$TOOLCHAIN_PREFIX-gcc"
+		export CXX="$TOOLCHAIN_PREFIX-g++"
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --target=$TOOLCHAIN_PREFIX -miphoneos-version-min=4.2"
 	elif [ "$COMPILE_TARGET" == "ios-armv7" ]; then
 		[ -z "$march" ] && march=armv7-a;
 		[ -z "$mtune" ] && mtune=cortex-a8;
 		TOOLCHAIN_PREFIX="arm-apple-darwin10"
 		export CC="$TOOLCHAIN_PREFIX-gcc"
+		export CXX="$TOOLCHAIN_PREFIX-g++"
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --target=$TOOLCHAIN_PREFIX -miphoneos-version-min=4.2"
 		if [ "$DO_OPTIMIZE" == "yes" ]; then
 			CFLAGS="$CFLAGS -mfpu=neon"
@@ -292,6 +301,7 @@ rm test.* >> "$DIR/install.log" 2>&1
 rm test >> "$DIR/install.log" 2>&1
 
 export CC="$CC"
+export CXX="$CXX"
 export CFLAGS="-O2 -fPIC $CFLAGS"
 export LDFLAGS="$LDFLAGS"
 
@@ -580,23 +590,21 @@ cd ..
 rm -r -f ./yaml
 echo " done!"
 
-if [ "$COMPILE_FOR_ANDROID" != "yes" ]; then
-	#LevelDB
-	echo -n "[LevelDB] downloading $LEVELDB_VERSION..."
-	download_file "https://leveldb.googlecode.com/files/leveldb-$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv leveldb-$LEVELDB_VERSION leveldb
-	echo -n " checking..."
-	cd leveldb
-	echo -n " compiling..."
-	make -j $THREADS >> "$DIR/install.log" 2>&1
-	echo -n " installing..."
-	cp libleveldb.a "$DIR/bin/php5/lib/libleveldb.a"
-	cp -r include/leveldb "$DIR/bin/php5/include/"
-	echo -n " cleaning..."
-	cd ..
-	rm -r -f ./leveldb
-	echo " done!"
-fi
+#LevelDB
+echo -n "[LevelDB] downloading $LEVELDB_VERSION..."
+download_file "https://leveldb.googlecode.com/files/leveldb-$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+mv leveldb-$LEVELDB_VERSION leveldb
+echo -n " checking..."
+cd leveldb
+echo -n " compiling..."
+make -j $THREADS >> "$DIR/install.log" 2>&1
+echo -n " installing..."
+cp libleveldb.a "$DIR/bin/php5/lib/libleveldb.a"
+cp -r include/leveldb "$DIR/bin/php5/include/"
+echo -n " cleaning..."
+cd ..
+rm -r -f ./leveldb
+echo " done!"
 
 if [ "$DO_STATIC" == "yes" ]; then
 	EXTRA_FLAGS="--enable-shared=no --enable-static=yes"
@@ -678,16 +686,12 @@ download_file "http://pecl.php.net/get/yaml-$PHPYAML_VERSION.tgz" | tar -zx >> "
 mv yaml-$PHPYAML_VERSION "$DIR/install_data/php/ext/yaml"
 echo " done!"
 
-if [ "$COMPILE_FOR_ANDROID" != "yes" ]; then
-	#PHP LevelDB
-	echo -n "[PHP LevelDB] downloading $PHPLEVELDB_VERSION..."
-	download_file "http://pecl.php.net/get/leveldb-$PHPLEVELDB_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv leveldb-$PHPLEVELDB_VERSION "$DIR/install_data/php/ext/leveldb"
-	echo " done!"
-	WITH_LEVELDB="--with-leveldb=$DIR/bin/php5" 
-else
-	WITH_LEVELDB=""
-fi
+#PHP LevelDB
+echo -n "[PHP LevelDB] downloading $PHPLEVELDB_VERSION..."
+download_file "http://pecl.php.net/get/leveldb-$PHPLEVELDB_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+mv leveldb-$PHPLEVELDB_VERSION "$DIR/install_data/php/ext/leveldb"
+echo " done!"
+
 
 echo -n "[PHP]"
 
@@ -729,10 +733,6 @@ if [ "$(uname -s)" == "Darwin" ] && [ "$IS_CROSSCOMPILE" != "yes" ]; then
 	export EXTRA_CFLAGS=-lresolv
 fi
 
-if [ "$COMPILE_FOR_ANDROID" != "yes" ]; then
-	export LDFLAGS="$LDFLAGS -lstdc++"
-fi
-
 LIBRARY_PATH="$DIR/bin/php5/lib:$DIR/bin/php5/lib:$LIBRARY_PATH" RANLIB=$RANLIB ./configure $PHP_OPTIMIZATION --prefix="$DIR/bin/php5" \
 --exec-prefix="$DIR/bin/php5" \
 --with-curl="$HAVE_CURL" \
@@ -741,7 +741,7 @@ LIBRARY_PATH="$DIR/bin/php5/lib:$DIR/bin/php5/lib:$LIBRARY_PATH" RANLIB=$RANLIB 
 --with-yaml="$DIR/bin/php5" \
 --with-mcrypt="$DIR/bin/php5" \
 --with-gmp="$DIR/bin/php5" \
-$WITH_LEVELDB \
+--with-leveldb="$DIR/bin/php5" \
 $HAVE_NCURSES \
 $HAVE_READLINE \
 $HAS_POCKETMINE \
