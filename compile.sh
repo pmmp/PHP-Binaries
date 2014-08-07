@@ -592,20 +592,20 @@ rm -r -f ./yaml
 echo " done!"
 
 #LevelDB
-echo -n "[LevelDB] downloading $LEVELDB_VERSION..."
-download_file "https://leveldb.googlecode.com/files/leveldb-$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-mv leveldb-$LEVELDB_VERSION leveldb
-echo -n " checking..."
-cd leveldb
-echo -n " compiling..."
-make -j $THREADS >> "$DIR/install.log" 2>&1
-echo -n " installing..."
-cp libleveldb.a "$DIR/bin/php5/lib/libleveldb.a"
-cp -r include/leveldb "$DIR/bin/php5/include/"
-echo -n " cleaning..."
-cd ..
-rm -r -f ./leveldb
-echo " done!"
+#echo -n "[LevelDB] downloading $LEVELDB_VERSION..."
+#download_file "https://leveldb.googlecode.com/files/leveldb-$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+#mv leveldb-$LEVELDB_VERSION leveldb
+#echo -n " checking..."
+#cd leveldb
+#echo -n " compiling..."
+#make -j $THREADS >> "$DIR/install.log" 2>&1
+#echo -n " installing..."
+#cp libleveldb.a "$DIR/bin/php5/lib/libleveldb.a"
+#cp -r include/leveldb "$DIR/bin/php5/include/"
+#echo -n " cleaning..."
+#cd ..
+#rm -r -f ./leveldb
+#echo " done!"
 
 if [ "$DO_STATIC" == "yes" ]; then
 	EXTRA_FLAGS="--enable-shared=no --enable-static=yes"
@@ -688,10 +688,10 @@ mv yaml-$PHPYAML_VERSION "$DIR/install_data/php/ext/yaml"
 echo " done!"
 
 #PHP LevelDB
-echo -n "[PHP LevelDB] downloading $PHPLEVELDB_VERSION..."
-download_file "http://pecl.php.net/get/leveldb-$PHPLEVELDB_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-mv leveldb-$PHPLEVELDB_VERSION "$DIR/install_data/php/ext/leveldb"
-echo " done!"
+#echo -n "[PHP LevelDB] downloading $PHPLEVELDB_VERSION..."
+#download_file "http://pecl.php.net/get/leveldb-$PHPLEVELDB_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+#mv leveldb-$PHPLEVELDB_VERSION "$DIR/install_data/php/ext/leveldb"
+#echo " done!"
 
 
 echo -n "[PHP]"
@@ -734,6 +734,8 @@ if [ "$(uname -s)" == "Darwin" ] && [ "$IS_CROSSCOMPILE" != "yes" ]; then
 	export EXTRA_CFLAGS=-lresolv
 fi
 
+#--with-leveldb="$DIR/bin/php5"
+
 LIBRARY_PATH="$DIR/bin/php5/lib:$DIR/bin/php5/lib:$LIBRARY_PATH" RANLIB=$RANLIB ./configure $PHP_OPTIMIZATION --prefix="$DIR/bin/php5" \
 --exec-prefix="$DIR/bin/php5" \
 --with-curl="$HAVE_CURL" \
@@ -742,7 +744,6 @@ LIBRARY_PATH="$DIR/bin/php5/lib:$DIR/bin/php5/lib:$LIBRARY_PATH" RANLIB=$RANLIB 
 --with-yaml="$DIR/bin/php5" \
 --with-mcrypt="$DIR/bin/php5" \
 --with-gmp="$DIR/bin/php5" \
---with-leveldb="$DIR/bin/php5" \
 $HAVE_NCURSES \
 $HAVE_READLINE \
 $HAS_POCKETMINE \
