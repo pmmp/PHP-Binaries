@@ -94,6 +94,7 @@ while getopts "::t:oj:srcxzff:" OPTION; do
 		s)
 			echo "[opt] Will compile everything statically"
 			DO_STATIC="yes"
+			CFLAGS="$CFLAGS -static"
 			;;
 		z)
 			echo "[opt] Will add PocketMine C PHP extension"
