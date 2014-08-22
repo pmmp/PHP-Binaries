@@ -1,4 +1,6 @@
 CHANNEL="stable"
+NAME="PocketMine-MP"
+
 LINUX_32_BUILD="PHP_5.5.15_x86_Linux"
 LINUX_64_BUILD="PHP_5.5.15_x86-64_Linux"
 CENTOS_32_BUILD="PHP_5.5.15_x86_CentOS"
@@ -52,6 +54,10 @@ while getopts "ucd:v:" opt; do
   esac
 done
 
+if [ "$CHANNEL" == "soft" ]; then
+	NAME="PocketMine-Soft"
+fi
+
 VERSION_DATA=$(download_file "http://www.pocketmine.net/api/?channel=$CHANNEL")
 
 VERSION=$(echo "$VERSION_DATA" | grep '"version"' | cut -d ':' -f2- | tr -d ' ",')
@@ -68,35 +74,39 @@ else
 fi
 
 if [ "$VERSION" == "" ]; then
-	echo "[ERROR] Couldn't get the latest PocketMine-MP version"
+	echo "[ERROR] Couldn't get the latest $NAME version"
 	exit 1
 fi
 
-echo "[INFO] Found PocketMine-MP $BASE_VERSION (build $BUILD) using API $API_VERSION"
+echo "[INFO] Found $NAME $BASE_VERSION (build $BUILD) using API $API_VERSION"
 echo "[INFO] This $CHANNEL build was released on $VERSION_DATE_STRING"
 
-echo "[INFO] Installing/updating PocketMine-MP on directory $INSTALL_DIRECTORY"
+echo "[INFO] Installing/updating $NAME on directory $INSTALL_DIRECTORY"
 mkdir -m 0777 "$INSTALL_DIRECTORY" 2> /dev/null
 cd "$INSTALL_DIRECTORY"
 echo "[1/3] Cleaning..."
 rm -r -f src/
-rm -f PocketMine-MP.phar
+rm -f "$NAME.phar"
 rm -f PocketMine-MP.php
 rm -f README.md
 rm -f CONTRIBUTING.md
 rm -f LICENSE
 rm -f start.sh
 rm -f start.bat
-echo -n "[2/3] Downloading PocketMine-MP $VERSION phar..."
+echo -n "[2/3] Downloading $NAME $VERSION phar..."
 set +e
-download_file "$VERSION_DOWNLOAD" > PocketMine-MP.phar
-if ! [ -s "PocketMine-MP.phar" ] || [ "$(head -n 1 PocketMine-MP.phar)" == '<!DOCTYPE html>' ]; then
-	rm "PocketMine-MP.phar" 2> /dev/null
+download_file "$VERSION_DOWNLOAD" > "$NAME.phar"
+if ! [ -s "$NAME.phar" ] || [ "$(head -n 1 $NAME.phar)" == '<!DOCTYPE html>' ]; then
+	rm "$NAME.phar" 2> /dev/null
 	echo " failed!"
-	echo "[ERROR] Couldn't download PocketMine-MP automatically from $VERSION_DOWNLOAD"
+	echo "[ERROR] Couldn't download $NAME automatically from $VERSION_DOWNLOAD"
 	exit 1
 else
-	download_file "https://raw.githubusercontent.com/PocketMine/PocketMine-MP/master/start.sh" > start.sh
+	if [ "$CHANNEL" == "soft" ]; then
+		download_file "https://raw.githubusercontent.com/PocketMine/PocketMine-Soft/master/resources/start.sh" > start.sh
+	else
+		download_file "https://raw.githubusercontent.com/PocketMine/PocketMine-MP/master/start.sh" > start.sh
+	fi
 	download_file "https://raw.githubusercontent.com/PocketMine/PocketMine-MP/master/LICENSE" > LICENSE
 	download_file "https://raw.githubusercontent.com/PocketMine/PocketMine-MP/master/README.md" > README.md
 	download_file "https://raw.githubusercontent.com/PocketMine/PocketMine-MP/master/CONTRIBUTING.md" > CONTRIBUTING.md
@@ -323,5 +333,5 @@ fi
 
 rm compile.sh
 
-echo "[INFO] Everything done! Run ./start.sh to start PocketMine-MP"
+echo "[INFO] Everything done! Run ./start.sh to start $NAME"
 exit 0
