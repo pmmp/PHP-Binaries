@@ -1,5 +1,5 @@
 #!/bin/bash
-PHP_VERSION="5.5.15"
+PHP_VERSION="5.5.16"
 ZEND_VM="GOTO"
 
 ZLIB_VERSION="1.2.8"
