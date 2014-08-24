@@ -71,11 +71,7 @@ download_file "http://windows.php.net/downloads/pecl/releases/yaml/$YAML_VERSION
 echo " done!"
 
 echo -n "[xdebug] downloading ${XDEBUG_VERSION}..."
-if [ "$BUILD_TARGET" == "x86" ]; then	
-	download_file "http://xdebug.org/files/php_xdebug-$XDEBUG_VERSION-$PHP_VERSION_BASE-vc11.dll" > php_xdebug.dll
-elif [ "$BUILD_TARGET" == "x64" ]; then	
-	download_file "http://xdebug.org/files/php_xdebug-$XDEBUG_VERSION-$PHP_VERSION_BASE-vc11-x86_64.dll" > php_xdebug.dll
-fi
+download_file "http://windows.php.net/downloads/pecl/releases/xdebug/$XDEBUG_VERSION/php_xdebug-$XDEBUG_VERSION-$PHP_VERSION_BASE-ts-vc11-$BUILD_TARGET.zip" > temp.zip && unzip -o temp.zip >/dev/null 2>&1 && rm temp.zip
 echo " done!"
 
 cd ../..
