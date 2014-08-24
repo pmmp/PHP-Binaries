@@ -66,9 +66,10 @@ IS_CROSSCOMPILE="no"
 IS_WINDOWS="no"
 DO_OPTIMIZE="no"
 DO_STATIC="no"
+COMPILE_DEBUG="no"
 LD_PRELOAD=""
 
-while getopts "::t:oj:srcxzff:" OPTION; do
+while getopts "::t:oj:srcdxzff:" OPTION; do
 
 	case $OPTION in
 		t)
@@ -82,6 +83,10 @@ while getopts "::t:oj:srcxzff:" OPTION; do
 		r)
 			echo "[opt] Will compile readline and ncurses"
 			COMPILE_FANCY="yes"
+			;;
+		d)
+			echo "[opt] Will compile profiler"
+			COMPILE_DEBUG="yes"
 			;;
 		c)
 			echo "[opt] Will force compile cURL"
@@ -654,6 +659,17 @@ else
 	HAS_XDEBUG=""
 fi
 
+if [ "$COMPILE_DEBUG" == "yes" ]; then
+	#profiler
+	echo -n "[PHP profiler] downloading latest..."
+	download_file "https://github.com/krakjoe/profiler/archive/master.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv profiler-master "$DIR/install_data/php/ext/profiler"
+	echo " done!"
+	HAS_PROFILER="--enable-profiler --with-profiler-max-frames=1000"
+else
+	HAS_PROFILER=""
+fi
+
 #pthreads
 echo -n "[PHP pthreads] downloading $PTHREADS_VERSION..."
 download_file "http://pecl.php.net/get/pthreads-$PTHREADS_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
@@ -749,6 +765,7 @@ $HAVE_NCURSES \
 $HAVE_READLINE \
 $HAS_POCKETMINE \
 $HAS_XDEBUG \
+$HAS_PROFILER \
 --enable-mbstring \
 --enable-calendar \
 --enable-weakref \

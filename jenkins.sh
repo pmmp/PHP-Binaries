@@ -21,8 +21,10 @@ rm -rf $WORKSPACE/*
 download_file "https://github.com/PocketMine/php-build-scripts/archive/master.tar.gz" | tar -xz > /dev/null
 mv -f $WORKSPACE/php-build-scripts-master/* $WORKSPACE/
 chmod +x $WORKSPACE/compile.sh
+chmod +x $WORKSPACE/windows-binaries.sh
 TESTS="$WORKSPACE/tests/test.sh"
 SCRIPT="$WORKSPACE/compile.sh"
+WINDOWS_SCRIPT="$WORKSPACE/windows-binaries.sh"
 ARCHIVE="$WORKSPACE/archive"
 COMPILEDIR="$WORKSPACE/compile"
 rm -rf "$ARCHIVE" "$COMPILEDIR"
@@ -30,6 +32,32 @@ mkdir -p "$ARCHIVE"
 mkdir -p "$COMPILEDIR"
 
 PHP_VERSION=$(grep 'PHP_VERSION="' $SCRIPT | cut -d '=' -f2- | tr -d ' ",')
+
+if [ "$COMPILE_WINDOWS_32BIT" = "true" ];then
+    mkdir -p {$COMPILEDIR,$ARCHIVE}/windows/32bit
+    cd $COMPILEDIR/windows/32bit
+
+    $WINDOWS_SCRIPT -t x86
+    
+    tar -czf PHP_${PHP_VERSION}_x86_Windows.tar.gz bin/
+    cp -r $COMPILEDIR/windows/32bit/PHP_${PHP_VERSION}_x86_Windows.tar.gz $ARCHIVE/windows/32bit/
+	if [ ! -f $COMPILEDIR/windows/32bit/bin/php/php.exe ]; then
+		exit 1
+	fi
+fi
+
+if [ "$COMPILE_WINDOWS_64BIT" = "true" ];then
+    mkdir -p {$COMPILEDIR,$ARCHIVE}/windows/64bit
+    cd $COMPILEDIR/windows/64bit
+
+    $WINDOWS_SCRIPT -t x64
+    
+    tar -czf PHP_${PHP_VERSION}_x64_Windows.tar.gz bin/
+    cp -r $COMPILEDIR/windows/64bit/PHP_${PHP_VERSION}_x64_Windows.tar.gz $ARCHIVE/windows/64bit/
+	if [ ! -f $COMPILEDIR/windows/64bit/bin/php/php.exe ]; then
+		exit 1
+	fi
+fi
 
 if [ "$COMPILE_LINUX_32BIT" = "true" ];
 then
