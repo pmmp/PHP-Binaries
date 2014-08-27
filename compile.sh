@@ -1,5 +1,5 @@
 #!/bin/bash
-PHP_VERSION="5.5.16"
+PHP_VERSION="5.6.0"
 ZEND_VM="GOTO"
 
 ZLIB_VERSION="1.2.8"
@@ -322,8 +322,11 @@ set -e
 
 #PHP 5
 echo -n "[PHP] downloading $PHP_VERSION..."
-download_file "http://php.net/get/php-$PHP_VERSION.tar.gz/from/this/mirror" | tar -zx >> "$DIR/install.log" 2>&1
-mv php-$PHP_VERSION php
+#download_file "http://php.net/get/php-$PHP_VERSION.tar.gz/from/this/mirror" | tar -zx >> "$DIR/install.log" 2>&1
+#mv php-$PHP_VERSION php
+download_file "https://github.com/php/php-src/archive/php-$PHP_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+mv php-src-php-$PHP_VERSION php
+
 echo " done!"
 
 if [ "$COMPILE_FANCY" == "yes" ]; then
@@ -576,13 +579,18 @@ else
 fi
 #YAML
 echo -n "[YAML] downloading $YAML_VERSION..."
-download_file "http://pyyaml.org/download/libyaml/yaml-$YAML_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-mv yaml-$YAML_VERSION yaml
-#download_file "https://github.com/yaml/libyaml/archive/$YAML_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-#mv libyaml-$YAML_VERSION yaml
+if [ "$COMPILE_FOR_ANDROID" == "yes" ]; then
+	download_file "https://github.com/yaml/libyaml/archive/$YAML_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv libyaml-$YAML_VERSION yaml
+	./bootstrap >> "$DIR/install.log" 2>&1
+else
+	download_file "http://pyyaml.org/download/libyaml/yaml-$YAML_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv yaml-$YAML_VERSION yaml
+fi
+
 echo -n " checking..."
 cd yaml
-#./bootstrap >> "$DIR/install.log" 2>&1
+
 RANLIB=$RANLIB ./configure \
 --prefix="$DIR/bin/php5" \
 $EXTRA_FLAGS \

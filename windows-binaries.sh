@@ -6,6 +6,7 @@ PTHREADS_VERSION="2.0.7"
 XDEBUG_VERSION="2.2.5"
 WEAKREF_VERSION="0.2.4"
 YAML_VERSION="1.1.1"
+WXWIDGETS_VERSION="3.0.0.2"
 
 echo "[PocketMine] PHP Windows binary builder"
 DIR="$(pwd)"
@@ -74,6 +75,10 @@ echo -n "[xdebug] downloading ${XDEBUG_VERSION}..."
 download_file "http://windows.php.net/downloads/pecl/releases/xdebug/$XDEBUG_VERSION/php_xdebug-$XDEBUG_VERSION-$PHP_VERSION_BASE-ts-vc11-$BUILD_TARGET.zip" > temp.zip && unzip -o temp.zip >/dev/null 2>&1 && rm temp.zip
 echo " done!"
 
+echo -n "[wxwidgets] downloading ${WXWIDGETS_VERSION}..."
+download_file "http://windows.php.net/downloads/pecl/releases/wxwidgets/$WXWIDGETS_VERSION/php_wxwidgets-$WXWIDGETS_VERSION-$PHP_VERSION_BASE-ts-vc11-$BUILD_TARGET.zip" > temp.zip && unzip -o temp.zip >/dev/null 2>&1 && rm temp.zip
+echo " done!"
+
 cd ../..
 
 mkdir -p bin/php
@@ -99,7 +104,7 @@ cp "$TMP_PATH/ext/php_pthreads.dll" .
 cp "$TMP_PATH/ext/php_sockets.dll" .
 cp "$TMP_PATH/ext/php_sqlite3.dll" .
 cp "$TMP_PATH/ext/php_weakref.dll" .
-#cp "$TMP_PATH/ext/php_wxwidgets.dll" .
+cp "$TMP_PATH/ext/php_wxwidgets.dll" .
 cp "$TMP_PATH/ext/php_xdebug.dll" .
 cp "$TMP_PATH/ext/php_yaml.dll" .
 cp "$TMP_PATH/ext/yaml.dll" .
@@ -109,7 +114,7 @@ echo " done!"
 
 echo -n "Creating php.ini..."
 
-echo "#Custom PocketMine php.ini file" > php.ini
+echo ";Custom PocketMine php.ini file" > php.ini
 echo "zend.enable_gc = On" >> php.ini
 echo "max_execution_time = 0" >> php.ini
 echo "memory_limit = 256M" >> php.ini
@@ -132,7 +137,7 @@ echo "extension=php_mbstring.dll" >> php.ini
 echo "extension=php_yaml.dll" >> php.ini
 echo "extension=php_pthreads.dll" >> php.ini
 echo "extension=php_com_dotnet.dll" >> php.ini
-#echo "extension=php_wxwidgets.dll" >> php.ini
+echo "extension=php_wxwidgets.dll" >> php.ini
 
 echo "zend_extension=php_opcache.dll" >> php.ini
 echo "zend_extension=php_xdebug.dll" >> php.ini
