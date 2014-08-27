@@ -576,13 +576,13 @@ else
 fi
 #YAML
 echo -n "[YAML] downloading $YAML_VERSION..."
-#download_file "http://pyyaml.org/download/libyaml/yaml-$YAML_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-#mv yaml-$YAML_VERSION yaml
-download_file "https://github.com/yaml/libyaml/archive/$YAML_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-mv libyaml-$YAML_VERSION yaml
+download_file "http://pyyaml.org/download/libyaml/yaml-$YAML_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+mv yaml-$YAML_VERSION yaml
+#download_file "https://github.com/yaml/libyaml/archive/$YAML_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+#mv libyaml-$YAML_VERSION yaml
 echo -n " checking..."
 cd yaml
-./bootstrap >> "$DIR/install.log" 2>&1
+#./bootstrap >> "$DIR/install.log" 2>&1
 RANLIB=$RANLIB ./configure \
 --prefix="$DIR/bin/php5" \
 $EXTRA_FLAGS \
