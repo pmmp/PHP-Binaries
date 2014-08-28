@@ -1,3 +1,5 @@
+#!/bin/bash
+
 CHANNEL="stable"
 NAME="PocketMine-MP"
 
