@@ -1,15 +1,15 @@
 CHANNEL="stable"
 NAME="PocketMine-MP"
 
-LINUX_32_BUILD="PHP_5.5.16_x86_Linux"
-LINUX_64_BUILD="PHP_5.5.16_x86-64_Linux"
-CENTOS_32_BUILD="PHP_5.5.15_x86_CentOS"
-CENTOS_64_BUILD="PHP_5.5.15_x86-64_CentOS"
-MAC_32_BUILD="PHP_5.5.16_x86_MacOS"
-MAC_64_BUILD="PHP_5.5.16_x86-64_MacOS"
-RPI_BUILD="PHP_5.5.16_ARM_Raspbian_hard"
+LINUX_32_BUILD="PHP_5.6.0_x86_Linux"
+LINUX_64_BUILD="PHP_5.6.0_x86-64_Linux"
+CENTOS_32_BUILD="PHP_5.6.0_x86_CentOS"
+CENTOS_64_BUILD="PHP_5.6.0_x86-64_CentOS"
+MAC_32_BUILD="PHP_5.5.15_x86_MacOS"
+MAC_64_BUILD="PHP_5.5.15_x86-64_MacOS"
+RPI_BUILD="PHP_5.5.15_ARM_Raspbian_hard"
 # Temporal build
-ODROID_BUILD="PHP_5.5.16_ARM_Raspbian_hard"
+ODROID_BUILD="PHP_5.5.15_ARM_Raspbian_hard"
 AND_BUILD="PHP_5.5.15_ARMv7_Android"
 IOS_BUILD="PHP_5.5.13_ARMv6_iOS"
 update=off
@@ -140,7 +140,7 @@ else
 			download_file "https://downloads.sourceforge.net/project/pocketmine/builds/$IOS_BUILD.tar.gz$EXTRA_URL" | tar -zx > /dev/null 2>&1
 			chmod +x ./bin/php5/bin/*
 			echo -n " checking..."
-			if [ $(./bin/php5/bin/php -r 'echo "yes";' 2>/dev/null) == "yes" ]; then
+			if [ "$(./bin/php5/bin/php -r 'echo 1;' 2>/dev/null)" == "1" ]; then
 				echo -n " regenerating php.ini..."
 				TIMEZONE=$(date +%Z)
 				echo "" > "./bin/php5/bin/php.ini"
@@ -168,7 +168,7 @@ else
 			download_file "https://downloads.sourceforge.net/project/pocketmine/builds/$MAC_BUILD.tar.gz$EXTRA_URL" | tar -zx > /dev/null 2>&1
 			chmod +x ./bin/php5/bin/*
 			echo -n " checking..."
-			if [ $(./bin/php5/bin/php -r 'echo "yes";' 2>/dev/null) == "yes" ]; then
+			if [ "$(./bin/php5/bin/php -r 'echo 1;' 2>/dev/null)" == "1" ]; then
 				echo -n " regenerating php.ini..."
 				TIMEZONE=$(date +%Z)
 				OPCACHE_PATH="$(find $(pwd) -name opcache.so)"
@@ -210,7 +210,7 @@ else
 			download_file "https://downloads.sourceforge.net/project/pocketmine/builds/$RPI_BUILD.tar.gz$EXTRA_URL" | tar -zx > /dev/null 2>&1
 			chmod +x ./bin/php5/bin/*
 			echo -n " checking..."
-			if [ $(./bin/php5/bin/php -r 'echo "yes";' 2>/dev/null) == "yes" ]; then
+			if [ "$(./bin/php5/bin/php -r 'echo 1;' 2>/dev/null)" == "1" ]; then
 				echo -n " regenerating php.ini..."
 				TIMEZONE=$(date +%Z)
 				OPCACHE_PATH="$(find $(pwd) -name opcache.so)"
@@ -244,7 +244,7 @@ else
 			download_file "https://downloads.sourceforge.net/project/pocketmine/builds/$ODROID_BUILD.tar.gz$EXTRA_URL" | tar -zx > /dev/null 2>&1
 			chmod +x ./bin/php5/bin/*
 			echo -n " checking..."
-			if [ $(./bin/php5/bin/php -r 'echo "yes";' 2>/dev/null) == "yes" ]; then
+			if [ "$(./bin/php5/bin/php -r 'echo 1;' 2>/dev/null)" == "1" ]; then
 				echo -n " regenerating php.ini..."
 				OPCACHE_PATH="$(find $(pwd) -name opcache.so)"
 				XDEBUG_PATH="$(find $(pwd) -name xdebug.so)"
@@ -295,7 +295,7 @@ else
 			download_file "https://downloads.sourceforge.net/project/pocketmine/builds/$LINUX_BUILD.tar.gz$EXTRA_URL" | tar -zx > /dev/null 2>&1
 			chmod +x ./bin/php5/bin/*
 			echo -n " checking..."
-			if [ $(./bin/php5/bin/php -r 'echo "yes";' 2>/dev/null) == "yes" ]; then
+			if [ "$(./bin/php5/bin/php -r 'echo 1;' 2>/dev/null)" == "1" ]; then
 				echo -n " regenerating php.ini..."
 				OPCACHE_PATH="$(find $(pwd) -name opcache.so)"
 				XDEBUG_PATH="$(find $(pwd) -name xdebug.so)"
