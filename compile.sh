@@ -582,14 +582,15 @@ echo -n "[YAML] downloading $YAML_VERSION..."
 if [ "$COMPILE_FOR_ANDROID" == "yes" ]; then
 	download_file "https://github.com/yaml/libyaml/archive/$YAML_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 	mv libyaml-$YAML_VERSION yaml
-	./bootstrap >> "$DIR/install.log" 2>&1
+	cd yaml
+	./bootstrap >> "$DIR/install.log" 2>&1	
 else
 	download_file "http://pyyaml.org/download/libyaml/yaml-$YAML_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 	mv yaml-$YAML_VERSION yaml
+	cd yaml
 fi
 
 echo -n " checking..."
-cd yaml
 
 RANLIB=$RANLIB ./configure \
 --prefix="$DIR/bin/php5" \
