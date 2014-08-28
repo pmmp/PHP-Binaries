@@ -779,6 +779,7 @@ $HAS_PROFILER \
 --enable-weakref \
 --enable-pthreads \
 --enable-pthreads-pedantic \
+--disable-fileinfo \
 --disable-libxml \
 --disable-xml \
 --disable-dom \
