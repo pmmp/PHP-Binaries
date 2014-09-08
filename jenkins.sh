@@ -31,7 +31,7 @@ rm -rf "$ARCHIVE" "$COMPILEDIR"
 mkdir -p "$ARCHIVE"
 mkdir -p "$COMPILEDIR"
 
-PHP_VERSION=$(grep 'PHP_VERSION="' $SCRIPT | cut -d '=' -f2- | tr -d ' ",')
+PHP_VERSION_NAME=$(grep 'PHP_VERSION_NAME="' $SCRIPT | cut -d '=' -f2- | tr -d ' ",')
 
 if [ "$COMPILE_WINDOWS_32BIT" = "true" ];then
     mkdir -p {$COMPILEDIR,$ARCHIVE}/windows/32bit
@@ -39,8 +39,8 @@ if [ "$COMPILE_WINDOWS_32BIT" = "true" ];then
 
     $WINDOWS_SCRIPT -t x86
     
-    tar -czf PHP_${PHP_VERSION}_x86_Windows.tar.gz bin/
-    cp -r $COMPILEDIR/windows/32bit/PHP_${PHP_VERSION}_x86_Windows.tar.gz $ARCHIVE/windows/32bit/
+    tar -czf PHP_${PHP_VERSION_NAME}_x86_Windows.tar.gz bin/
+    cp -r $COMPILEDIR/windows/32bit/PHP_${PHP_VERSION_NAME}_x86_Windows.tar.gz $ARCHIVE/windows/32bit/
 	if [ ! -f $COMPILEDIR/windows/32bit/bin/php/php.exe ]; then
 		exit 1
 	fi
@@ -52,8 +52,8 @@ if [ "$COMPILE_WINDOWS_64BIT" = "true" ];then
 
     $WINDOWS_SCRIPT -t x64
     
-    tar -czf PHP_${PHP_VERSION}_x64_Windows.tar.gz bin/
-    cp -r $COMPILEDIR/windows/64bit/PHP_${PHP_VERSION}_x64_Windows.tar.gz $ARCHIVE/windows/64bit/
+    tar -czf PHP_${PHP_VERSION_NAME}_x64_Windows.tar.gz bin/
+    cp -r $COMPILEDIR/windows/64bit/PHP_${PHP_VERSION_NAME}_x64_Windows.tar.gz $ARCHIVE/windows/64bit/
 	if [ ! -f $COMPILEDIR/windows/64bit/bin/php/php.exe ]; then
 		exit 1
 	fi
@@ -66,8 +66,8 @@ then
 
     $SCRIPT -t linux32 -j $THREADS -c $EXTRA_FLAGS -f x86
     
-    tar -czf PHP_${PHP_VERSION}_x86_Linux.tar.gz bin/
-    cp -r $COMPILEDIR/linux/32bit/{install.log,PHP_${PHP_VERSION}_x86_Linux.tar.gz} $ARCHIVE/linux/32bit/
+    tar -czf PHP_${PHP_VERSION_NAME}_x86_Linux.tar.gz bin/
+    cp -r $COMPILEDIR/linux/32bit/{install.log,PHP_${PHP_VERSION_NAME}_x86_Linux.tar.gz} $ARCHIVE/linux/32bit/
 	if [ ! -f $COMPILEDIR/linux/32bit/bin/php5/bin/php ]; then
 		exit 1
 	fi
@@ -82,8 +82,8 @@ then
 
     $SCRIPT -t linux64 -j $THREADS -c $EXTRA_FLAGS -f x86_64
     
-    tar -czf PHP_${PHP_VERSION}_x86-64_Linux.tar.gz bin/
-    cp -r $COMPILEDIR/linux/64bit/{install.log,PHP_${PHP_VERSION}_x86-64_Linux.tar.gz} $ARCHIVE/linux/64bit/
+    tar -czf PHP_${PHP_VERSION_NAME}_x86-64_Linux.tar.gz bin/
+    cp -r $COMPILEDIR/linux/64bit/{install.log,PHP_${PHP_VERSION_NAME}_x86-64_Linux.tar.gz} $ARCHIVE/linux/64bit/
 	if [ ! -f $COMPILEDIR/linux/64bit/bin/php5/bin/php ]; then
 		exit 1
 	fi
@@ -107,8 +107,8 @@ then
 	export LIBTOOLIZE="$COMPILEDIR/mac/libtool/bin/libtoolize"
     $SCRIPT -t mac32 -j $THREADS -c $EXTRA_FLAGS -f
     
-    tar -czf PHP_${PHP_VERSION}_x86_MacOS.tar.gz bin/
-    cp -r $COMPILEDIR/mac32/{install.log,PHP_${PHP_VERSION}_x86_MacOS.tar.gz} $ARCHIVE/mac32/
+    tar -czf PHP_${PHP_VERSION_NAME}_x86_MacOS.tar.gz bin/
+    cp -r $COMPILEDIR/mac32/{install.log,PHP_${PHP_VERSION_NAME}_x86_MacOS.tar.gz} $ARCHIVE/mac32/
 	if [ ! -f $COMPILEDIR/mac32/bin/php5/bin/php ]; then
 		exit 1
 	fi
@@ -132,8 +132,8 @@ then
 	export LIBTOOLIZE="$COMPILEDIR/mac/libtool/bin/libtoolize"
     $SCRIPT -t mac64 -j $THREADS -c $EXTRA_FLAGS -f
     
-    tar -czf PHP_${PHP_VERSION}_x86-64_MacOS.tar.gz bin/
-    cp -r $COMPILEDIR/mac64/{install.log,PHP_${PHP_VERSION}_x86-64_MacOS.tar.gz} $ARCHIVE/mac64
+    tar -czf PHP_${PHP_VERSION_NAME}_x86-64_MacOS.tar.gz bin/
+    cp -r $COMPILEDIR/mac64/{install.log,PHP_${PHP_VERSION_NAME}_x86-64_MacOS.tar.gz} $ARCHIVE/mac64
 	if [ ! -f $COMPILEDIR/mac64/bin/php5/bin/php ]; then
 		exit 1
 	fi
@@ -148,8 +148,8 @@ then
     
     $SCRIPT -t rpi -j $THREADS -c $EXTRA_FLAGS -f arm
     
-    tar -czf PHP_${PHP_VERSION}_ARM_Raspbian_hard.tar.gz bin/
-    cp -r $COMPILEDIR/rpi/{install.log,PHP_${PHP_VERSION}_ARM_Raspbian_hard.tar.gz} $ARCHIVE/rpi/
+    tar -czf PHP_${PHP_VERSION_NAME}_ARM_Raspbian_hard.tar.gz bin/
+    cp -r $COMPILEDIR/rpi/{install.log,PHP_${PHP_VERSION_NAME}_ARM_Raspbian_hard.tar.gz} $ARCHIVE/rpi/
 	if [ ! -f $COMPILEDIR/rpi/bin/php5/bin/php ]; then
 		exit 1
 	fi
@@ -164,8 +164,8 @@ then
 
     $SCRIPT -t android-armv6 -j $THREADS -c -x -s $EXTRA_FLAGS -f arm
     
-    tar -czf PHP_${PHP_VERSION}_ARMv6_Android.tar.gz bin/
-    cp -r $COMPILEDIR/crosscompile/android-armv6/{install.log,PHP_${PHP_VERSION}_ARMv6_Android.tar.gz} $ARCHIVE/crosscompile/android-armv6/
+    tar -czf PHP_${PHP_VERSION_NAME}_ARMv6_Android.tar.gz bin/
+    cp -r $COMPILEDIR/crosscompile/android-armv6/{install.log,PHP_${PHP_VERSION_NAME}_ARMv6_Android.tar.gz} $ARCHIVE/crosscompile/android-armv6/
 	if [ ! -f $COMPILEDIR/crosscompile/android-armv6/bin/php5/bin/php ]; then
 		exit 1
 	fi
@@ -180,8 +180,8 @@ then
 
     $SCRIPT -t android-armv7 -j $THREADS -c -x -s $EXTRA_FLAGS -f arm
     
-    tar -czf PHP_${PHP_VERSION}_ARMv7_Android.tar.gz bin/
-    cp -r $COMPILEDIR/crosscompile/android-armv7/{install.log,PHP_${PHP_VERSION}_ARMv7_Android.tar.gz} $ARCHIVE/crosscompile/android-armv7/
+    tar -czf PHP_${PHP_VERSION_NAME}_ARMv7_Android.tar.gz bin/
+    cp -r $COMPILEDIR/crosscompile/android-armv7/{install.log,PHP_${PHP_VERSION_NAME}_ARMv7_Android.tar.gz} $ARCHIVE/crosscompile/android-armv7/
 	if [ ! -f $COMPILEDIR/crosscompile/android-armv7/bin/php5/bin/php ]; then
 		exit 1
 	fi
@@ -242,8 +242,8 @@ then
     
     $SCRIPT -t rpi -j $THREADS -c -x $EXTRA_FLAGS -f arm
 
-    tar -czf PHP_${PHP_VERSION}_ARM_Raspbian_hard.tar.gz bin/
-    cp -r $COMPILEDIR/crosscompile/rpi/{install.log,PHP_${PHP_VERSION}_ARM_Raspbian_hard.tar.gz} $ARCHIVE/crosscompile/rpi/
+    tar -czf PHP_${PHP_VERSION_NAME}_ARM_Raspbian_hard.tar.gz bin/
+    cp -r $COMPILEDIR/crosscompile/rpi/{install.log,PHP_${PHP_VERSION_NAME}_ARM_Raspbian_hard.tar.gz} $ARCHIVE/crosscompile/rpi/
 	if [ ! -f $COMPILEDIR/crosscompile/rpi/bin/php5/bin/php ]; then
 		exit 1
 	fi
