@@ -31,7 +31,7 @@ rm -rf "$ARCHIVE" "$COMPILEDIR"
 mkdir -p "$ARCHIVE"
 mkdir -p "$COMPILEDIR"
 
-PHP_VERSION_NAME=$(grep 'PHP_VERSION_NAME="' $SCRIPT | cut -d '=' -f2- | tr -d ' ",')
+PHP_VERSION_NAME=$(grep 'PHP_VERSION="' $SCRIPT | cut -d '=' -f2- | tr -d ' ",')
 
 if [ "$COMPILE_WINDOWS_32BIT" = "true" ];then
     mkdir -p {$COMPILEDIR,$ARCHIVE}/windows/32bit
