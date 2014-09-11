@@ -17,6 +17,7 @@ IOS_BUILD="PHP_5.5.13_ARMv6_iOS"
 update=off
 forcecompile=off
 alldone=no
+checkRoot=on
 
 INSTALL_DIRECTORY="./"
 
@@ -35,8 +36,11 @@ else
 fi
 
 
-while getopts "ucd:v:" opt; do
+while getopts "rucd:v:" opt; do
   case $opt in
+    r)
+	  checkRoot=off
+      ;;
     u)
 	  update=on
       ;;
@@ -55,6 +59,15 @@ while getopts "ucd:v:" opt; do
       ;;
   esac
 done
+
+if [ "$checkRoot" == "on" ]; then
+	if [ "$(id -u)" == "0" ]; then
+	   echo "This script is running as root, this is discouraged."
+	   echo "It is recommended to run it as a normal user as it doesn't need further permissions."
+	   echo "If you want to run it as root, add the -r flag."
+	   exit 1
+	fi
+fi
 
 if [ "$CHANNEL" == "soft" ]; then
 	NAME="PocketMine-Soft"
