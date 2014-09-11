@@ -18,6 +18,7 @@ update=off
 forcecompile=off
 alldone=no
 checkRoot=on
+XDEBUG="off"
 
 INSTALL_DIRECTORY="./"
 
@@ -36,10 +37,14 @@ else
 fi
 
 
-while getopts "rucd:v:" opt; do
+while getopts "rxucd:v:" opt; do
   case $opt in
     r)
 	  checkRoot=off
+      ;;
+    x)
+	  XDEBUG="on"
+	  echo "[+] Enabling xdebug"
       ;;
     u)
 	  update=on
@@ -192,7 +197,9 @@ else
 				#UOPZ_PATH="$(find $(pwd) -name uopz.so)"
 				#echo "zend_extension=\"$UOPZ_PATH\"" >> "./bin/php5/bin/php.ini"
 				echo "zend_extension=\"$OPCACHE_PATH\"" >> "./bin/php5/bin/php.ini"
-				echo "zend_extension=\"$XDEBUG_PATH\"" >> "./bin/php5/bin/php.ini"
+				if [ "$XDEBUG" == "on" ]; then
+					echo "zend_extension=\"$XDEBUG_PATH\"" >> "./bin/php5/bin/php.ini"
+				fi
 				echo "opcache.enable=1" >> "./bin/php5/bin/php.ini"
 				echo "opcache.enable_cli=1" >> "./bin/php5/bin/php.ini"
 				echo "opcache.save_comments=0" >> "./bin/php5/bin/php.ini"
@@ -229,12 +236,16 @@ else
 				echo -n " regenerating php.ini..."
 				TIMEZONE=$(date +%Z)
 				OPCACHE_PATH="$(find $(pwd) -name opcache.so)"
-				XDEBUG_PATH="$(find $(pwd) -name xdebug.so)"
+				if [ "$XDEBUG" == "on" ]; then
+					echo "zend_extension=\"$XDEBUG_PATH\"" >> "./bin/php5/bin/php.ini"
+				fi
 				echo "" > "./bin/php5/bin/php.ini"
 				#UOPZ_PATH="$(find $(pwd) -name uopz.so)"
 				#echo "zend_extension=\"$UOPZ_PATH\"" >> "./bin/php5/bin/php.ini"
 				echo "zend_extension=\"$OPCACHE_PATH\"" >> "./bin/php5/bin/php.ini"
-				echo "zend_extension=\"$XDEBUG_PATH\"" >> "./bin/php5/bin/php.ini"
+				if [ "$XDEBUG" == "on" ]; then
+					echo "zend_extension=\"$XDEBUG_PATH\"" >> "./bin/php5/bin/php.ini"
+				fi
 				echo "opcache.enable=1" >> "./bin/php5/bin/php.ini"
 				echo "opcache.enable_cli=1" >> "./bin/php5/bin/php.ini"
 				echo "opcache.save_comments=0" >> "./bin/php5/bin/php.ini"
@@ -267,7 +278,9 @@ else
 				#UOPZ_PATH="$(find $(pwd) -name uopz.so)"
 				#echo "zend_extension=\"$UOPZ_PATH\"" >> "./bin/php5/bin/php.ini"
 				echo "zend_extension=\"$OPCACHE_PATH\"" >> "./bin/php5/bin/php.ini"
-				echo "zend_extension=\"$XDEBUG_PATH\"" >> "./bin/php5/bin/php.ini"
+				if [ "$XDEBUG" == "on" ]; then
+					echo "zend_extension=\"$XDEBUG_PATH\"" >> "./bin/php5/bin/php.ini"
+				fi
 				echo "opcache.enable=1" >> "./bin/php5/bin/php.ini"
 				echo "opcache.enable_cli=1" >> "./bin/php5/bin/php.ini"
 				echo "opcache.save_comments=0" >> "./bin/php5/bin/php.ini"
@@ -318,7 +331,9 @@ else
 				#UOPZ_PATH="$(find $(pwd) -name uopz.so)"
 				#echo "zend_extension=\"$UOPZ_PATH\"" >> "./bin/php5/bin/php.ini"
 				echo "zend_extension=\"$OPCACHE_PATH\"" >> "./bin/php5/bin/php.ini"
-				echo "zend_extension=\"$XDEBUG_PATH\"" >> "./bin/php5/bin/php.ini"
+				if [ "$XDEBUG" == "on" ]; then
+					echo "zend_extension=\"$XDEBUG_PATH\"" >> "./bin/php5/bin/php.ini"
+				fi
 				echo "opcache.enable=1" >> "./bin/php5/bin/php.ini"
 				echo "opcache.enable_cli=1" >> "./bin/php5/bin/php.ini"
 				echo "opcache.save_comments=0" >> "./bin/php5/bin/php.ini"
