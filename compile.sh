@@ -779,7 +779,6 @@ $HAS_PROFILER \
 --enable-calendar \
 --enable-weakref \
 --enable-pthreads \
---enable-pthreads-pedantic \
 --disable-fileinfo \
 --disable-libxml \
 --disable-xml \
