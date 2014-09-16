@@ -113,9 +113,9 @@ while getopts "::t:oj:srcdxzff:" OPTION; do
 			if [ "$OPTARG" == "arm" ]; then
 				CFLAGS="$CFLAGS -mfloat-abi=softfp -mfpu=vfp"
 			elif [ "$OPTARG" == "x86_64" ]; then
-				CFLAGS="$CFLAGS -mmx -msse -msse2 -msse3 -mfpmath=sse -free -msahf -ftree-parallelize-loops=4"
+				CFLAGS="$CFLAGS -mmmx -msse -msse2 -msse3 -mfpmath=sse -free -msahf -ftree-parallelize-loops=4"
 			elif [ "$OPTARG" == "x86" ]; then
-				CFLAGS="$CFLAGS -mmx -msse -msse2 -mfpmath=sse -m128bit-long-double -malign-double -ftree-parallelize-loops=4"
+				CFLAGS="$CFLAGS -mmmx -msse -msse2 -mfpmath=sse -m128bit-long-double -malign-double -ftree-parallelize-loops=4"
 			fi
 			;;
 		\?)
