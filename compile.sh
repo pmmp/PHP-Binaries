@@ -1,5 +1,5 @@
 #!/bin/bash
-[ -z "$PHP_VERSION" ] && PHP_VERSION="5.6.0"
+[ -z "$PHP_VERSION" ] && PHP_VERSION="5.6.1"
 ZEND_VM="GOTO"
 
 ZLIB_VERSION="1.2.8"
