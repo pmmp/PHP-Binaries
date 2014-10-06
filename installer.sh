@@ -3,16 +3,16 @@
 CHANNEL="stable"
 NAME="PocketMine-MP"
 
-LINUX_32_BUILD="PHP_5.6.0_x86_Linux"
-LINUX_64_BUILD="PHP_5.6.0_x86-64_Linux"
+LINUX_32_BUILD="PHP_5.6.1_x86_Linux"
+LINUX_64_BUILD="PHP_5.6.1_x86-64_Linux"
 CENTOS_32_BUILD="PHP_5.6.0_x86_CentOS"
 CENTOS_64_BUILD="PHP_5.6.0_x86-64_CentOS"
 MAC_32_BUILD="PHP_5.6.0_x86_MacOS"
 MAC_64_BUILD="PHP_5.6.0_x86-64_MacOS"
-RPI_BUILD="PHP_5.6.0_ARM_Raspbian_hard"
+RPI_BUILD="PHP_5.6.1_ARM_Raspbian_hard"
 # Temporal build
-ODROID_BUILD="PHP_5.6.0_ARM_Raspbian_hard"
-AND_BUILD="PHP_5.6.0_ARMv7_Android"
+ODROID_BUILD="PHP_5.6.1_ARM_Raspbian_hard"
+AND_BUILD="PHP_5.6.1_ARMv7_Android"
 IOS_BUILD="PHP_5.5.13_ARMv6_iOS"
 update=off
 forcecompile=off
