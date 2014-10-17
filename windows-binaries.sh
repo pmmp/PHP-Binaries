@@ -90,6 +90,7 @@ echo -n "Selecting files..."
 cp "$TMP_PATH/php.exe" .
 cp "$TMP_PATH/php5ts.dll" .
 cp "$TMP_PATH/libeay32.dll" .
+cp "$TMP_PATH/libssh2.dll" .
 cp "$TMP_PATH/ssleay32.dll" .
 cp "$TMP_PATH/license.txt" .
 cp "$TMP_PATH/news.txt" .
