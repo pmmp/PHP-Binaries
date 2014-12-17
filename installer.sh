@@ -203,6 +203,7 @@ else
 				echo "opcache.enable=1" >> "./bin/php5/bin/php.ini"
 				echo "opcache.enable_cli=1" >> "./bin/php5/bin/php.ini"
 				echo "opcache.save_comments=1" >> "./bin/php5/bin/php.ini"
+				echo "opcache.load_comments=1" >> "./bin/php5/bin/php.ini"
 				echo "opcache.fast_shutdown=0" >> "./bin/php5/bin/php.ini"
 				echo "opcache.max_accelerated_files=4096" >> "./bin/php5/bin/php.ini"
 				echo "opcache.interned_strings_buffer=8" >> "./bin/php5/bin/php.ini"
@@ -248,7 +249,8 @@ else
 				fi
 				echo "opcache.enable=1" >> "./bin/php5/bin/php.ini"
 				echo "opcache.enable_cli=1" >> "./bin/php5/bin/php.ini"
-				echo "opcache.save_comments=0" >> "./bin/php5/bin/php.ini"
+				echo "opcache.save_comments=1" >> "./bin/php5/bin/php.ini"
+				echo "opcache.load_comments=1" >> "./bin/php5/bin/php.ini"
 				echo "opcache.fast_shutdown=1" >> "./bin/php5/bin/php.ini"
 				echo "opcache.max_accelerated_files=4096" >> "./bin/php5/bin/php.ini"
 				echo "opcache.interned_strings_buffer=8" >> "./bin/php5/bin/php.ini"
@@ -283,7 +285,8 @@ else
 				fi
 				echo "opcache.enable=1" >> "./bin/php5/bin/php.ini"
 				echo "opcache.enable_cli=1" >> "./bin/php5/bin/php.ini"
-				echo "opcache.save_comments=0" >> "./bin/php5/bin/php.ini"
+				echo "opcache.save_comments=1" >> "./bin/php5/bin/php.ini"
+				echo "opcache.load_comments=1" >> "./bin/php5/bin/php.ini"
 				echo "opcache.fast_shutdown=1" >> "./bin/php5/bin/php.ini"
 				echo "opcache.max_accelerated_files=4096" >> "./bin/php5/bin/php.ini"
 				echo "opcache.interned_strings_buffer=8" >> "./bin/php5/bin/php.ini"
@@ -336,7 +339,7 @@ else
 				fi
 				echo "opcache.enable=1" >> "./bin/php5/bin/php.ini"
 				echo "opcache.enable_cli=1" >> "./bin/php5/bin/php.ini"
-				echo "opcache.save_comments=0" >> "./bin/php5/bin/php.ini"
+				echo "opcache.save_comments=1" >> "./bin/php5/bin/php.ini"
 				echo "opcache.fast_shutdown=1" >> "./bin/php5/bin/php.ini"
 				echo "opcache.max_accelerated_files=4096" >> "./bin/php5/bin/php.ini"
 				echo "opcache.interned_strings_buffer=8" >> "./bin/php5/bin/php.ini"
