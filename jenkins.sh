@@ -64,7 +64,7 @@ then
     mkdir -p {$COMPILEDIR,$ARCHIVE}/linux/32bit
     cd $COMPILEDIR/linux/32bit
 
-    $SCRIPT -t linux32 -j $THREADS -c $EXTRA_FLAGS -f x86
+    $SCRIPT -t linux32 -l -j $THREADS -c $EXTRA_FLAGS -f x86
     
     tar -czf PHP_${PHP_VERSION_NAME}_x86_Linux.tar.gz bin/
     cp -r $COMPILEDIR/linux/32bit/{install.log,PHP_${PHP_VERSION_NAME}_x86_Linux.tar.gz} $ARCHIVE/linux/32bit/
@@ -80,7 +80,7 @@ then
     mkdir -p {$COMPILEDIR,$ARCHIVE}/linux/64bit
     cd $COMPILEDIR/linux/64bit
 
-    $SCRIPT -t linux64 -j $THREADS -c $EXTRA_FLAGS -f x86_64
+    $SCRIPT -t linux64 -l -j $THREADS -c $EXTRA_FLAGS -f x86_64
     
     tar -czf PHP_${PHP_VERSION_NAME}_x86-64_Linux.tar.gz bin/
     cp -r $COMPILEDIR/linux/64bit/{install.log,PHP_${PHP_VERSION_NAME}_x86-64_Linux.tar.gz} $ARCHIVE/linux/64bit/

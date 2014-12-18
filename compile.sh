@@ -322,6 +322,7 @@ export CXX="$CXX"
 export CFLAGS="-s -O2 -fPIC $CFLAGS"
 export CXXFLAGS="$CFLAGS"
 export LDFLAGS="$LDFLAGS"
+export LIBRARY_PATH="$DIR/bin/php5/lib:$DIR/bin/php5/lib:$LIBRARY_PATH"
 
 rm -r -f install_data/ >> "$DIR/install.log" 2>&1
 rm -r -f bin/ >> "$DIR/install.log" 2>&1
@@ -620,13 +621,13 @@ echo " done!"
 if [ "$COMPILE_LEVELDB" == "yes" ]; then
 	#LevelDB
 	echo -n "[LevelDB] downloading $LEVELDB_VERSION..."
-	#download_file "https://github.com/PocketMine/leveldb/archive/$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	download_file "https://github.com/Mojang/leveldb-mcpe/archive/$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv leveldb-mcpe-$LEVELDB_VERSION leveldb
+	download_file "https://github.com/PocketMine/leveldb/archive/$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	#download_file "https://github.com/Mojang/leveldb-mcpe/archive/$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv leveldb-$LEVELDB_VERSION leveldb
 	echo -n " checking..."
 	cd leveldb
 	echo -n " compiling..."
-	make -j $THREADS >> "$DIR/install.log" 2>&1
+	CFLAGS="$CFLAGS -I$DIR/bin/php5/include" CXXFLAGS="$CFLAGS -I$DIR/bin/php5/include" LDFLAGS="$LDFLAGS -L$DIR/bin/php5/lib" make -j $THREADS >> "$DIR/install.log" 2>&1
 	echo -n " installing..."
 	cp libleveldb* "$DIR/bin/php5/lib/"
 	cp -r include/leveldb "$DIR/bin/php5/include/leveldb"
@@ -780,7 +781,7 @@ if [ "$(uname -s)" == "Darwin" ] && [ "$IS_CROSSCOMPILE" != "yes" ]; then
 	export EXTRA_CFLAGS=-lresolv
 fi
 
-LIBRARY_PATH="$DIR/bin/php5/lib:$DIR/bin/php5/lib:$LIBRARY_PATH" RANLIB=$RANLIB ./configure $PHP_OPTIMIZATION --prefix="$DIR/bin/php5" \
+RANLIB=$RANLIB ./configure $PHP_OPTIMIZATION --prefix="$DIR/bin/php5" \
 --exec-prefix="$DIR/bin/php5" \
 --with-curl="$HAVE_CURL" \
 --with-zlib="$DIR/bin/php5" \
