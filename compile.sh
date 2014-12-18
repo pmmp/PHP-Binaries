@@ -69,9 +69,10 @@ IS_WINDOWS="no"
 DO_OPTIMIZE="no"
 DO_STATIC="no"
 COMPILE_DEBUG="no"
+COMPILE_LEVELDB="no"
 LD_PRELOAD=""
 
-while getopts "::t:oj:srcdxzff:" OPTION; do
+while getopts "::t:oj:srcdlxzff:" OPTION; do
 
 	case $OPTION in
 		t)
@@ -98,6 +99,10 @@ while getopts "::t:oj:srcdxzff:" OPTION; do
 			echo "[opt] Doing cross-compile"
 			IS_CROSSCOMPILE="yes"
 			;;
+		l)
+                        echo "[opt] Will compile with LevelDB support"
+                        COMPILE_LEVELDB="yes"
+                        ;;
 		s)
 			echo "[opt] Will compile everything statically"
 			DO_STATIC="yes"
@@ -612,7 +617,7 @@ cd ..
 rm -r -f ./yaml
 echo " done!"
 
-if [ "$IS_CROSSCOMPILE" != "yes" ]; then
+if [ "$COMPILE_LEVELDB" == "yes" ]; then
 	#LevelDB
 	echo -n "[LevelDB] downloading $LEVELDB_VERSION..."
 	#download_file "https://github.com/PocketMine/leveldb/archive/$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
@@ -722,7 +727,7 @@ download_file "http://pecl.php.net/get/yaml-$PHPYAML_VERSION.tgz" | tar -zx >> "
 mv yaml-$PHPYAML_VERSION "$DIR/install_data/php/ext/yaml"
 echo " done!"
 
-if [ "$IS_CROSSCOMPILE" != "yes" ]; then
+if [ "$COMPILE_LEVELDB" == "yes" ]; then
 	#PHP LevelDB
 	echo -n "[PHP LevelDB] downloading $PHPLEVELDB_VERSION..."
 	#download_file "http://pecl.php.net/get/leveldb-$PHPLEVELDB_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
