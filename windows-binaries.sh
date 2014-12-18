@@ -3,7 +3,7 @@
 PHP_VERSION_BASE="${PHP_VERSION:0:3}"
 
 PTHREADS_VERSION="2.0.10"
-XDEBUG_VERSION="2.2.5"
+XDEBUG_VERSION="2.2.6"
 WEAKREF_VERSION="0.2.6"
 YAML_VERSION="1.1.1"
 WXWIDGETS_VERSION="3.0.0.2"
@@ -141,7 +141,7 @@ echo "extension=php_com_dotnet.dll" >> php.ini
 #echo "extension=php_wxwidgets.dll" >> php.ini
 
 echo "zend_extension=php_opcache.dll" >> php.ini
-echo ";zend_extension=php_xdebug.dll" >> php.ini
+echo "zend_extension=php_xdebug.dll" >> php.ini
 
 echo "cli_server.color = On" >> php.ini
 echo "phar.readonly = Off" >> php.ini
@@ -152,6 +152,7 @@ echo "opcache.memory_consumption=128" >> php.ini
 echo "opcache.interned_strings_buffer=8" >> php.ini
 echo "opcache.max_accelerated_files=4000" >> php.ini
 echo "opcache.save_comments=1" >> php.ini
+echo "opcache.load_comments=1" >> php.ini
 echo "opcache.fast_shutdown=0" >> php.ini
 echo "opcache.optimization_level=0xffffffff" >> php.ini
 

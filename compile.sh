@@ -7,19 +7,21 @@ POLARSSL_VERSION="1.3.8"
 LIBMCRYPT_VERSION="2.5.8"
 GMP_VERSION="6.0.0a"
 GMP_VERSION_DIR="6.0.0"
-CURL_VERSION="curl-7_37_1"
+CURL_VERSION="curl-7_39_0"
 READLINE_VERSION="6.3"
 NCURSES_VERSION="5.9"
 PHPNCURSES_VERSION="1.0.2"
 PTHREADS_VERSION="2.0.10"
-XDEBUG_VERSION="2.2.5"
+XDEBUG_VERSION="2.2.6"
 PHP_POCKETMINE_VERSION="0.0.6"
-UOPZ_VERSION="2.0.4"
+#UOPZ_VERSION="2.0.4"
 WEAKREF_VERSION="0.2.6"
 PHPYAML_VERSION="1.1.1"
 YAML_VERSION="0.1.4"
-PHPLEVELDB_VERSION="0.1.4"
-LEVELDB_VERSION="1.15.0"
+#PHPLEVELDB_VERSION="0.1.4"
+PHPLEVELDB_VERSION="d84b2ccbe6b879d93cfa3270ed2cc25d849353d5"
+#LEVELDB_VERSION="1.18"
+LEVELDB_VERSION="3f7ad20ac551754bdc70c4e9929eff6b427a11ff"
 LIBXML_VERSION="2.9.1"
 BCOMPILER_VERSION="1.0.2"
 
@@ -602,7 +604,7 @@ $EXTRA_FLAGS \
 $CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
 sed -i=".backup" 's/ tests win32/ win32/g' Makefile
 echo -n " compiling..."
-make -j $THREADS >> "$DIR/install.log" 2>&1
+make -j $THREADS all >> "$DIR/install.log" 2>&1
 echo -n " installing..."
 make install >> "$DIR/install.log" 2>&1
 echo -n " cleaning..."
@@ -610,21 +612,24 @@ cd ..
 rm -r -f ./yaml
 echo " done!"
 
-#LevelDB
-#echo -n "[LevelDB] downloading $LEVELDB_VERSION..."
-#download_file "https://leveldb.googlecode.com/files/leveldb-$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-#mv leveldb-$LEVELDB_VERSION leveldb
-#echo -n " checking..."
-#cd leveldb
-#echo -n " compiling..."
-#make -j $THREADS >> "$DIR/install.log" 2>&1
-#echo -n " installing..."
-#cp libleveldb.a "$DIR/bin/php5/lib/libleveldb.a"
-#cp -r include/leveldb "$DIR/bin/php5/include/"
-#echo -n " cleaning..."
-#cd ..
-#rm -r -f ./leveldb
-#echo " done!"
+if [ "$IS_CROSSCOMPILE" != "yes" ]; then
+	#LevelDB
+	echo -n "[LevelDB] downloading $LEVELDB_VERSION..."
+	#download_file "https://github.com/PocketMine/leveldb/archive/$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	download_file "https://github.com/Mojang/leveldb-mcpe/archive/$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv leveldb-mcpe-$LEVELDB_VERSION leveldb
+	echo -n " checking..."
+	cd leveldb
+	echo -n " compiling..."
+	make -j $THREADS >> "$DIR/install.log" 2>&1
+	echo -n " installing..."
+	cp libleveldb* "$DIR/bin/php5/lib/"
+	cp -r include/leveldb "$DIR/bin/php5/include/leveldb"
+	echo -n " cleaning..."
+	cd ..
+	rm -r -f ./leveldb
+	echo " done!"
+fi
 
 if [ "$DO_STATIC" == "yes" ]; then
 	EXTRA_FLAGS="--enable-shared=no --enable-static=yes"
@@ -717,11 +722,17 @@ download_file "http://pecl.php.net/get/yaml-$PHPYAML_VERSION.tgz" | tar -zx >> "
 mv yaml-$PHPYAML_VERSION "$DIR/install_data/php/ext/yaml"
 echo " done!"
 
-#PHP LevelDB
-#echo -n "[PHP LevelDB] downloading $PHPLEVELDB_VERSION..."
-#download_file "http://pecl.php.net/get/leveldb-$PHPLEVELDB_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-#mv leveldb-$PHPLEVELDB_VERSION "$DIR/install_data/php/ext/leveldb"
-#echo " done!"
+if [ "$IS_CROSSCOMPILE" != "yes" ]; then
+	#PHP LevelDB
+	echo -n "[PHP LevelDB] downloading $PHPLEVELDB_VERSION..."
+	#download_file "http://pecl.php.net/get/leveldb-$PHPLEVELDB_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+	download_file "https://github.com/PocketMine/php-leveldb/archive/$PHPLEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv php-leveldb-$PHPLEVELDB_VERSION "$DIR/install_data/php/ext/leveldb"
+	echo " done!"
+	HAS_LEVELDB=--with-leveldb="$DIR/bin/php5"
+else
+	HAS_LEVELDB=""
+fi
 
 
 echo -n "[PHP]"
@@ -764,8 +775,6 @@ if [ "$(uname -s)" == "Darwin" ] && [ "$IS_CROSSCOMPILE" != "yes" ]; then
 	export EXTRA_CFLAGS=-lresolv
 fi
 
-#--with-leveldb="$DIR/bin/php5"
-
 LIBRARY_PATH="$DIR/bin/php5/lib:$DIR/bin/php5/lib:$LIBRARY_PATH" RANLIB=$RANLIB ./configure $PHP_OPTIMIZATION --prefix="$DIR/bin/php5" \
 --exec-prefix="$DIR/bin/php5" \
 --with-curl="$HAVE_CURL" \
@@ -776,6 +785,7 @@ LIBRARY_PATH="$DIR/bin/php5/lib:$DIR/bin/php5/lib:$LIBRARY_PATH" RANLIB=$RANLIB 
 --with-gmp="$DIR/bin/php5" \
 $HAVE_NCURSES \
 $HAVE_READLINE \
+$HAS_LEVELDB \
 $HAS_POCKETMINE \
 $HAS_XDEBUG \
 $HAS_PROFILER \
