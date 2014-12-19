@@ -162,7 +162,7 @@ then
     mkdir -p {$COMPILEDIR,$ARCHIVE}/crosscompile/android-armv6
     cd $COMPILEDIR/crosscompile/android-armv6
 
-    $SCRIPT -t android-armv6 -j $THREADS -l -c -x -s $EXTRA_FLAGS -f arm
+    $SCRIPT -t android-armv6 -j $THREADS -c -x -s $EXTRA_FLAGS -f arm
     
     tar -czf PHP_${PHP_VERSION_NAME}_ARMv6_Android.tar.gz bin/
     cp -r $COMPILEDIR/crosscompile/android-armv6/{install.log,PHP_${PHP_VERSION_NAME}_ARMv6_Android.tar.gz} $ARCHIVE/crosscompile/android-armv6/
@@ -178,7 +178,7 @@ then
     mkdir -p {$COMPILEDIR,$ARCHIVE}/crosscompile/android-armv7
     cd $COMPILEDIR/crosscompile/android-armv7
 
-    $SCRIPT -t android-armv7 -j $THREADS -l -c -x -s $EXTRA_FLAGS -f arm
+    $SCRIPT -t android-armv7 -j $THREADS -c -x -s $EXTRA_FLAGS -f arm
     
     tar -czf PHP_${PHP_VERSION_NAME}_ARMv7_Android.tar.gz bin/
     cp -r $COMPILEDIR/crosscompile/android-armv7/{install.log,PHP_${PHP_VERSION_NAME}_ARMv7_Android.tar.gz} $ARCHIVE/crosscompile/android-armv7/
