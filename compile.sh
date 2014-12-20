@@ -55,10 +55,19 @@ else
 	fi
 fi
 
-export CC="gcc"
-export CXX="g++"
+#if type llvm-gcc >/dev/null 2>&1; then
+#	export CC="llvm-gcc"
+#	export CXX="llvm-g++"
+#	export AR="llvm-ar"
+#	export AS="llvm-as"
+#	export RANLIB=llvm-ranlib
+#else
+	export CC="gcc"
+	export CXX="g++"
+	export RANLIB=ranlib
+#fi
+
 COMPILE_FOR_ANDROID=no
-RANLIB=ranlib
 HAVE_MYSQLI="--enable-embedded-mysqli --enable-mysqlnd --with-mysqli=mysqlnd"
 COMPILE_TARGET=""
 COMPILE_CURL="default"
