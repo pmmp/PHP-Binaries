@@ -78,6 +78,11 @@ if [ "$CHANNEL" == "soft" ]; then
 	NAME="PocketMine-Soft"
 fi
 
+ENABLE_GPG="no"
+PUBLICKEY_URL="http://cdn.pocketmine.net/key/pocketmine.asc"
+PUBLICKEY_FINGERPRINT="20D377AFC3F7535B3261AA4DCF48E7E52280B75B"
+PUBLICKEY_LONGID="${PUBLICKEY_FINGERPRINT: -16}"
+
 VERSION_DATA=$(download_file "http://www.pocketmine.net/api/?channel=$CHANNEL")
 
 VERSION=$(echo "$VERSION_DATA" | grep '"version"' | cut -d ':' -f2- | tr -d ' ",')
@@ -85,6 +90,7 @@ BUILD=$(echo "$VERSION_DATA" | grep build | cut -d ':' -f2- | tr -d ' ",')
 API_VERSION=$(echo "$VERSION_DATA" | grep api_version | cut -d ':' -f2- | tr -d ' ",')
 VERSION_DATE=$(echo "$VERSION_DATA" | grep '"date"' | cut -d ':' -f2- | tr -d ' ",')
 VERSION_DOWNLOAD=$(echo "$VERSION_DATA" | grep '"download_url"' | cut -d ':' -f2- | tr -d ' ",')
+
 if [ "$(uname -s)" == "Darwin" ]; then
 	BASE_VERSION=$(echo "$VERSION" | sed -E 's/([A-Za-z0-9_\.]*).*/\1/')
 	VERSION_DATE_STRING=$(date -j -f "%s" $VERSION_DATE)
@@ -93,15 +99,42 @@ else
 	VERSION_DATE_STRING=$(date --date="@$VERSION_DATE")
 fi
 
+GPG_SIGNATURE=$(echo "$VERSION_DATA" | grep '"signature_url"' | cut -d ':' -f2- | tr -d ' ",')
+GPG_SIGNATURE_PUBLICKEY=$(echo "$VERSION_DATA" | grep '"publickey_url"' | cut -d ':' -f2- | tr -d ' ",')
+
+if [ "$GPG_SIGNATURE" != "" ]; then
+	ENABLE_GPG="yes"
+fi
+
 if [ "$VERSION" == "" ]; then
-	echo "[ERROR] Couldn't get the latest $NAME version"
+	echo "[!] Couldn't get the latest $NAME version"
 	exit 1
 fi
 
-echo "[INFO] Found $NAME $BASE_VERSION (build $BUILD) using API $API_VERSION"
-echo "[INFO] This $CHANNEL build was released on $VERSION_DATE_STRING"
+if [ "$ENABLE_GPG" == "yes" ]; then
+	type gpg > /dev/null 2>&1
+	if [ $? -eq 0 ]; then
+		gpg --fingerprint $PUBLICKEY_FINGERPRINT > /dev/null 2>&1
+		if [ $? -ne 0 ]; then
+			download_file $PUBLICKEY_URL | gpg --import
+		fi
+		gpg --fingerprint $PUBLICKEY_FINGERPRINT > /dev/null 2>&1
+		if [ $? -ne 0 ]; then
+			gpg --keyserver pgp.mit.edu --recv-key $PUBLICKEY_FINGERPRINT
+		fi
+	else
+		ENABLE_GPG="no"
+	fi
+fi
 
-echo "[INFO] Installing/updating $NAME on directory $INSTALL_DIRECTORY"
+echo "[*] Found $NAME $BASE_VERSION (build $BUILD) using API $API_VERSION"
+echo "[*] This $CHANNEL build was released on $VERSION_DATE_STRING"
+
+if [ "$ENABLE_GPG" == "yes" ]; then
+	echo "[+] The build was signed, will check signature"
+fi
+
+echo "[*] Installing/updating $NAME on directory $INSTALL_DIRECTORY"
 mkdir -m 0777 "$INSTALL_DIRECTORY" 2> /dev/null
 cd "$INSTALL_DIRECTORY"
 echo "[1/3] Cleaning..."
@@ -119,7 +152,7 @@ download_file "$VERSION_DOWNLOAD" > "$NAME.phar"
 if ! [ -s "$NAME.phar" ] || [ "$(head -n 1 $NAME.phar)" == '<!DOCTYPE html>' ]; then
 	rm "$NAME.phar" 2> /dev/null
 	echo " failed!"
-	echo "[ERROR] Couldn't download $NAME automatically from $VERSION_DOWNLOAD"
+	echo "[!] Couldn't download $NAME automatically from $VERSION_DOWNLOAD"
 	exit 1
 else
 	if [ "$CHANNEL" == "soft" ]; then
@@ -137,6 +170,23 @@ chmod +x compile.sh
 chmod +x start.sh
 
 echo " done!"
+
+if [ "$ENABLE_GPG" == "yes" ]; then
+	echo "[*] Checking signature"
+	download_file "$GPG_SIGNATURE" > "$NAME.phar.asc"
+	download_file "$GPG_SIGNATURE_PUBLICKEY" | gpg --import > /dev/null 2>&1
+	if [ $? -ne 0 ]; then
+		echo "[!] Invalid public key!"
+		exit 1
+	fi
+	gpg --trusted-key $PUBLICKEY_LONGID --verify "$NAME.phar.asc" "$NAME.phar"
+	if [ $? -eq 0 ]; then
+		echo "[+] Signature checked!"
+	else
+		echo "[!] Invalid signature! Please check for file corruption or a wrongly imported public key (signed by $PUBLICKEY_FINGERPRINT)"
+		exit 1
+	fi	
+fi
 
 if [ "$update" == "on" ]; then
 	echo "[3/3] Skipping PHP recompilation due to user request"
