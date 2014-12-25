@@ -95,6 +95,7 @@ ENABLE_GPG="no"
 PUBLICKEY_URL="https://cdn.pocketmine.net/key/pocketmine.asc"
 PUBLICKEY_FINGERPRINT="20D377AFC3F7535B3261AA4DCF48E7E52280B75B"
 PUBLICKEY_LONGID="${PUBLICKEY_FINGERPRINT: -16}"
+GPG_KEYSERVER="pgp.mit.edu"
 
 VERSION_DATA=$(download_file "https://www.pocketmine.net/api/?channel=$CHANNEL")
 
@@ -113,7 +114,6 @@ else
 fi
 
 GPG_SIGNATURE=$(echo "$VERSION_DATA" | grep '"signature_url"' | cut -d ':' -f2- | tr -d ' ",')
-GPG_SIGNATURE_PUBLICKEY=$(echo "$VERSION_DATA" | grep '"publickey_url"' | cut -d ':' -f2- | tr -d ' ",')
 
 if [ "$GPG_SIGNATURE" != "" ]; then
 	ENABLE_GPG="yes"
@@ -186,13 +186,8 @@ echo " done!"
 
 if [ "$ENABLE_GPG" == "yes" ]; then
 	echo "[*] Checking signature"
-	download_file "$GPG_SIGNATURE" > "$NAME.phar.asc"
-	download_file "$GPG_SIGNATURE_PUBLICKEY" | gpg --import > /dev/null 2>&1
-	if [ $? -ne 0 ]; then
-		echo "[!] Invalid public key!"
-		exit 1
-	fi
-	gpg --trusted-key $PUBLICKEY_LONGID --verify "$NAME.phar.asc" "$NAME.phar"
+	download_file "$GPG_SIGNATURE" > "$NAME.phar.sig"
+	gpg --keyserver "$GPG_KEYSERVER" --keyserver-options auto-key-retrieve=1 --trusted-key $PUBLICKEY_LONGID --verify "$NAME.phar.sig" "$NAME.phar"
 	if [ $? -eq 0 ]; then
 		echo "[+] Signature checked!"
 	else
