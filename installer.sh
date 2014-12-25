@@ -22,22 +22,9 @@ XDEBUG="off"
 
 INSTALL_DIRECTORY="./"
 
-#Needed to use aliases
-shopt -s expand_aliases
-type wget > /dev/null 2>&1
-if [ $? -eq 0 ]; then
-	alias download_file="wget --no-check-certificate -q -O -"
-else
-	type curl >> /dev/null 2>&1
-	if [ $? -eq 0 ]; then
-		alias download_file="curl --insecure --silent --location"
-	else
-		echo "error, curl or wget not found"
-	fi
-fi
+IGNORE_CERT="no"
 
-
-while getopts "rxucd:v:" opt; do
+while getopts "rxucid:v:" opt; do
   case $opt in
     r)
 	  checkRoot=off
@@ -55,6 +42,9 @@ while getopts "rxucd:v:" opt; do
 	d)
 	  INSTALL_DIRECTORY="$OPTARG"
       ;;
+	d)
+	  IGNORE_CERT="yes"
+      ;;
 	v)
 	  CHANNEL="$OPTARG"
       ;;
@@ -64,6 +54,29 @@ while getopts "rxucd:v:" opt; do
       ;;
   esac
 done
+
+
+#Needed to use aliases
+shopt -s expand_aliases
+type wget > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+	if [ "$IGNORE_CERT" == "yes" ]; then
+		alias download_file="wget --no-check-certificate -q -O -"
+	else
+		alias download_file="wget -q -O -"
+	fi
+else
+	type curl >> /dev/null 2>&1
+	if [ $? -eq 0 ]; then
+		if [ "$IGNORE_CERT" == "yes" ]; then
+			alias download_file="curl --insecure --silent --location"
+		else
+			alias download_file="curl --silent --location"
+		fi
+	else
+		echo "error, curl or wget not found"
+	fi
+fi
 
 if [ "$checkRoot" == "on" ]; then
 	if [ "$(id -u)" == "0" ]; then
@@ -79,11 +92,11 @@ if [ "$CHANNEL" == "soft" ]; then
 fi
 
 ENABLE_GPG="no"
-PUBLICKEY_URL="http://cdn.pocketmine.net/key/pocketmine.asc"
+PUBLICKEY_URL="https://cdn.pocketmine.net/key/pocketmine.asc"
 PUBLICKEY_FINGERPRINT="20D377AFC3F7535B3261AA4DCF48E7E52280B75B"
 PUBLICKEY_LONGID="${PUBLICKEY_FINGERPRINT: -16}"
 
-VERSION_DATA=$(download_file "http://www.pocketmine.net/api/?channel=$CHANNEL")
+VERSION_DATA=$(download_file "https://www.pocketmine.net/api/?channel=$CHANNEL")
 
 VERSION=$(echo "$VERSION_DATA" | grep '"version"' | cut -d ':' -f2- | tr -d ' ",')
 BUILD=$(echo "$VERSION_DATA" | grep build | cut -d ':' -f2- | tr -d ' ",')
@@ -120,7 +133,7 @@ if [ "$ENABLE_GPG" == "yes" ]; then
 		fi
 		gpg --fingerprint $PUBLICKEY_FINGERPRINT > /dev/null 2>&1
 		if [ $? -ne 0 ]; then
-			gpg --keyserver pgp.mit.edu --recv-key $PUBLICKEY_FINGERPRINT
+			gpg --recv-key $PUBLICKEY_FINGERPRINT
 		fi
 	else
 		ENABLE_GPG="no"
