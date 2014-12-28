@@ -105,7 +105,7 @@ then
 	rm -rf libtool-2.4.2
 	export LIBTOOL="$COMPILEDIR/mac/libtool/bin/libtool"
 	export LIBTOOLIZE="$COMPILEDIR/mac/libtool/bin/libtoolize"
-    $SCRIPT -t mac32 -j $THREADS -c $EXTRA_FLAGS -f
+    $SCRIPT -t mac32 -j $THREADS -c $EXTRA_FLAGS -l -f
     
     tar -czf PHP_${PHP_VERSION_NAME}_x86_MacOS.tar.gz bin/
     cp -r $COMPILEDIR/mac32/{install.log,PHP_${PHP_VERSION_NAME}_x86_MacOS.tar.gz} $ARCHIVE/mac32/
@@ -130,7 +130,7 @@ then
 	rm -rf libtool-2.4.2
 	export LIBTOOL="$COMPILEDIR/mac/libtool/bin/libtool"
 	export LIBTOOLIZE="$COMPILEDIR/mac/libtool/bin/libtoolize"
-    $SCRIPT -t mac64 -j $THREADS -c $EXTRA_FLAGS -f
+    $SCRIPT -t mac64 -j $THREADS -c $EXTRA_FLAGS -l -f
     
     tar -czf PHP_${PHP_VERSION_NAME}_x86-64_MacOS.tar.gz bin/
     cp -r $COMPILEDIR/mac64/{install.log,PHP_${PHP_VERSION_NAME}_x86-64_MacOS.tar.gz} $ARCHIVE/mac64
