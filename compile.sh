@@ -146,6 +146,7 @@ while getopts "::t:oj:srcdlxzff:" OPTION; do
 done
 
 GMP_ABI=""
+TOOLCHAIN_PREFIX=""
 
 if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 	export CROSS_COMPILER="$PATH"
@@ -154,8 +155,6 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		[ -z "$march" ] && march=i686;
 		[ -z "$mtune" ] && mtune=pentium4;
 		CFLAGS="$CFLAGS -mconsole"
-		export CC="$TOOLCHAIN_PREFIX-gcc"
-		export CXX="$TOOLCHAIN_PREFIX-g++"
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --target=$TOOLCHAIN_PREFIX --build=$TOOLCHAIN_PREFIX"
 		IS_WINDOWS="yes"
 		GMP_ABI="32"
@@ -165,8 +164,6 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		[ -z "$march" ] && march=x86_64;
 		[ -z "$mtune" ] && mtune=nocona;
 		CFLAGS="$CFLAGS -mconsole"
-		export CC="$TOOLCHAIN_PREFIX-gcc"
-		export CXX="$TOOLCHAIN_PREFIX-g++"
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --target=$TOOLCHAIN_PREFIX --build=$TOOLCHAIN_PREFIX"
 		IS_WINDOWS="yes"
 		GMP_ABI="64"
@@ -176,10 +173,9 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		[ -z "$march" ] && march=armv6;
 		[ -z "$mtune" ] && mtune=arm1136jf-s;
 		TOOLCHAIN_PREFIX="arm-linux-musleabi"
-		export CC="$TOOLCHAIN_PREFIX-gcc"
-		export CXX="$TOOLCHAIN_PREFIX-g++"
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --enable-static-link --disable-ipv6"
 		CFLAGS="-static $CFLAGS"
+		CXXFLAGS="-static $CXXFLAGS"
 		LDFLAGS="-static"
 		echo "[INFO] Cross-compiling for Android ARMv6"
 	elif [ "$COMPILE_TARGET" == "android-armv7" ]; then
@@ -187,22 +183,18 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		[ -z "$march" ] && march=armv7-a;
 		[ -z "$mtune" ] && mtune=cortex-a8;
 		TOOLCHAIN_PREFIX="arm-linux-musleabi"
-		export CC="$TOOLCHAIN_PREFIX-gcc"
-		export CXX="$TOOLCHAIN_PREFIX-g++"
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --enable-static-link --disable-ipv6"
 		CFLAGS="-static $CFLAGS"
+		CXXFLAGS="-static $CXXFLAGS"
 		LDFLAGS="-static"
 		echo "[INFO] Cross-compiling for Android ARMv7"
 	elif [ "$COMPILE_TARGET" == "rpi" ]; then
 		TOOLCHAIN_PREFIX="arm-linux-gnueabihf"
 		[ -z "$march" ] && march=armv6zk;
 		[ -z "$mtune" ] && mtune=arm1176jzf-s;
-		CFLAGS="$CFLAGS -mfloat-abi=hard -mfpu=vfp";
 		if [ "$DO_OPTIMIZE" == "yes" ]; then
 			CFLAGS="$CFLAGS -mfloat-abi=hard -mfpu=vfp"
 		fi
-		export CC="$TOOLCHAIN_PREFIX-gcc"
-		export CXX="$TOOLCHAIN_PREFIX-g++"
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX"
 		[ -z "$CFLAGS" ] && CFLAGS="-uclibc";
 		echo "[INFO] Cross-compiling for Raspberry Pi ARMv6zk hard float"
@@ -211,8 +203,6 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		[ -z "$mtune" ] && mtune=generic;
 		CFLAGS="$CFLAGS -fomit-frame-pointer";
 		TOOLCHAIN_PREFIX="i686-apple-darwin10"
-		export CC="$TOOLCHAIN_PREFIX-gcc"
-		export CXX="$TOOLCHAIN_PREFIX-g++"
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX"
 		#zlib doesn't use the correct ranlib
 		RANLIB=$TOOLCHAIN_PREFIX-ranlib
@@ -224,15 +214,11 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		[ -z "$march" ] && march=armv6;
 		[ -z "$mtune" ] && mtune=arm1176jzf-s;
 		TOOLCHAIN_PREFIX="arm-apple-darwin10"
-		export CC="$TOOLCHAIN_PREFIX-gcc"
-		export CXX="$TOOLCHAIN_PREFIX-g++"
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --target=$TOOLCHAIN_PREFIX -miphoneos-version-min=4.2"
 	elif [ "$COMPILE_TARGET" == "ios-armv7" ]; then
 		[ -z "$march" ] && march=armv7-a;
 		[ -z "$mtune" ] && mtune=cortex-a8;
 		TOOLCHAIN_PREFIX="arm-apple-darwin10"
-		export CC="$TOOLCHAIN_PREFIX-gcc"
-		export CXX="$TOOLCHAIN_PREFIX-g++"
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --target=$TOOLCHAIN_PREFIX -miphoneos-version-min=4.2"
 		if [ "$DO_OPTIMIZE" == "yes" ]; then
 			CFLAGS="$CFLAGS -mfpu=neon"
@@ -262,8 +248,10 @@ elif [ "$COMPILE_TARGET" == "mac" ] || [ "$COMPILE_TARGET" == "mac32" ]; then
 	[ -z "$march" ] && march=prescott;
 	[ -z "$mtune" ] && mtune=generic;
 	CFLAGS="$CFLAGS -m32 -arch i386 -fomit-frame-pointer -mmacosx-version-min=10.5";
-	LDFLAGS="$LDFLAGS -Wl,-rpath,@loader_path/../lib";
-	export DYLD_LIBRARY_PATH="@loader_path/../lib"
+	if [ "$DO_STATIC" == "no" ]; then
+		LDFLAGS="$LDFLAGS -Wl,-rpath,@loader_path/../lib";
+		export DYLD_LIBRARY_PATH="@loader_path/../lib"
+	fi
 	CFLAGS="$CFLAGS -Qunused-arguments -Wno-error=unused-command-line-argument-hard-error-in-future"
 	ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
 	GMP_ABI="32"
@@ -272,8 +260,10 @@ elif [ "$COMPILE_TARGET" == "mac64" ]; then
 	[ -z "$march" ] && march=core2;
 	[ -z "$mtune" ] && mtune=generic;
 	CFLAGS="$CFLAGS -m64 -arch x86_64 -fomit-frame-pointer -mmacosx-version-min=10.5";
-	LDFLAGS="$LDFLAGS -Wl,-rpath,@loader_path/../lib";
-	export DYLD_LIBRARY_PATH="@loader_path/../lib"
+	if [ "$DO_STATIC" == "no" ]; then
+		LDFLAGS="$LDFLAGS -Wl,-rpath,@loader_path/../lib";
+		export DYLD_LIBRARY_PATH="@loader_path/../lib"
+	fi
 	CFLAGS="$CFLAGS -Qunused-arguments -Wno-error=unused-command-line-argument-hard-error-in-future"
 	ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
 	GMP_ABI="64"
@@ -294,6 +284,15 @@ elif [ -z "$CFLAGS" ]; then
 	fi
 fi
 
+if [ "$TOOLCHAIN_PREFIX" != "" ]; then
+		export CC="$TOOLCHAIN_PREFIX-gcc"
+		export CXX="$TOOLCHAIN_PREFIX-g++"
+		export AR="$TOOLCHAIN_PREFIX-ar"
+		export RANLIB="$TOOLCHAIN_PREFIX-ranlib"
+		export CPP="$TOOLCHAIN_PREFIX-cpp"
+		export LD="$TOOLCHAIN_PREFIX-ld"
+fi
+
 echo "#include <stdio.h> \
 int main(void){ \
 	printf("Hello world\n"); \
@@ -307,7 +306,11 @@ type $CC >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"$CC\
 [ -z "$march" ] && march=native;
 [ -z "$mtune" ] && mtune=native;
 [ -z "$CFLAGS" ] && CFLAGS="";
-[ -z "$LDFLAGS" ] && LDFLAGS="-Wl,-rpath='\$\$ORIGIN/../lib' -Wl,-rpath-link='\$\$ORIGIN/../lib'";
+
+if [ "$DO_STATIC" == "no" ]; then
+	[ -z "$LDFLAGS" ] && LDFLAGS="-Wl,-rpath='\$\$ORIGIN/../lib' -Wl,-rpath-link='\$\$ORIGIN/../lib'";
+fi
+
 [ -z "$CONFIGURE_FLAGS" ] && CONFIGURE_FLAGS="";
 
 
@@ -328,7 +331,7 @@ rm test >> "$DIR/install.log" 2>&1
 
 export CC="$CC"
 export CXX="$CXX"
-export CFLAGS="-s -O2 -fpic $CFLAGS"
+export CFLAGS="-s -O2 -fPIC $CFLAGS"
 export CXXFLAGS="$CFLAGS"
 export LDFLAGS="$LDFLAGS"
 export LIBRARY_PATH="$DIR/bin/php5/lib:$DIR/bin/php5/lib:$LIBRARY_PATH"
@@ -850,6 +853,11 @@ if [ "$COMPILE_FOR_ANDROID" == "yes" ]; then
 fi
 sed -i=".backup" 's/PHP_BINARIES. pharcmd$/PHP_BINARIES)/g' Makefile
 sed -i=".backup" 's/install-programs install-pharcmd$/install-programs/g' Makefile
+
+if [ "$COMPILE_LEVELDB" == "yes" ]; then
+sed -i=".backup" 's/--mode=link $(CC)/--mode=link $(CXX)/g' Makefile
+fi
+
 make -j $THREADS >> "$DIR/install.log" 2>&1
 echo -n " installing..."
 make install >> "$DIR/install.log" 2>&1
@@ -885,7 +893,7 @@ echo "asp_tags=0" >> "$DIR/bin/php5/bin/php.ini"
 echo "phar.readonly=0" >> "$DIR/bin/php5/bin/php.ini"
 echo "phar.require_hash=1" >> "$DIR/bin/php5/bin/php.ini"
 #echo "zend_extension=uopz.so" >> "$DIR/bin/php5/bin/php.ini"
-if [ "$IS_CROSSCOMPILE" != "yes" ]; then
+if [ "$IS_CROSSCOMPILE" != "yes" && "$DO_STATIC" == "no" ]; then
 	echo ";zend_extension=xdebug.so" >> "$DIR/bin/php5/bin/php.ini"
 	echo "zend_extension=opcache.so" >> "$DIR/bin/php5/bin/php.ini"
 	echo "opcache.enable=1" >> "$DIR/bin/php5/bin/php.ini"
@@ -897,6 +905,7 @@ if [ "$IS_CROSSCOMPILE" != "yes" ]; then
 	echo "opcache.memory_consumption=128" >> "$DIR/bin/php5/bin/php.ini"
 	echo "opcache.optimization_level=0xffffffff" >> "$DIR/bin/php5/bin/php.ini"
 fi
+
 if [ "$HAVE_CURL" == "shared,/usr" ]; then
 	echo "extension=curl.so" >> "$DIR/bin/php5/bin/php.ini"
 fi
