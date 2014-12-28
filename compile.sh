@@ -854,9 +854,9 @@ fi
 sed -i=".backup" 's/PHP_BINARIES. pharcmd$/PHP_BINARIES)/g' Makefile
 sed -i=".backup" 's/install-programs install-pharcmd$/install-programs/g' Makefile
 
-#if [ "$COMPILE_LEVELDB" == "yes" ]; then
-	#sed -i=".backup" 's/--mode=link $(CC)/--mode=link $(CXX)/g' Makefile
-#fi
+if [ "$COMPILE_LEVELDB" == "yes" ]; then
+	sed -i=".backup" 's/--mode=link $(CC)/--mode=link $(CXX)/g' Makefile
+fi
 
 make -j $THREADS >> "$DIR/install.log" 2>&1
 echo -n " installing..."

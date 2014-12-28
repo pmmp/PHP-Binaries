@@ -240,7 +240,7 @@ then
     mkdir -p {$COMPILEDIR,$ARCHIVE}/crosscompile/rpi
     cd $COMPILEDIR/crosscompile/rpi
     
-    $SCRIPT -t rpi -j $THREADS -c -x $EXTRA_FLAGS -s -f arm
+    $SCRIPT -t rpi -j $THREADS -c -x $EXTRA_FLAGS -s -l -f arm
 
     tar -czf PHP_${PHP_VERSION_NAME}_ARM_Raspbian_hard.tar.gz bin/
     cp -r $COMPILEDIR/crosscompile/rpi/{install.log,PHP_${PHP_VERSION_NAME}_ARM_Raspbian_hard.tar.gz} $ARCHIVE/crosscompile/rpi/
