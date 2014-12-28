@@ -854,9 +854,9 @@ fi
 sed -i=".backup" 's/PHP_BINARIES. pharcmd$/PHP_BINARIES)/g' Makefile
 sed -i=".backup" 's/install-programs install-pharcmd$/install-programs/g' Makefile
 
-if [ "$COMPILE_LEVELDB" == "yes" ]; then
-sed -i=".backup" 's/--mode=link $(CC)/--mode=link $(CXX)/g' Makefile
-fi
+#if [ "$COMPILE_LEVELDB" == "yes" ]; then
+	#sed -i=".backup" 's/--mode=link $(CC)/--mode=link $(CXX)/g' Makefile
+#fi
 
 make -j $THREADS >> "$DIR/install.log" 2>&1
 echo -n " installing..."
@@ -893,7 +893,7 @@ echo "asp_tags=0" >> "$DIR/bin/php5/bin/php.ini"
 echo "phar.readonly=0" >> "$DIR/bin/php5/bin/php.ini"
 echo "phar.require_hash=1" >> "$DIR/bin/php5/bin/php.ini"
 #echo "zend_extension=uopz.so" >> "$DIR/bin/php5/bin/php.ini"
-if [ "$IS_CROSSCOMPILE" != "yes" && "$DO_STATIC" == "no" ]; then
+if [ "$IS_CROSSCOMPILE" != "yes" ] && [ "$DO_STATIC" == "no" ]; then
 	echo ";zend_extension=xdebug.so" >> "$DIR/bin/php5/bin/php.ini"
 	echo "zend_extension=opcache.so" >> "$DIR/bin/php5/bin/php.ini"
 	echo "opcache.enable=1" >> "$DIR/bin/php5/bin/php.ini"
