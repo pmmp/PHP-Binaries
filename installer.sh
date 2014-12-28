@@ -42,7 +42,7 @@ while getopts "rxucid:v:" opt; do
 	d)
 	  INSTALL_DIRECTORY="$OPTARG"
       ;;
-	d)
+	i)
 	  IGNORE_CERT="yes"
       ;;
 	v)
@@ -92,10 +92,22 @@ if [ "$CHANNEL" == "soft" ]; then
 fi
 
 ENABLE_GPG="no"
-PUBLICKEY_URL="https://cdn.pocketmine.net/key/pocketmine.asc"
+PUBLICKEY_URL="https://cdn.pocketmine.net/pocketmine.asc"
 PUBLICKEY_FINGERPRINT="20D377AFC3F7535B3261AA4DCF48E7E52280B75B"
 PUBLICKEY_LONGID="${PUBLICKEY_FINGERPRINT: -16}"
 GPG_KEYSERVER="pgp.mit.edu"
+
+function check_signature {
+	echo "[*] Checking signature of $1"
+	gpg --keyserver "$GPG_KEYSERVER" --keyserver-options auto-key-retrieve=1 --trusted-key $PUBLICKEY_LONGID --verify "$1.sig" "$1"
+	if [ $? -eq 0 ]; then
+		echo "[+] Signature valid and checked!"
+	else
+		gpg --refresh-keys > /dev/null 2>&1
+		echo "[!] Invalid signature! Please check for file corruption or a wrongly imported public key (signed by $PUBLICKEY_FINGERPRINT)"
+		exit 1
+	fi	
+}
 
 VERSION_DATA=$(download_file "https://www.pocketmine.net/api/?channel=$CHANNEL")
 
@@ -129,11 +141,11 @@ if [ "$ENABLE_GPG" == "yes" ]; then
 	if [ $? -eq 0 ]; then
 		gpg --fingerprint $PUBLICKEY_FINGERPRINT > /dev/null 2>&1
 		if [ $? -ne 0 ]; then
-			download_file $PUBLICKEY_URL | gpg --import
-		fi
-		gpg --fingerprint $PUBLICKEY_FINGERPRINT > /dev/null 2>&1
-		if [ $? -ne 0 ]; then
-			gpg --recv-key $PUBLICKEY_FINGERPRINT
+			download_file $PUBLICKEY_URL | gpg --trusted-key $PUBLICKEY_FINGERPRINT --import
+			gpg --fingerprint $PUBLICKEY_FINGERPRINT > /dev/null 2>&1
+			if [ $? -ne 0 ]; then
+				gpg --trusted-key $PUBLICKEY_FINGERPRINT --keyserver "$GPG_KEYSERVER" --recv-key $PUBLICKEY_FINGERPRINT
+			fi
 		fi
 	else
 		ENABLE_GPG="no"
@@ -185,15 +197,8 @@ chmod +x start.sh
 echo " done!"
 
 if [ "$ENABLE_GPG" == "yes" ]; then
-	echo "[*] Checking signature"
 	download_file "$GPG_SIGNATURE" > "$NAME.phar.sig"
-	gpg --keyserver "$GPG_KEYSERVER" --keyserver-options auto-key-retrieve=1 --trusted-key $PUBLICKEY_LONGID --verify "$NAME.phar.sig" "$NAME.phar"
-	if [ $? -eq 0 ]; then
-		echo "[+] Signature checked!"
-	else
-		echo "[!] Invalid signature! Please check for file corruption or a wrongly imported public key (signed by $PUBLICKEY_FINGERPRINT)"
-		exit 1
-	fi	
+	check_signature "$NAME.phar"
 fi
 
 if [ "$update" == "on" ]; then

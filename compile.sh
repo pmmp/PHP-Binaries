@@ -109,9 +109,9 @@ while getopts "::t:oj:srcdlxzff:" OPTION; do
 			IS_CROSSCOMPILE="yes"
 			;;
 		l)
-                        echo "[opt] Will compile with LevelDB support"
-                        COMPILE_LEVELDB="yes"
-                        ;;
+			echo "[opt] Will compile with LevelDB support"
+			COMPILE_LEVELDB="yes"
+			;;
 		s)
 			echo "[opt] Will compile everything statically"
 			DO_STATIC="yes"
@@ -328,7 +328,7 @@ rm test >> "$DIR/install.log" 2>&1
 
 export CC="$CC"
 export CXX="$CXX"
-export CFLAGS="-s -O2 -fPIC $CFLAGS"
+export CFLAGS="-s -O2 -fpic $CFLAGS"
 export CXXFLAGS="$CFLAGS"
 export LDFLAGS="$LDFLAGS"
 export LIBRARY_PATH="$DIR/bin/php5/lib:$DIR/bin/php5/lib:$LIBRARY_PATH"
@@ -636,7 +636,11 @@ if [ "$COMPILE_LEVELDB" == "yes" ]; then
 	echo -n " checking..."
 	cd leveldb
 	echo -n " compiling..."
-	CFLAGS="$CFLAGS -I$DIR/bin/php5/include" CXXFLAGS="$CFLAGS -I$DIR/bin/php5/include" LDFLAGS="$LDFLAGS -L$DIR/bin/php5/lib" make -j $THREADS >> "$DIR/install.log" 2>&1
+	if [ "$DO_STATIC" == "yes" ]; then
+		CFLAGS="$CFLAGS -I$DIR/bin/php5/include" CXXFLAGS="$CXXFLAGS -I$DIR/bin/php5/include" LDFLAGS="$LDFLAGS -L$DIR/bin/php5/lib" make -j $THREADS libleveldb.a >> "$DIR/install.log" 2>&1
+	else
+		CFLAGS="$CFLAGS -I$DIR/bin/php5/include" CXXFLAGS="$CXXFLAGS -I$DIR/bin/php5/include" LDFLAGS="$LDFLAGS -L$DIR/bin/php5/lib" make -j $THREADS libleveldb.so >> "$DIR/install.log" 2>&1
+	fi
 	echo -n " installing..."
 	cp libleveldb* "$DIR/bin/php5/lib/"
 	cp -r include/leveldb "$DIR/bin/php5/include/leveldb"
