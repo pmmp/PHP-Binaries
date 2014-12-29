@@ -19,9 +19,9 @@ WEAKREF_VERSION="0.2.6"
 PHPYAML_VERSION="1.1.1"
 YAML_VERSION="0.1.4"
 #PHPLEVELDB_VERSION="0.1.4"
-PHPLEVELDB_VERSION="d84b2ccbe6b879d93cfa3270ed2cc25d849353d5"
+PHPLEVELDB_VERSION="master"
 #LEVELDB_VERSION="1.18"
-LEVELDB_VERSION="b633756b51390a9970efde9068f60188ca06a724"
+LEVELDB_VERSION="master"
 LIBXML_VERSION="2.9.1"
 BCOMPILER_VERSION="1.0.2"
 
@@ -800,6 +800,8 @@ if [ "$(uname -s)" == "Darwin" ] && [ "$IS_CROSSCOMPILE" != "yes" ]; then
 	export EXTRA_CFLAGS=-lresolv
 fi
 
+export LD_LIBRARY_PATH="$DIR/bin/php5/lib"
+
 RANLIB=$RANLIB ./configure $PHP_OPTIMIZATION --prefix="$DIR/bin/php5" \
 --exec-prefix="$DIR/bin/php5" \
 --with-curl="$HAVE_CURL" \
@@ -877,6 +879,8 @@ if [ "$(uname -s)" == "Darwin" ] && [ "$IS_CROSSCOMPILE" != "yes" ]; then
 	install_name_tool -change "$DIR/bin/php5/lib/libmenu.6.0.dylib" "@loader_path/../lib/libmenu.6.0.dylib" "$DIR/bin/php5/bin/php" >> "$DIR/install.log" 2>&1
 	install_name_tool -change "$DIR/bin/php5/lib/libncurses.6.0.dylib" "@loader_path/../lib/libncurses.6.0.dylib" "$DIR/bin/php5/bin/php" >> "$DIR/install.log" 2>&1
 	install_name_tool -change "$DIR/bin/php5/lib/libpanel.6.0.dylib" "@loader_path/../lib/libpanel.6.0.dylib" "$DIR/bin/php5/bin/php" >> "$DIR/install.log" 2>&1
+	
+	#install_name_tool -change "$DIR/bin/php5/lib/libz.1.dylib" "@loader_path/../lib/libz.1.dylib" "$DIR/bin/php5/bin/php" >> "$DIR/install.log" 2>&1
 	#install_name_tool -change "$DIR/bin/php5/lib/libssl.1.0.0.dylib" "@loader_path/../lib/libssl.1.0.0.dylib" "$DIR/bin/php5/bin/php" >> "$DIR/install.log" 2>&1
 	#install_name_tool -change "$DIR/bin/php5/lib/libssl.1.0.0.dylib" "@loader_path/../lib/libssl.1.0.0.dylib" "$DIR/bin/php5/lib/libcurl.4.dylib" >> "$DIR/install.log" 2>&1
 	#install_name_tool -change "$DIR/bin/php5/lib/libcrypto.1.0.0.dylib" "@loader_path/../lib/libcrypto.1.0.0.dylib" "$DIR/bin/php5/bin/php" >> "$DIR/install.log" 2>&1
