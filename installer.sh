@@ -254,12 +254,12 @@ else
 			if [ "$(./bin/php5/bin/php -r 'echo 1;' 2>/dev/null)" == "1" ]; then
 				echo -n " regenerating php.ini..."
 				TIMEZONE=$(date +%Z)
-				OPCACHE_PATH="$(find $(pwd) -name opcache.so)"
+				#OPCACHE_PATH="$(find $(pwd) -name opcache.so)"
 				XDEBUG_PATH="$(find $(pwd) -name xdebug.so)"
 				echo "" > "./bin/php5/bin/php.ini"
 				#UOPZ_PATH="$(find $(pwd) -name uopz.so)"
 				#echo "zend_extension=\"$UOPZ_PATH\"" >> "./bin/php5/bin/php.ini"
-				echo "zend_extension=\"$OPCACHE_PATH\"" >> "./bin/php5/bin/php.ini"
+				#echo "zend_extension=\"$OPCACHE_PATH\"" >> "./bin/php5/bin/php.ini"
 				if [ "$XDEBUG" == "on" ]; then
 					echo "zend_extension=\"$XDEBUG_PATH\"" >> "./bin/php5/bin/php.ini"
 				fi
@@ -299,14 +299,14 @@ else
 			if [ "$(./bin/php5/bin/php -r 'echo 1;' 2>/dev/null)" == "1" ]; then
 				echo -n " regenerating php.ini..."
 				TIMEZONE=$(date +%Z)
-				OPCACHE_PATH="$(find $(pwd) -name opcache.so)"
+				#OPCACHE_PATH="$(find $(pwd) -name opcache.so)"
 				if [ "$XDEBUG" == "on" ]; then
 					echo "zend_extension=\"$XDEBUG_PATH\"" >> "./bin/php5/bin/php.ini"
 				fi
 				echo "" > "./bin/php5/bin/php.ini"
 				#UOPZ_PATH="$(find $(pwd) -name uopz.so)"
 				#echo "zend_extension=\"$UOPZ_PATH\"" >> "./bin/php5/bin/php.ini"
-				echo "zend_extension=\"$OPCACHE_PATH\"" >> "./bin/php5/bin/php.ini"
+				#echo "zend_extension=\"$OPCACHE_PATH\"" >> "./bin/php5/bin/php.ini"
 				if [ "$XDEBUG" == "on" ]; then
 					echo "zend_extension=\"$XDEBUG_PATH\"" >> "./bin/php5/bin/php.ini"
 				fi
@@ -337,12 +337,12 @@ else
 			echo -n " checking..."
 			if [ "$(./bin/php5/bin/php -r 'echo 1;' 2>/dev/null)" == "1" ]; then
 				echo -n " regenerating php.ini..."
-				OPCACHE_PATH="$(find $(pwd) -name opcache.so)"
+				#OPCACHE_PATH="$(find $(pwd) -name opcache.so)"
 				XDEBUG_PATH="$(find $(pwd) -name xdebug.so)"
 				echo "" > "./bin/php5/bin/php.ini"
 				#UOPZ_PATH="$(find $(pwd) -name uopz.so)"
 				#echo "zend_extension=\"$UOPZ_PATH\"" >> "./bin/php5/bin/php.ini"
-				echo "zend_extension=\"$OPCACHE_PATH\"" >> "./bin/php5/bin/php.ini"
+				#echo "zend_extension=\"$OPCACHE_PATH\"" >> "./bin/php5/bin/php.ini"
 				if [ "$XDEBUG" == "on" ]; then
 					echo "zend_extension=\"$XDEBUG_PATH\"" >> "./bin/php5/bin/php.ini"
 				fi
@@ -391,12 +391,12 @@ else
 			echo -n " checking..."
 			if [ "$(./bin/php5/bin/php -r 'echo 1;' 2>/dev/null)" == "1" ]; then
 				echo -n " regenerating php.ini..."
-				OPCACHE_PATH="$(find $(pwd) -name opcache.so)"
+				#OPCACHE_PATH="$(find $(pwd) -name opcache.so)"
 				XDEBUG_PATH="$(find $(pwd) -name xdebug.so)"
 				echo "" > "./bin/php5/bin/php.ini"
 				#UOPZ_PATH="$(find $(pwd) -name uopz.so)"
 				#echo "zend_extension=\"$UOPZ_PATH\"" >> "./bin/php5/bin/php.ini"
-				echo "zend_extension=\"$OPCACHE_PATH\"" >> "./bin/php5/bin/php.ini"
+				#echo "zend_extension=\"$OPCACHE_PATH\"" >> "./bin/php5/bin/php.ini"
 				if [ "$XDEBUG" == "on" ]; then
 					echo "zend_extension=\"$XDEBUG_PATH\"" >> "./bin/php5/bin/php.ini"
 				fi
