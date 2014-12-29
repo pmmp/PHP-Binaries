@@ -21,7 +21,7 @@ YAML_VERSION="0.1.4"
 #PHPLEVELDB_VERSION="0.1.4"
 PHPLEVELDB_VERSION="d84b2ccbe6b879d93cfa3270ed2cc25d849353d5"
 #LEVELDB_VERSION="1.18"
-LEVELDB_VERSION="b633756b51390a9970efde9068f60188ca06a724"
+LEVELDB_VERSION="b633756b51390a9970efde9068f60188ca06a724" #Check MacOS
 LIBXML_VERSION="2.9.1"
 BCOMPILER_VERSION="1.0.2"
 
@@ -206,7 +206,7 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX"
 		#zlib doesn't use the correct ranlib
 		RANLIB=$TOOLCHAIN_PREFIX-ranlib
-		LEVELDB_VERSION="macos"
+		LEVELDB_VERSION="1bd4a335d620b395b0a587b15804f9b2ab3c403f"
 		CFLAGS="$CFLAGS -Qunused-arguments -Wno-error=unused-command-line-argument-hard-error-in-future"
 		ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
 		GMP_ABI="32"
@@ -253,7 +253,7 @@ elif [[ "$COMPILE_TARGET" == "mac" ]] || [[ "$COMPILE_TARGET" == "mac32" ]]; the
 		LDFLAGS="$LDFLAGS -Wl,-rpath,@loader_path/../lib";
 		export DYLD_LIBRARY_PATH="@loader_path/../lib"
 	fi
-	LEVELDB_VERSION="macos"
+	LEVELDB_VERSION="1bd4a335d620b395b0a587b15804f9b2ab3c403f"
 	CFLAGS="$CFLAGS -Qunused-arguments -Wno-error=unused-command-line-argument-hard-error-in-future"
 	ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
 	GMP_ABI="32"
@@ -266,7 +266,7 @@ elif [ "$COMPILE_TARGET" == "mac64" ]; then
 		LDFLAGS="$LDFLAGS -Wl,-rpath,@loader_path/../lib";
 		export DYLD_LIBRARY_PATH="@loader_path/../lib"
 	fi
-	LEVELDB_VERSION="macos"
+	LEVELDB_VERSION="1bd4a335d620b395b0a587b15804f9b2ab3c403f"
 	CFLAGS="$CFLAGS -Qunused-arguments -Wno-error=unused-command-line-argument-hard-error-in-future"
 	ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
 	GMP_ABI="64"
