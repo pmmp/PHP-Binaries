@@ -860,7 +860,7 @@ fi
 sed -i=".backup" 's/PHP_BINARIES. pharcmd$/PHP_BINARIES)/g' Makefile
 sed -i=".backup" 's/install-programs install-pharcmd$/install-programs/g' Makefile
 
-if [ "$COMPILE_LEVELDB" == "yes" ] && [ "$DO_STATIC" == "yes" ]; then
+if [[ "$COMPILE_LEVELDB" == "yes" ]] && [[ "$DO_STATIC" == "yes" ]]; then
 	sed -i=".backup" 's/--mode=link $(CC)/--mode=link $(CXX)/g' Makefile
 fi
 
@@ -868,7 +868,7 @@ make -j $THREADS >> "$DIR/install.log" 2>&1
 echo -n " installing..."
 make install >> "$DIR/install.log" 2>&1
 
-if [ "$(uname -s)" == "Darwin" ] && [ "$IS_CROSSCOMPILE" != "yes" ]; then
+if [[ "$(uname -s)" == "Darwin" ]] && [[ "$IS_CROSSCOMPILE" != "yes" ]]; then
 	set +e
 	install_name_tool -delete_rpath "$DIR/bin/php5/lib" "$DIR/bin/php5/bin/php" >> "$DIR/install.log" 2>&1
 	install_name_tool -change "$DIR/bin/php5/lib/libz.1.dylib" "@loader_path/../lib/libz.1.dylib" "$DIR/bin/php5/bin/php" >> "$DIR/install.log" 2>&1
