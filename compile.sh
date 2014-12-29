@@ -645,7 +645,7 @@ if [ "$COMPILE_LEVELDB" == "yes" ]; then
 	if [ "$DO_STATIC" == "yes" ]; then
 		CFLAGS="$CFLAGS -I$DIR/bin/php5/include" CXXFLAGS="$CXXFLAGS -I$DIR/bin/php5/include" LDFLAGS="$LDFLAGS -L$DIR/bin/php5/lib" make -j $THREADS libleveldb.a >> "$DIR/install.log" 2>&1
 	else
-		CFLAGS="$CFLAGS -I$DIR/bin/php5/include" CXXFLAGS="$CXXFLAGS -I$DIR/bin/php5/include" LDFLAGS="$LDFLAGS -L$DIR/bin/php5/lib" make -j $THREADS libleveldb.so >> "$DIR/install.log" 2>&1
+		CFLAGS="$CFLAGS -I$DIR/bin/php5/include" CXXFLAGS="$CXXFLAGS -I$DIR/bin/php5/include" LDFLAGS="$LDFLAGS -L$DIR/bin/php5/lib" make -j $THREADS >> "$DIR/install.log" 2>&1
 	fi
 	echo -n " installing..."
 	cp libleveldb* "$DIR/bin/php5/lib/"
