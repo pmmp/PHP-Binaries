@@ -860,7 +860,7 @@ fi
 sed -i=".backup" 's/PHP_BINARIES. pharcmd$/PHP_BINARIES)/g' Makefile
 sed -i=".backup" 's/install-programs install-pharcmd$/install-programs/g' Makefile
 
-if [ "$COMPILE_LEVELDB" == "yes" ]; then
+if [ "$COMPILE_LEVELDB" == "yes" ] && [ "$DO_STATIC" == "yes" ]; then
 	sed -i=".backup" 's/--mode=link $(CC)/--mode=link $(CXX)/g' Makefile
 fi
 
