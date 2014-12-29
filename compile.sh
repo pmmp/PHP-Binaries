@@ -150,7 +150,7 @@ TOOLCHAIN_PREFIX=""
 
 if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 	export CROSS_COMPILER="$PATH"
-	if [ "$COMPILE_TARGET" == "win" ] || [ "$COMPILE_TARGET" == "win32" ]; then
+	if [[ "$COMPILE_TARGET" == "win" ]] || [[ "$COMPILE_TARGET" == "win32" ]]; then
 		TOOLCHAIN_PREFIX="i686-w64-mingw32"
 		[ -z "$march" ] && march=i686;
 		[ -z "$mtune" ] && mtune=pentium4;
@@ -228,7 +228,7 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		echo "Please supply a proper platform [android android-armv6 android-armv7 rpi mac ios ios-armv6 ios-armv7 win win32 win64] to cross-compile"
 		exit 1
 	fi
-elif [ "$COMPILE_TARGET" == "linux" ] || [ "$COMPILE_TARGET" == "linux32" ]; then
+elif [[ "$COMPILE_TARGET" == "linux" ]] || [[ "$COMPILE_TARGET" == "linux32" ]]; then
 	[ -z "$march" ] && march=i686;
 	[ -z "$mtune" ] && mtune=pentium4;
 	CFLAGS="$CFLAGS -m32";
@@ -245,7 +245,7 @@ elif [ "$COMPILE_TARGET" == "rpi" ]; then
 	[ -z "$mtune" ] && mtune=arm1176jzf-s;
 	CFLAGS="$CFLAGS -mfloat-abi=hard -mfpu=vfp";
 	echo "[INFO] Compiling for Raspberry Pi ARMv6zk hard float"
-elif [ "$COMPILE_TARGET" == "mac" ] || [ "$COMPILE_TARGET" == "mac32" ]; then
+elif [[ "$COMPILE_TARGET" == "mac" ]] || [[ "$COMPILE_TARGET" == "mac32" ]]; then
 	[ -z "$march" ] && march=prescott;
 	[ -z "$mtune" ] && mtune=generic;
 	CFLAGS="$CFLAGS -m32 -arch i386 -fomit-frame-pointer -mmacosx-version-min=10.5";
@@ -799,8 +799,6 @@ if [ "$(uname -s)" == "Darwin" ] && [ "$IS_CROSSCOMPILE" != "yes" ]; then
 	sed -i=".backup" 's/flock_type=unknown/flock_type=bsd/' ./configure
 	export EXTRA_CFLAGS=-lresolv
 fi
-
-export LD_LIBRARY_PATH="$DIR/bin/php5/lib"
 
 RANLIB=$RANLIB ./configure $PHP_OPTIMIZATION --prefix="$DIR/bin/php5" \
 --exec-prefix="$DIR/bin/php5" \
