@@ -334,7 +334,7 @@ rm test >> "$DIR/install.log" 2>&1
 
 export CC="$CC"
 export CXX="$CXX"
-export CFLAGS="-s -O2 -fPIC $CFLAGS"
+export CFLAGS="-O2 -fPIC $CFLAGS"
 export CXXFLAGS="$CFLAGS"
 export LDFLAGS="$LDFLAGS"
 export LIBRARY_PATH="$DIR/bin/php5/lib:$DIR/bin/php5/lib:$LIBRARY_PATH"
@@ -785,6 +785,8 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 	mv ext/mysqlnd/config9.m4 ext/mysqlnd/config.m4
 	sed  -i=".backup" "s{ext/mysqlnd/php_mysqlnd_config.h{config.h{" ext/mysqlnd/mysqlnd_portability.h
 	CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-opcache=no"
+elif [ "$DO_STATIC" == "yes" ]; then
+	export LIBS="$LIBS -ldl"
 fi
 
 if [ "$IS_WINDOWS" != "yes" ]; then
@@ -795,7 +797,7 @@ else
 	sed 's:@PREFIX@:$DIR/bin/php5:' ./main/config.w32.h.in > ./wmain/config.w32.h 2>> "$DIR/install.log"
 fi
 
-if [ "$(uname -s)" == "Darwin" ] && [ "$IS_CROSSCOMPILE" != "yes" ]; then
+if [[ "$(uname -s)" == "Darwin" ]] && [[ "$IS_CROSSCOMPILE" != "yes" ]]; then
 	sed -i=".backup" 's/flock_type=unknown/flock_type=bsd/' ./configure
 	export EXTRA_CFLAGS=-lresolv
 fi
