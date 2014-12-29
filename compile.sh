@@ -206,6 +206,7 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX"
 		#zlib doesn't use the correct ranlib
 		RANLIB=$TOOLCHAIN_PREFIX-ranlib
+		LEVELDB_VERSION="macos"
 		CFLAGS="$CFLAGS -Qunused-arguments -Wno-error=unused-command-line-argument-hard-error-in-future"
 		ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
 		GMP_ABI="32"
@@ -252,6 +253,7 @@ elif [ "$COMPILE_TARGET" == "mac" ] || [ "$COMPILE_TARGET" == "mac32" ]; then
 		LDFLAGS="$LDFLAGS -Wl,-rpath,@loader_path/../lib";
 		export DYLD_LIBRARY_PATH="@loader_path/../lib"
 	fi
+	LEVELDB_VERSION="macos"
 	CFLAGS="$CFLAGS -Qunused-arguments -Wno-error=unused-command-line-argument-hard-error-in-future"
 	ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
 	GMP_ABI="32"
@@ -264,6 +266,7 @@ elif [ "$COMPILE_TARGET" == "mac64" ]; then
 		LDFLAGS="$LDFLAGS -Wl,-rpath,@loader_path/../lib";
 		export DYLD_LIBRARY_PATH="@loader_path/../lib"
 	fi
+	LEVELDB_VERSION="macos"
 	CFLAGS="$CFLAGS -Qunused-arguments -Wno-error=unused-command-line-argument-hard-error-in-future"
 	ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
 	GMP_ABI="64"
