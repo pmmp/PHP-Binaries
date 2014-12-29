@@ -777,7 +777,11 @@ rm -f ./configure >> "$DIR/install.log" 2>&1
 if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 	sed -i=".backup" 's/pthreads_working=no/pthreads_working=yes/' ./configure
 	if [ "$IS_WINDOWS" != "yes" ]; then
-		export LIBS="$LIBS -lpthread -ldl -lresolv"
+		if [ "$COMPILE_FOR_ANDROID" == "no" ]; then
+			export LIBS="$LIBS -lpthread -ldl -lresolv"
+		else
+			export LIBS="$LIBS -lpthread -lresolv"
+		fi
 	else
 		export LIBS="$LIBS -lpthread"
 	fi

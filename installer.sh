@@ -141,10 +141,10 @@ if [ "$ENABLE_GPG" == "yes" ]; then
 	if [ $? -eq 0 ]; then
 		gpg --fingerprint $PUBLICKEY_FINGERPRINT > /dev/null 2>&1
 		if [ $? -ne 0 ]; then
-			download_file $PUBLICKEY_URL | gpg --trusted-key $PUBLICKEY_FINGERPRINT --import
+			download_file $PUBLICKEY_URL | gpg --trusted-key $PUBLICKEY_LONGID --import
 			gpg --fingerprint $PUBLICKEY_FINGERPRINT > /dev/null 2>&1
 			if [ $? -ne 0 ]; then
-				gpg --trusted-key $PUBLICKEY_FINGERPRINT --keyserver "$GPG_KEYSERVER" --recv-key $PUBLICKEY_FINGERPRINT
+				gpg --trusted-key $PUBLICKEY_LONGID --keyserver "$GPG_KEYSERVER" --recv-key $PUBLICKEY_FINGERPRINT
 			fi
 		fi
 	else
