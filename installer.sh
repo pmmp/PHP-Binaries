@@ -22,7 +22,7 @@ XDEBUG="off"
 
 INSTALL_DIRECTORY="./"
 
-IGNORE_CERT="no"
+IGNORE_CERT="yes"
 
 while getopts "rxucid:v:" opt; do
   case $opt in
@@ -43,7 +43,7 @@ while getopts "rxucid:v:" opt; do
 	  INSTALL_DIRECTORY="$OPTARG"
       ;;
 	i)
-	  IGNORE_CERT="yes"
+	  IGNORE_CERT="no"
       ;;
 	v)
 	  CHANNEL="$OPTARG"
@@ -92,24 +92,24 @@ if [ "$CHANNEL" == "soft" ]; then
 fi
 
 ENABLE_GPG="no"
-PUBLICKEY_URL="https://cdn.pocketmine.net/pocketmine.asc"
+PUBLICKEY_URL="http://cdn.pocketmine.net/pocketmine.asc"
 PUBLICKEY_FINGERPRINT="20D377AFC3F7535B3261AA4DCF48E7E52280B75B"
 PUBLICKEY_LONGID="${PUBLICKEY_FINGERPRINT: -16}"
 GPG_KEYSERVER="pgp.mit.edu"
 
 function check_signature {
 	echo "[*] Checking signature of $1"
-	gpg --keyserver "$GPG_KEYSERVER" --keyserver-options auto-key-retrieve=1 --trusted-key $PUBLICKEY_LONGID --verify "$1.sig" "$1"
+	"$GPG_BIN" --keyserver "$GPG_KEYSERVER" --keyserver-options auto-key-retrieve=1 --trusted-key $PUBLICKEY_LONGID --verify "$1.sig" "$1"
 	if [ $? -eq 0 ]; then
 		echo "[+] Signature valid and checked!"
 	else
-		gpg --refresh-keys > /dev/null 2>&1
+		"$GPG_BIN" --refresh-keys > /dev/null 2>&1
 		echo "[!] Invalid signature! Please check for file corruption or a wrongly imported public key (signed by $PUBLICKEY_FINGERPRINT)"
 		exit 1
 	fi	
 }
 
-VERSION_DATA=$(download_file "https://www.pocketmine.net/api/?channel=$CHANNEL")
+VERSION_DATA=$(download_file "http://www.pocketmine.net/api/?channel=$CHANNEL")
 
 VERSION=$(echo "$VERSION_DATA" | grep '"version"' | cut -d ':' -f2- | tr -d ' ",')
 BUILD=$(echo "$VERSION_DATA" | grep build | cut -d ':' -f2- | tr -d ' ",')
@@ -136,9 +136,20 @@ if [ "$VERSION" == "" ]; then
 	exit 1
 fi
 
+GPG_BIN=""
+
 if [ "$ENABLE_GPG" == "yes" ]; then
 	type gpg > /dev/null 2>&1
 	if [ $? -eq 0 ]; then
+		GPG_BIN="gpg"
+	else
+		type gpg2 > /dev/null 2>&1
+		if [ $? -eq 0 ]; then
+			GPG_BIN="gpg2"
+		fi
+	fi
+	
+	if [ "$GPG_BIN" != "" ]; then
 		gpg --fingerprint $PUBLICKEY_FINGERPRINT > /dev/null 2>&1
 		if [ $? -ne 0 ]; then
 			download_file $PUBLICKEY_URL | gpg --trusted-key $PUBLICKEY_LONGID --import
@@ -157,20 +168,27 @@ echo "[*] This $CHANNEL build was released on $VERSION_DATE_STRING"
 
 if [ "$ENABLE_GPG" == "yes" ]; then
 	echo "[+] The build was signed, will check signature"
+elif [ "$GPG_SIGNATURE" == "" ]; then
+	if [[ "$CHANNEL" == "beta" ]] || [[ "$CHANNEL" == "stable" ]]; then
+		echo "[-] This channel should have a signature, none found"
+	fi
 fi
 
 echo "[*] Installing/updating $NAME on directory $INSTALL_DIRECTORY"
 mkdir -m 0777 "$INSTALL_DIRECTORY" 2> /dev/null
 cd "$INSTALL_DIRECTORY"
 echo "[1/3] Cleaning..."
-rm -r -f src/
 rm -f "$NAME.phar"
-rm -f PocketMine-MP.php
 rm -f README.md
 rm -f CONTRIBUTING.md
 rm -f LICENSE
 rm -f start.sh
 rm -f start.bat
+
+#Old installations
+rm -f PocketMine-MP.php
+rm -r -f src/
+
 echo -n "[2/3] Downloading $NAME $VERSION phar..."
 set +e
 download_file "$VERSION_DOWNLOAD" > "$NAME.phar"
@@ -416,18 +434,18 @@ else
 				echo " done"
 				alldone=yes
 			else
-				echo " invalid build detected"
+				echo " invalid build detected, please upgrade your OS"
 			fi
 		fi
 		if [ "$alldone" == "no" ]; then
 			set -e
-			echo "[3/3] no build found, compiling PHP"
-			exec "./compile.sh" -l
+			echo "[3/3] no build found, compiling PHP automatically"
+			exec "./compile.sh"
 		fi
 	fi
 fi
 
 rm compile.sh
 
-echo "[INFO] Everything done! Run ./start.sh to start $NAME"
+echo "[*] Everything done! Run ./start.sh to start $NAME"
 exit 0
