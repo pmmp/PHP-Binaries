@@ -103,6 +103,7 @@ cp "$TMP_PATH/ext/php_mysqli.dll" .
 cp "$TMP_PATH/ext/php_opcache.dll" .
 cp "$TMP_PATH/ext/php_pthreads.dll" .
 cp "$TMP_PATH/ext/php_sockets.dll" .
+cp "$TMP_PATH/ext/php_gd2.dll" .
 cp "$TMP_PATH/ext/php_sqlite3.dll" .
 cp "$TMP_PATH/ext/php_weakref.dll" .
 #cp "$TMP_PATH/ext/php_wxwidgets.dll" .
@@ -138,6 +139,7 @@ echo "extension=php_mbstring.dll" >> php.ini
 echo "extension=php_yaml.dll" >> php.ini
 echo "extension=php_pthreads.dll" >> php.ini
 echo "extension=php_com_dotnet.dll" >> php.ini
+echo "extension=php_gd2.dll" >> php.ini
 #echo "extension=php_wxwidgets.dll" >> php.ini
 
 echo "zend_extension=php_opcache.dll" >> php.ini
