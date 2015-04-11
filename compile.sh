@@ -1,5 +1,5 @@
 #!/bin/bash
-[ -z "$PHP_VERSION" ] && PHP_VERSION="5.6.6"
+[ -z "$PHP_VERSION" ] && PHP_VERSION="5.6.7"
 ZEND_VM="GOTO"
 
 ZLIB_VERSION="1.2.8"
@@ -7,7 +7,7 @@ POLARSSL_VERSION="1.3.8"
 LIBMCRYPT_VERSION="2.5.8"
 GMP_VERSION="6.0.0a"
 GMP_VERSION_DIR="6.0.0"
-CURL_VERSION="curl-7_39_0"
+CURL_VERSION="curl-7_41_0"
 READLINE_VERSION="6.3"
 NCURSES_VERSION="5.9"
 PHPNCURSES_VERSION="1.0.2"
@@ -23,6 +23,7 @@ PHPLEVELDB_VERSION="d84b2ccbe6b879d93cfa3270ed2cc25d849353d5"
 #LEVELDB_VERSION="1.18"
 LEVELDB_VERSION="b633756b51390a9970efde9068f60188ca06a724" #Check MacOS
 LIBXML_VERSION="2.9.1"
+LIBPNG_VERSION="1.6.17"
 BCOMPILER_VERSION="1.0.2"
 
 echo "[PocketMine] PHP compiler for Linux, MacOS and Android"
@@ -79,6 +80,10 @@ DO_OPTIMIZE="no"
 DO_STATIC="no"
 COMPILE_DEBUG="no"
 COMPILE_LEVELDB="no"
+if [ $(gcc -dumpversion | sed -e 's/\.\([0-9][0-9]\)/\1/g' -e 's/\.\([0-9]\)/0\1/g' -e 's/^[0-9]\{3,4\}$/&00/') -gt 40800 ]; then
+	COMPILE_LEVELDB="yes"
+	echo "YES"
+fi
 LD_PRELOAD=""
 
 while getopts "::t:oj:srcdlxzff:" OPTION; do
@@ -337,7 +342,8 @@ export CXX="$CXX"
 export CFLAGS="-O2 -fPIC $CFLAGS"
 export CXXFLAGS="$CFLAGS"
 export LDFLAGS="$LDFLAGS"
-export LIBRARY_PATH="$DIR/bin/php5/lib:$DIR/bin/php5/lib:$LIBRARY_PATH"
+export CPPFLAGS="$CPPFLAGS"
+export LIBRARY_PATH="$DIR/bin/php5/lib:$LIBRARY_PATH"
 
 rm -r -f install_data/ >> "$DIR/install.log" 2>&1
 rm -r -f bin/ >> "$DIR/install.log" 2>&1
@@ -662,10 +668,29 @@ else
 	EXTRA_FLAGS="--enable-shared=yes --enable-static=no"
 fi
 
+#libpng
+echo -n "[libpng] downloading $LIBPNG_VERSION..."
+download_file "https://sourceforge.net/projects/libpng/files/libpng16/$LIBPNG_VERSION/libpng-$LIBPNG_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+mv libpng-$LIBPNG_VERSION libpng
+echo -n " checking..."
+cd libpng
+LDFLAGS="$LDFLAGS -L${DIR}/bin/php5/lib" CPPFLAGS="$CPPFLAGS -I${DIR}/bin/php5/include" RANLIB=$RANLIB ./configure \
+--prefix="$DIR/bin/php5" \
+$EXTRA_FLAGS \
+$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
+echo -n " compiling..."
+make -j $THREADS >> "$DIR/install.log" 2>&1
+echo -n " installing..."
+make install >> "$DIR/install.log" 2>&1
+echo -n " cleaning..."
+cd ..
+rm -r -f ./libpng
+echo " done!"
+
 #libxml2
 #echo -n "[libxml2] downloading $LIBXML_VERSION..."
 #download_file "ftp://xmlsoft.org/libxml2/libxml2-$LIBXML_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-#mv libxml2-$LIBXML_VERSION yaml
+#mv libxml2-$LIBXML_VERSION libxml2
 #echo -n " checking..."
 #cd libxml2
 #RANLIB=$RANLIB ./configure \
@@ -814,6 +839,8 @@ RANLIB=$RANLIB ./configure $PHP_OPTIMIZATION --prefix="$DIR/bin/php5" \
 --with-yaml="$DIR/bin/php5" \
 --with-mcrypt="$DIR/bin/php5" \
 --with-gmp="$DIR/bin/php5" \
+--with-png-dir="$DIR/bin/php5" \
+--with-gd \
 $HAVE_NCURSES \
 $HAVE_READLINE \
 $HAS_LEVELDB \
@@ -937,3 +964,4 @@ date >> "$DIR/install.log" 2>&1
 echo " done!"
 echo "[PocketMine] You should start the server now using \"./start.sh.\""
 echo "[PocketMine] If it doesn't work, please send the \"install.log\" file to the Bug Tracker."
+
