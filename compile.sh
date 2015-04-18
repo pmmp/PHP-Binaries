@@ -1,5 +1,5 @@
 #!/bin/bash
-[ -z "$PHP_VERSION" ] && PHP_VERSION="5.6.7"
+[ -z "$PHP_VERSION" ] && PHP_VERSION="5.6.8"
 ZEND_VM="GOTO"
 
 ZLIB_VERSION="1.2.8"
@@ -11,7 +11,8 @@ CURL_VERSION="curl-7_41_0"
 READLINE_VERSION="6.3"
 NCURSES_VERSION="5.9"
 PHPNCURSES_VERSION="1.0.2"
-PTHREADS_VERSION="2.0.10"
+#PTHREADS_VERSION="2.0.10"
+PTHREADS_VERSION="7d4e30a4cf440a7c25124f95726ef99e587a03b6"
 XDEBUG_VERSION="2.2.6"
 PHP_POCKETMINE_VERSION="0.0.6"
 #UOPZ_VERSION="2.0.4"
@@ -82,7 +83,6 @@ COMPILE_DEBUG="no"
 COMPILE_LEVELDB="no"
 if [ $(gcc -dumpversion | sed -e 's/\.\([0-9][0-9]\)/\1/g' -e 's/\.\([0-9]\)/0\1/g' -e 's/^[0-9]\{3,4\}$/&00/') -gt 40800 ]; then
 	COMPILE_LEVELDB="yes"
-	echo "YES"
 fi
 LD_PRELOAD=""
 
@@ -740,7 +740,8 @@ fi
 
 #pthreads
 echo -n "[PHP pthreads] downloading $PTHREADS_VERSION..."
-download_file "http://pecl.php.net/get/pthreads-$PTHREADS_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+#download_file "http://pecl.php.net/get/pthreads-$PTHREADS_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+download_file "https://github.com/PocketMine/pthreads/archive/$PTHREADS_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 mv pthreads-$PTHREADS_VERSION "$DIR/install_data/php/ext/pthreads"
 echo " done!"
 
