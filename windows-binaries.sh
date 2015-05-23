@@ -143,7 +143,7 @@ echo "extension=php_gd2.dll" >> php.ini
 #echo "extension=php_wxwidgets.dll" >> php.ini
 
 echo "zend_extension=php_opcache.dll" >> php.ini
-echo "zend_extension=php_xdebug.dll" >> php.ini
+echo ";zend_extension=php_xdebug.dll" >> php.ini
 
 echo "cli_server.color = On" >> php.ini
 echo "phar.readonly = Off" >> php.ini
