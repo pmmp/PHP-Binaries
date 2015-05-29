@@ -30,7 +30,7 @@ BCOMPILER_VERSION="1.0.2"
 echo "[PocketMine] PHP compiler for Linux, MacOS and Android"
 DIR="$(pwd)"
 date > "$DIR/install.log" 2>&1
-trap "echo \"# \$(eval echo \$BASH_COMMAND)\" >> \"$DIR/install.log\" 2>&1" DEBUG
+#trap "echo \"# \$(eval echo \$BASH_COMMAND)\" >> \"$DIR/install.log\" 2>&1" DEBUG
 uname -a >> "$DIR/install.log" 2>&1
 echo "[INFO] Checking dependecies"
 type make >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"make\""; read -p "Press [Enter] to continue..."; exit 1; }
@@ -66,6 +66,7 @@ fi
 #else
 	export CC="gcc"
 	export CXX="g++"
+	export AR="gcc-ar"
 	export RANLIB=ranlib
 #fi
 
@@ -81,6 +82,7 @@ DO_OPTIMIZE="no"
 DO_STATIC="no"
 COMPILE_DEBUG="no"
 COMPILE_LEVELDB="no"
+FLAGS_LTO=""
 if [ $(gcc -dumpversion | sed -e 's/\.\([0-9][0-9]\)/\1/g' -e 's/\.\([0-9]\)/0\1/g' -e 's/^[0-9]\{3,4\}$/&00/') -gt 40800 ]; then
 	COMPILE_LEVELDB="yes"
 fi
@@ -129,6 +131,7 @@ while getopts "::t:oj:srcdlxzff:" OPTION; do
 		f)
 			echo "[opt] Enabling abusive optimizations..."
 			DO_OPTIMIZE="yes"
+			#FLAGS_LTO="-fvisibility=hidden -flto"
 			ffast_math="-fno-math-errno -funsafe-math-optimizations -fno-signed-zeros -fno-trapping-math -ffinite-math-only -fno-rounding-math -fno-signaling-nans" #workaround SQLite3 fail
 			CFLAGS="$CFLAGS -O2 -DSQLITE_HAVE_ISNAN $ffast_math -ftree-vectorize -fomit-frame-pointer -funswitch-loops -fivopts"
 			if [ "$COMPILE_TARGET" != "mac" ] && [ "$COMPILE_TARGET" != "mac32" ] && [ "$COMPILE_TARGET" != "mac64" ]; then
@@ -301,11 +304,11 @@ if [ "$TOOLCHAIN_PREFIX" != "" ]; then
 		export LD="$TOOLCHAIN_PREFIX-ld"
 fi
 
-echo "#include <stdio.h> \
-int main(void){ \
-	printf("Hello world\n"); \
-	return 0; \
-}" > test.c
+echo "#include <stdio.h>" > test.c
+echo "int main(void){" >> test.c
+echo "printf(\"Hello world\n\");" >> test.c
+echo "return 0;" >> test.c
+echo "}" >> test.c
 
 
 type $CC >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"$CC\""; read -p "Press [Enter] to continue..."; exit 1; }
@@ -320,7 +323,6 @@ if [ "$DO_STATIC" == "no" ]; then
 fi
 
 [ -z "$CONFIGURE_FLAGS" ] && CONFIGURE_FLAGS="";
-
 
 if [ "$mtune" != "none" ]; then
 	$CC -march=$march -mtune=$mtune $CFLAGS -o test test.c >> "$DIR/install.log" 2>&1
@@ -832,7 +834,7 @@ if [[ "$(uname -s)" == "Darwin" ]] && [[ "$IS_CROSSCOMPILE" != "yes" ]]; then
 	export EXTRA_CFLAGS=-lresolv
 fi
 
-RANLIB=$RANLIB ./configure $PHP_OPTIMIZATION --prefix="$DIR/bin/php5" \
+RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" LDFLAGS="$LDFLAGS $FLAGS_LTO" ./configure $PHP_OPTIMIZATION --prefix="$DIR/bin/php5" \
 --exec-prefix="$DIR/bin/php5" \
 --with-curl="$HAVE_CURL" \
 --with-zlib="$DIR/bin/php5" \
