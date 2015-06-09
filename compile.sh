@@ -66,7 +66,7 @@ fi
 #else
 	export CC="gcc"
 	export CXX="g++"
-	export AR="gcc-ar"
+	#export AR="gcc-ar"
 	export RANLIB=ranlib
 #fi
 
