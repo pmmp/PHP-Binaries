@@ -86,10 +86,6 @@ COMPILE_DEBUG="no"
 COMPILE_LEVELDB="no"
 FLAGS_LTO=""
 
-#TODO Uncomment this when php-leveldb supports PHP7 properly
-#if [ $(gcc -dumpversion | sed -e 's/\.\([0-9][0-9]\)/\1/g' -e 's/\.\([0-9]\)/0\1/g' -e 's/^[0-9]\{3,4\}$/&00/') -gt 40800 ]; then
-	#COMPILE_LEVELDB="yes"
-#fi
 LD_PRELOAD=""
 
 while getopts "::t:oj:srcdlxzff:" OPTION; do
@@ -156,6 +152,12 @@ while getopts "::t:oj:srcdlxzff:" OPTION; do
 			;;
 	esac
 done
+
+#TODO Uncomment this when php-leveldb supports PHP7 properly
+#if [ $(gcc -dumpversion | sed -e 's/\.\([0-9][0-9]\)/\1/g' -e 's/\.\([0-9]\)/0\1/g' -e 's/^[0-9]\{3,4\}$/&00/') -gt 40800 ]; then
+	#COMPILE_LEVELDB="yes"
+#fi
+COMPILE_LEVELDB="no"
 
 GMP_ABI=""
 TOOLCHAIN_PREFIX=""
