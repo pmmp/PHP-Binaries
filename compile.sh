@@ -212,6 +212,13 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX"
 		[ -z "$CFLAGS" ] && CFLAGS="-uclibc";
 		echo "[INFO] Cross-compiling for Raspberry Pi ARMv6zk hard float"
+	elif [ "$COMPILE_TARGET" == "armv7" ]; then
+		TOOLCHAIN_PREFIX="arm-linux-gnueabihf"
+		[ -z "$march" ] && march=armv7-a;
+		[ -z "$mtune" ] && mtune=cortex-a8;
+		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX"
+		[ -z "$CFLAGS" ] && CFLAGS="-uclibc";
+		echo "[INFO] Cross-compiling for ARMv7"
 	elif [ "$COMPILE_TARGET" == "mac" ]; then
 		[ -z "$march" ] && march=prescott;
 		[ -z "$mtune" ] && mtune=generic;

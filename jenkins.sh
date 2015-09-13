@@ -237,6 +237,22 @@ then
 	$TESTS arm $COMPILEDIR/crosscompile/ios-armv7/bin/php7/bin/php
 fi
 
+if [ "$CROSSCOMPILE_ARMV7" = "true" ];
+then
+    mkdir -p {$COMPILEDIR,$ARCHIVE}/crosscompile/armv7
+    cd $COMPILEDIR/crosscompile/armv7
+    
+    $SCRIPT -t armv7 -j $THREADS -c -x $EXTRA_FLAGS -s -l -f arm
+
+    tar -czf PHP_${PHP_VERSION_NAME}_ARMv7.tar.gz bin/
+    cp -r $COMPILEDIR/crosscompile/armv7/{install.log,PHP_${PHP_VERSION_NAME}_ARMv7.tar.gz} $ARCHIVE/crosscompile/armv7/
+	if [ ! -f $COMPILEDIR/crosscompile/armv7/bin/php7/bin/php ]; then
+		exit 1
+	fi
+	
+	$TESTS arm $COMPILEDIR/crosscompile/armv7/bin/php7/bin/php
+fi
+
 if [ "$CROSSCOMPILE_RPI" = "true" ];
 then
     mkdir -p {$COMPILEDIR,$ARCHIVE}/crosscompile/rpi
