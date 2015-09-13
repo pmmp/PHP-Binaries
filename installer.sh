@@ -1,6 +1,7 @@
 #!/bin/bash
 
 CHANNEL="stable"
+BRANCH="php7"
 NAME="PocketMine-MP"
 
 LINUX_32_BUILD="PHP_5.7.0RC2_x86_Linux"
@@ -198,14 +199,14 @@ if ! [ -s "$NAME.phar" ] || [ "$(head -n 1 $NAME.phar)" == '<!DOCTYPE html>' ]; 
 	exit 1
 else
 	if [ "$CHANNEL" == "soft" ]; then
-		download_file "https://raw.githubusercontent.com/PocketMine/PocketMine-Soft/master/resources/start.sh" > start.sh
+		download_file "https://raw.githubusercontent.com/PocketMine/PocketMine-Soft/${BRANCH}/resources/start.sh" > start.sh
 	else
-		download_file "https://raw.githubusercontent.com/PocketMine/PocketMine-MP/master/start.sh" > start.sh
+		download_file "https://raw.githubusercontent.com/PocketMine/PocketMine-MP/${BRANCH}/start.sh" > start.sh
 	fi
-	download_file "https://raw.githubusercontent.com/PocketMine/PocketMine-MP/master/LICENSE" > LICENSE
-	download_file "https://raw.githubusercontent.com/PocketMine/PocketMine-MP/master/README.md" > README.md
-	download_file "https://raw.githubusercontent.com/PocketMine/PocketMine-MP/master/CONTRIBUTING.md" > CONTRIBUTING.md
-	download_file "https://raw.githubusercontent.com/PocketMine/php-build-scripts/master/compile.sh" > compile.sh
+	download_file "https://raw.githubusercontent.com/PocketMine/PocketMine-MP/${BRANCH}/LICENSE" > LICENSE
+	download_file "https://raw.githubusercontent.com/PocketMine/PocketMine-MP/${BRANCH}/README.md" > README.md
+	download_file "https://raw.githubusercontent.com/PocketMine/PocketMine-MP/${BRANCH}/CONTRIBUTING.md" > CONTRIBUTING.md
+	download_file "https://raw.githubusercontent.com/PocketMine/php-build-scripts/${BRANCH}/compile.sh" > compile.sh
 fi
 
 chmod +x compile.sh
