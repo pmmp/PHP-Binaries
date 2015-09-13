@@ -3,16 +3,17 @@
 CHANNEL="stable"
 BRANCH="php7"
 NAME="PocketMine-MP"
+BUILD_URL=""
 
-LINUX_32_BUILD="PHP_5.7.0RC2_x86_Linux"
-LINUX_64_BUILD="PHP_5.7.0RC2_x86-64_Linux"
+LINUX_32_BUILD="PHP_7.0.0RC2_x86_Linux"
+LINUX_64_BUILD="PHP_7.0.0RC2_x86-64_Linux"
 #CENTOS_32_BUILD="PHP_5.6.2_x86_CentOS"
 #CENTOS_64_BUILD="PHP_5.6.2_x86-64_CentOS"
-MAC_32_BUILD="PHP_5.7.0RC2_x86_MacOS"
-MAC_64_BUILD="PHP_5.7.0RC2_x86-64_MacOS"
-RPI_BUILD="PHP_5.7.0RC2_ARM_Raspbian_hard"
-ARMV7_BUILD="PHP_5.7.0RC2_ARMv7"
-AND_BUILD="PHP_5.7.0RC2_ARMv7_Android"
+MAC_32_BUILD="PHP_7.0.0RC2_x86_MacOS"
+MAC_64_BUILD="PHP_7.0.0RC2_x86-64_MacOS"
+RPI_BUILD="PHP_7.0.0RC2_ARM_Raspbian_hard"
+ARMV7_BUILD="PHP_7.0.0RC2_ARMv7"
+AND_BUILD="PHP_7.0.0RC2_ARMv7_Android"
 IOS_BUILD="PHP_5.5.13_ARMv6_iOS"
 update=off
 forcecompile=off
@@ -24,7 +25,7 @@ INSTALL_DIRECTORY="./"
 
 IGNORE_CERT="yes"
 
-while getopts "rxucid:v:" opt; do
+while getopts "rxucid:v:t:" opt; do
   case $opt in
     r)
 	  checkRoot=off
@@ -47,6 +48,9 @@ while getopts "rxucid:v:" opt; do
       ;;
 	v)
 	  CHANNEL="$OPTARG"
+      ;;
+	t)
+	  BUILD_URL="$OPTARG"
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -109,6 +113,16 @@ function check_signature {
 	fi	
 }
 
+if [[ "$BUILD_URL" != "" && "$CHANNEL" == "custom" ]]; then
+	BASE_VERSION="custom"
+	VERSION="custom"
+	BUILD="unknown"
+	API_VERSION="unknown"
+	VERSION_DATE_STRING="unknown"
+	ENABLE_GPG="no"
+	VERSION_DOWNLOAD="$BUILD_URL"
+else
+
 VERSION_DATA=$(download_file "http://www.pocketmine.net/api/?channel=$CHANNEL")
 
 VERSION=$(echo "$VERSION_DATA" | grep '"version"' | cut -d ':' -f2- | tr -d ' ",')
@@ -161,6 +175,8 @@ if [ "$ENABLE_GPG" == "yes" ]; then
 	else
 		ENABLE_GPG="no"
 	fi
+fi
+
 fi
 
 echo "[*] Found $NAME $BASE_VERSION (build $BUILD) using API $API_VERSION"
