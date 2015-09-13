@@ -1,11 +1,13 @@
 #!/bin/bash
-[ -z "$PHP_VERSION" ] && PHP_VERSION="5.6.10"
+[ -z "$PHP_VERSION" ] && PHP_VERSION="7.0.0RC2"
 PHP_VERSION_BASE="${PHP_VERSION:0:3}"
 
-PTHREADS_VERSION="2.0.10"
-XDEBUG_VERSION="2.2.6"
-WEAKREF_VERSION="0.2.6"
-YAML_VERSION="1.1.1"
+PHP_IS_BETA="yes"
+
+PTHREADS_VERSION="3.0.2"
+#XDEBUG_VERSION="2.2.6"
+#WEAKREF_VERSION="0.2.6"
+YAML_VERSION="1.2.0"
 WXWIDGETS_VERSION="3.0.0.2"
 
 echo "[PocketMine] PHP Windows binary builder"
@@ -54,8 +56,13 @@ TMP_PATH="$DIR/temp_data"
 
 echo -n "[PHP] downloading ${PHP_VERSION}..."
 
-download_file "http://windows.php.net/downloads/releases/php-$PHP_VERSION-Win32-VC11-$BUILD_TARGET.zip" > temp.zip && unzip -o temp.zip >/dev/null 2>&1 && rm temp.zip
-echo " done!"
+if [[ "$PHP_IS_BETA" == "yes" ]]; then
+	download_file "http://windows.php.net/downloads/qa/php-$PHP_VERSION-Win32-VC14-$BUILD_TARGET.zip" > temp.zip && unzip -o temp.zip >/dev/null 2>&1 && rm temp.zip
+	echo " done!"
+else
+	download_file "http://windows.php.net/downloads/releases/php-$PHP_VERSION-Win32-VC14-$BUILD_TARGET.zip" > temp.zip && unzip -o temp.zip >/dev/null 2>&1 && rm temp.zip
+	echo " done!"
+fi
 
 cd ext
 
@@ -63,17 +70,21 @@ echo -n "[pthreads] downloading ${PTHREADS_VERSION}..."
 download_file "http://windows.php.net/downloads/pecl/releases/pthreads/$PTHREADS_VERSION/php_pthreads-$PTHREADS_VERSION-$PHP_VERSION_BASE-ts-vc11-$BUILD_TARGET.zip" > temp.zip && unzip -o temp.zip >/dev/null 2>&1 && rm temp.zip
 echo " done!"
 
-echo -n "[WeakRef] downloading ${WEAKREF_VERSION}..."
-download_file "http://windows.php.net/downloads/pecl/releases/weakref/$WEAKREF_VERSION/php_weakref-$WEAKREF_VERSION-$PHP_VERSION_BASE-ts-vc11-$BUILD_TARGET.zip" > temp.zip && unzip -o temp.zip >/dev/null 2>&1 && rm temp.zip
-echo " done!"
+if [[ "$WEAKREF_VERSION" != "" ]]; then
+	echo -n "[WeakRef] downloading ${WEAKREF_VERSION}..."
+	download_file "http://windows.php.net/downloads/pecl/releases/weakref/$WEAKREF_VERSION/php_weakref-$WEAKREF_VERSION-$PHP_VERSION_BASE-ts-vc11-$BUILD_TARGET.zip" > temp.zip && unzip -o temp.zip >/dev/null 2>&1 && rm temp.zip
+	echo " done!"
+fi
 
 echo -n "[YAML] downloading ${YAML_VERSION}..."
 download_file "http://windows.php.net/downloads/pecl/releases/yaml/$YAML_VERSION/php_yaml-$YAML_VERSION-$PHP_VERSION_BASE-ts-vc11-$BUILD_TARGET.zip" > temp.zip && unzip -o temp.zip >/dev/null 2>&1 && rm temp.zip
 echo " done!"
 
-echo -n "[xdebug] downloading ${XDEBUG_VERSION}..."
-download_file "http://windows.php.net/downloads/pecl/releases/xdebug/$XDEBUG_VERSION/php_xdebug-$XDEBUG_VERSION-$PHP_VERSION_BASE-ts-vc11-$BUILD_TARGET.zip" > temp.zip && unzip -o temp.zip >/dev/null 2>&1 && rm temp.zip
-echo " done!"
+if [[ "$XDEBUG_VERSION" != "" ]]; then
+	echo -n "[xdebug] downloading ${XDEBUG_VERSION}..."
+	download_file "http://windows.php.net/downloads/pecl/releases/xdebug/$XDEBUG_VERSION/php_xdebug-$XDEBUG_VERSION-$PHP_VERSION_BASE-ts-vc11-$BUILD_TARGET.zip" > temp.zip && unzip -o temp.zip >/dev/null 2>&1 && rm temp.zip
+	echo " done!"
+fi
 
 #echo -n "[wxwidgets] downloading ${WXWIDGETS_VERSION}..."
 #download_file "http://windows.php.net/downloads/pecl/releases/wxwidgets/$WXWIDGETS_VERSION/php_wxwidgets-$WXWIDGETS_VERSION-$PHP_VERSION_BASE-ts-vc11-$BUILD_TARGET.zip" > temp.zip && unzip -o temp.zip >/dev/null 2>&1 && rm temp.zip
@@ -88,7 +99,7 @@ cd bin/php
 echo -n "Selecting files..."
 
 cp "$TMP_PATH/php.exe" .
-cp "$TMP_PATH/php5ts.dll" .
+cp "$TMP_PATH/php7ts.dll" .
 cp "$TMP_PATH/libeay32.dll" .
 cp "$TMP_PATH/libssh2.dll" .
 cp "$TMP_PATH/ssleay32.dll" .

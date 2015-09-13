@@ -1,5 +1,8 @@
 #!/bin/bash
-[ -z "$PHP_VERSION" ] && PHP_VERSION="5.6.10"
+[ -z "$PHP_VERSION" ] && PHP_VERSION="7.0.0RC2"
+
+PHP_IS_BETA="yes"
+
 ZEND_VM="GOTO"
 
 ZLIB_VERSION="1.2.8"
@@ -7,20 +10,19 @@ POLARSSL_VERSION="1.3.8"
 LIBMCRYPT_VERSION="2.5.8"
 GMP_VERSION="6.0.0a"
 GMP_VERSION_DIR="6.0.0"
-CURL_VERSION="curl-7_41_0"
+CURL_VERSION="curl-7_44_0"
 READLINE_VERSION="6.3"
 NCURSES_VERSION="5.9"
 PHPNCURSES_VERSION="1.0.2"
-#PTHREADS_VERSION="2.0.10"
-PTHREADS_VERSION="7d4e30a4cf440a7c25124f95726ef99e587a03b6"
+PTHREADS_VERSION="3.0.2"
 XDEBUG_VERSION="2.2.6"
 PHP_POCKETMINE_VERSION="0.0.6"
 #UOPZ_VERSION="2.0.4"
 WEAKREF_VERSION="0.2.6"
-PHPYAML_VERSION="1.1.1"
+PHPYAML_VERSION="d222b607f0791a9bf15245672d5d95baf565c33f"
 YAML_VERSION="0.1.4"
 #PHPLEVELDB_VERSION="0.1.4"
-PHPLEVELDB_VERSION="d84b2ccbe6b879d93cfa3270ed2cc25d849353d5"
+PHPLEVELDB_VERSION="2963815338edfebc5ab8c512bcd2b72f0357ac6e"
 #LEVELDB_VERSION="1.18"
 LEVELDB_VERSION="b633756b51390a9970efde9068f60188ca06a724" #Check MacOS
 LIBXML_VERSION="2.9.1"
@@ -36,7 +38,7 @@ echo "[INFO] Checking dependecies"
 type make >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"make\""; read -p "Press [Enter] to continue..."; exit 1; }
 type autoconf >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"autoconf\""; read -p "Press [Enter] to continue..."; exit 1; }
 type automake >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"automake\""; read -p "Press [Enter] to continue..."; exit 1; }
-type libtool >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"libtool\""; read -p "Press [Enter] to continue..."; exit 1; }
+type libtool >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"libtool\" or \"libtool-bin\""; read -p "Press [Enter] to continue..."; exit 1; }
 type m4 >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"m4\""; read -p "Press [Enter] to continue..."; exit 1; }
 type wget >> "$DIR/install.log" 2>&1 || type curl >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"wget\" or \"curl\""; read -p "Press [Enter] to continue..."; exit 1; }
 type getconf >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"getconf\""; read -p "Press [Enter] to continue..."; exit 1; }
@@ -83,9 +85,11 @@ DO_STATIC="no"
 COMPILE_DEBUG="no"
 COMPILE_LEVELDB="no"
 FLAGS_LTO=""
-if [ $(gcc -dumpversion | sed -e 's/\.\([0-9][0-9]\)/\1/g' -e 's/\.\([0-9]\)/0\1/g' -e 's/^[0-9]\{3,4\}$/&00/') -gt 40800 ]; then
-	COMPILE_LEVELDB="yes"
-fi
+
+#TODO Uncomment this when php-leveldb supports PHP7 properly
+#if [ $(gcc -dumpversion | sed -e 's/\.\([0-9][0-9]\)/\1/g' -e 's/\.\([0-9]\)/0\1/g' -e 's/^[0-9]\{3,4\}$/&00/') -gt 40800 ]; then
+	#COMPILE_LEVELDB="yes"
+#fi
 LD_PRELOAD=""
 
 while getopts "::t:oj:srcdlxzff:" OPTION; do
@@ -139,7 +143,7 @@ while getopts "::t:oj:srcdlxzff:" OPTION; do
 			fi
 			
 			if [ "$OPTARG" == "arm" ]; then
-				CFLAGS="$CFLAGS -mfloat-abi=softfp -mfpu=vfp"
+				CFLAGS="$CFLAGS -mfpu=vfp"
 			elif [ "$OPTARG" == "x86_64" ]; then
 				CFLAGS="$CFLAGS -mmmx -msse -msse2 -msse3 -mfpmath=sse -free -msahf -ftree-parallelize-loops=4"
 			elif [ "$OPTARG" == "x86" ]; then
@@ -253,6 +257,11 @@ elif [ "$COMPILE_TARGET" == "rpi" ]; then
 	[ -z "$mtune" ] && mtune=arm1176jzf-s;
 	CFLAGS="$CFLAGS -mfloat-abi=hard -mfpu=vfp";
 	echo "[INFO] Compiling for Raspberry Pi ARMv6zk hard float"
+elif [ "$COMPILE_TARGET" == "armv7" ]; then
+	[ -z "$march" ] && march=armv7-a;
+	[ -z "$mtune" ] && mtune=cortex-a8;
+	CFLAGS="$CFLAGS -mfpu=vfp";
+	echo "[INFO] Compiling for ARMv7"
 elif [[ "$COMPILE_TARGET" == "mac" ]] || [[ "$COMPILE_TARGET" == "mac32" ]]; then
 	[ -z "$march" ] && march=prescott;
 	[ -z "$mtune" ] && mtune=generic;
@@ -345,22 +354,26 @@ export CFLAGS="-O2 -fPIC $CFLAGS"
 export CXXFLAGS="$CFLAGS"
 export LDFLAGS="$LDFLAGS"
 export CPPFLAGS="$CPPFLAGS"
-export LIBRARY_PATH="$DIR/bin/php5/lib:$LIBRARY_PATH"
+export LIBRARY_PATH="$DIR/bin/php7/lib:$LIBRARY_PATH"
 
 rm -r -f install_data/ >> "$DIR/install.log" 2>&1
 rm -r -f bin/ >> "$DIR/install.log" 2>&1
 mkdir -m 0755 install_data >> "$DIR/install.log" 2>&1
 mkdir -m 0755 bin >> "$DIR/install.log" 2>&1
-mkdir -m 0755 bin/php5 >> "$DIR/install.log" 2>&1
+mkdir -m 0755 bin/php7 >> "$DIR/install.log" 2>&1
 cd install_data
 set -e
 
 #PHP 5
 echo -n "[PHP] downloading $PHP_VERSION..."
-download_file "http://php.net/get/php-$PHP_VERSION.tar.gz/from/this/mirror" | tar -zx >> "$DIR/install.log" 2>&1
-mv php-$PHP_VERSION php
-#download_file "https://github.com/php/php-src/archive/php-$PHP_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-#mv php-src-php-$PHP_VERSION php
+
+if [[ "$PHP_IS_BETA" == "yes" ]]; then
+	download_file "https://downloads.php.net/~ab/php-$PHP_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv php-$PHP_VERSION php
+else
+	download_file "http://php.net/get/php-$PHP_VERSION.tar.gz/from/this/mirror" | tar -zx >> "$DIR/install.log" 2>&1
+	mv php-$PHP_VERSION php
+fi
 
 echo " done!"
 
@@ -376,7 +389,7 @@ if [ "$COMPILE_FANCY" == "yes" ]; then
 	mv ncurses-$NCURSES_VERSION ncurses
 	echo -n " checking..."
 	cd ncurses
-	./configure --prefix="$DIR/bin/php5" \
+	./configure --prefix="$DIR/bin/php7" \
 	--without-ada \
 	--without-manpages \
 	--without-progs \
@@ -394,7 +407,7 @@ if [ "$COMPILE_FANCY" == "yes" ]; then
 	cd ..
 	rm -r -f ./ncurses
 	echo " done!"
-	HAVE_NCURSES="--with-ncurses=$DIR/bin/php5"
+	HAVE_NCURSES="--with-ncurses=$DIR/bin/php7"
 
 	if [ "$DO_STATIC" == "yes" ]; then
 		EXTRA_FLAGS="--enable-shared=no --enable-static=yes"
@@ -408,8 +421,8 @@ if [ "$COMPILE_FANCY" == "yes" ]; then
 	mv readline-$READLINE_VERSION readline
 	echo -n " checking..."
 	cd readline
-	./configure --prefix="$DIR/bin/php5" \
-	--with-curses="$DIR/bin/php5" \
+	./configure --prefix="$DIR/bin/php7" \
+	--with-curses="$DIR/bin/php7" \
 	--enable-multibyte \
 	$EXTRA_FLAGS \
 	$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
@@ -417,7 +430,7 @@ if [ "$COMPILE_FANCY" == "yes" ]; then
 	if make -j $THREADS >> "$DIR/install.log" 2>&1; then
 		echo -n " installing..."
 		make install >> "$DIR/install.log" 2>&1
-		HAVE_READLINE="--with-readline=$DIR/bin/php5"
+		HAVE_READLINE="--with-readline=$DIR/bin/php7"
 	else
 		echo -n " disabling..."
 		HAVE_READLINE="--without-readline"
@@ -445,7 +458,7 @@ download_file "https://github.com/madler/zlib/archive/v$ZLIB_VERSION.tar.gz" | t
 mv zlib-$ZLIB_VERSION zlib
 echo -n " checking..."
 cd zlib
-RANLIB=$RANLIB ./configure --prefix="$DIR/bin/php5" \
+RANLIB=$RANLIB ./configure --prefix="$DIR/bin/php7" \
 $EXTRA_FLAGS >> "$DIR/install.log" 2>&1
 echo -n " compiling..."
 make -j $THREADS >> "$DIR/install.log" 2>&1
@@ -455,7 +468,7 @@ echo -n " cleaning..."
 cd ..
 rm -r -f ./zlib
 	if [ "$DO_STATIC" != "yes" ]; then
-		rm -f "$DIR/bin/php5/lib/libz.a"
+		rm -f "$DIR/bin/php7/lib/libz.a"
 	fi
 echo " done!"
 
@@ -474,7 +487,7 @@ rm -f config.guess
 download_file "http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD" > config.guess
 rm -f config.sub
 download_file "http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD" > config.sub
-RANLIB=$RANLIB ./configure --prefix="$DIR/bin/php5" \
+RANLIB=$RANLIB ./configure --prefix="$DIR/bin/php7" \
 --disable-posix-threads \
 --enable-static \
 --disable-shared \
@@ -502,7 +515,7 @@ download_file "https://gmplib.org/download/gmp/gmp-$GMP_VERSION.tar.bz2" | tar -
 mv gmp-$GMP_VERSION_DIR gmp
 echo -n " checking..."
 cd gmp
-RANLIB=$RANLIB ./configure --prefix="$DIR/bin/php5" \
+RANLIB=$RANLIB ./configure --prefix="$DIR/bin/php7" \
 $EXTRA_FLAGS \
 --disable-posix-threads \
 --enable-static \
@@ -533,9 +546,9 @@ if [ "$(uname -s)" != "Darwin" ] || [ "$IS_CROSSCOMPILE" == "yes" ] || [ "$COMPI
 	cd polarssl
 	sed -i=".backup" 's,DESTDIR=/usr/local,,g' Makefile
 	echo -n " compiling..."
-	DESTDIR="$DIR/bin/php5" RANLIB=$RANLIB make -j $THREADS lib >> "$DIR/install.log" 2>&1
+	DESTDIR="$DIR/bin/php7" RANLIB=$RANLIB make -j $THREADS lib >> "$DIR/install.log" 2>&1
 	echo -n " installing..."
-	DESTDIR="$DIR/bin/php5" make install >> "$DIR/install.log" 2>&1
+	DESTDIR="$DIR/bin/php7" make install >> "$DIR/install.log" 2>&1
 	echo -n " cleaning..."
 	cd ..
 	rm -r -f ./polarssl
@@ -576,11 +589,11 @@ else
 	--disable-ldap \
 	--disable-ldaps \
 	--without-libidn \
-	--with-zlib="$DIR/bin/php5" \
+	--with-zlib="$DIR/bin/php7" \
 	--without-ssl \
-	--with-polarssl="$DIR/bin/php5" \
+	--with-polarssl="$DIR/bin/php7" \
 	--enable-threaded-resolver \
-	--prefix="$DIR/bin/php5" \
+	--prefix="$DIR/bin/php7" \
 	$EXTRA_FLAGS \
 	$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
 	echo -n " compiling..."
@@ -591,7 +604,7 @@ else
 	cd ..
 	rm -r -f ./curl
 	echo " done!"
-	HAVE_CURL="$DIR/bin/php5"
+	HAVE_CURL="$DIR/bin/php7"
 fi
 
 #bcompiler
@@ -628,7 +641,7 @@ fi
 echo -n " checking..."
 
 RANLIB=$RANLIB ./configure \
---prefix="$DIR/bin/php5" \
+--prefix="$DIR/bin/php7" \
 $EXTRA_FLAGS \
 $CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
 sed -i=".backup" 's/ tests win32/ win32/g' Makefile
@@ -651,13 +664,13 @@ if [ "$COMPILE_LEVELDB" == "yes" ]; then
 	cd leveldb
 	echo -n " compiling..."
 	if [ "$DO_STATIC" == "yes" ]; then
-		CFLAGS="$CFLAGS -I$DIR/bin/php5/include" CXXFLAGS="$CXXFLAGS -I$DIR/bin/php5/include" LDFLAGS="$LDFLAGS -L$DIR/bin/php5/lib" make -j $THREADS libleveldb.a >> "$DIR/install.log" 2>&1
+		CFLAGS="$CFLAGS -I$DIR/bin/php7/include" CXXFLAGS="$CXXFLAGS -I$DIR/bin/php7/include" LDFLAGS="$LDFLAGS -L$DIR/bin/php7/lib" make -j $THREADS libleveldb.a >> "$DIR/install.log" 2>&1
 	else
-		CFLAGS="$CFLAGS -I$DIR/bin/php5/include" CXXFLAGS="$CXXFLAGS -I$DIR/bin/php5/include" LDFLAGS="$LDFLAGS -L$DIR/bin/php5/lib" make -j $THREADS >> "$DIR/install.log" 2>&1
+		CFLAGS="$CFLAGS -I$DIR/bin/php7/include" CXXFLAGS="$CXXFLAGS -I$DIR/bin/php7/include" LDFLAGS="$LDFLAGS -L$DIR/bin/php7/lib" make -j $THREADS >> "$DIR/install.log" 2>&1
 	fi
 	echo -n " installing..."
-	cp libleveldb* "$DIR/bin/php5/lib/"
-	cp -r include/leveldb "$DIR/bin/php5/include/leveldb"
+	cp libleveldb* "$DIR/bin/php7/lib/"
+	cp -r include/leveldb "$DIR/bin/php7/include/leveldb"
 	echo -n " cleaning..."
 	cd ..
 	rm -r -f ./leveldb
@@ -676,8 +689,8 @@ download_file "https://sourceforge.net/projects/libpng/files/libpng16/$LIBPNG_VE
 mv libpng-$LIBPNG_VERSION libpng
 echo -n " checking..."
 cd libpng
-LDFLAGS="$LDFLAGS -L${DIR}/bin/php5/lib" CPPFLAGS="$CPPFLAGS -I${DIR}/bin/php5/include" RANLIB=$RANLIB ./configure \
---prefix="$DIR/bin/php5" \
+LDFLAGS="$LDFLAGS -L${DIR}/bin/php7/lib" CPPFLAGS="$CPPFLAGS -I${DIR}/bin/php7/include" RANLIB=$RANLIB ./configure \
+--prefix="$DIR/bin/php7" \
 $EXTRA_FLAGS \
 $CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
 echo -n " compiling..."
@@ -697,8 +710,8 @@ echo " done!"
 #cd libxml2
 #RANLIB=$RANLIB ./configure \
 #--disable-ipv6 \
-#--with-libz="$DIR/bin/php5" \
-#--prefix="$DIR/bin/php5" \
+#--with-libz="$DIR/bin/php7" \
+#--prefix="$DIR/bin/php7" \
 #$EXTRA_FLAGS \
 #$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
 #echo -n " compiling..."
@@ -717,33 +730,33 @@ echo " done!"
 
 # PECL libraries
 
+#TODO Uncomment this when it's ready for PHP7
+#if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
+#	#xdebug
+#	echo -n "[PHP xdebug] downloading $XDEBUG_VERSION..."
+#	download_file "http://pecl.php.net/get/xdebug-$XDEBUG_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+#	mv xdebug-$XDEBUG_VERSION "$DIR/install_data/php/ext/xdebug"
+#	echo " done!"
+#	HAS_XDEBUG="--enable-xdebug=shared"
+#else
+#	HAS_XDEBUG=""
+#fi
 
-if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
-	#xdebug
-	echo -n "[PHP xdebug] downloading $XDEBUG_VERSION..."
-	download_file "http://pecl.php.net/get/xdebug-$XDEBUG_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv xdebug-$XDEBUG_VERSION "$DIR/install_data/php/ext/xdebug"
-	echo " done!"
-	HAS_XDEBUG="--enable-xdebug=shared"
-else
-	HAS_XDEBUG=""
-fi
-
-if [ "$COMPILE_DEBUG" == "yes" ]; then
-	#profiler
-	echo -n "[PHP profiler] downloading latest..."
-	download_file "https://github.com/krakjoe/profiler/archive/master.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv profiler-master "$DIR/install_data/php/ext/profiler"
-	echo " done!"
-	HAS_PROFILER="--enable-profiler --with-profiler-max-frames=1000"
-else
-	HAS_PROFILER=""
-fi
+#if [ "$COMPILE_DEBUG" == "yes" ]; then
+#	#profiler
+#	echo -n "[PHP profiler] downloading latest..."
+#	download_file "https://github.com/krakjoe/profiler/archive/master.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+#	mv profiler-master "$DIR/install_data/php/ext/profiler"
+#	echo " done!"
+#	HAS_PROFILER="--enable-profiler --with-profiler-max-frames=1000"
+#else
+#	HAS_PROFILER=""
+#fi
 
 #pthreads
 echo -n "[PHP pthreads] downloading $PTHREADS_VERSION..."
-#download_file "http://pecl.php.net/get/pthreads-$PTHREADS_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-download_file "https://github.com/PocketMine/pthreads/archive/$PTHREADS_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+download_file "http://pecl.php.net/get/pthreads-$PTHREADS_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+#download_file "https://github.com/krakjoe/pthreads/archive/$PTHREADS_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 mv pthreads-$PTHREADS_VERSION "$DIR/install_data/php/ext/pthreads"
 echo " done!"
 
@@ -764,15 +777,18 @@ fi
 #echo " done!"
 
 #WeakRef
-echo -n "[PHP Weakref] downloading $WEAKREF_VERSION..."
-download_file "http://pecl.php.net/get/Weakref-$WEAKREF_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-mv Weakref-$WEAKREF_VERSION "$DIR/install_data/php/ext/weakref"
-echo " done!"
+#TODO Remove when there is support for PHP7
+#echo -n "[PHP Weakref] downloading $WEAKREF_VERSION..."
+#download_file "http://pecl.php.net/get/Weakref-$WEAKREF_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+#mv Weakref-$WEAKREF_VERSION "$DIR/install_data/php/ext/weakref"
+#echo " done!"
 
 #PHP YAML
 echo -n "[PHP YAML] downloading $PHPYAML_VERSION..."
-download_file "http://pecl.php.net/get/yaml-$PHPYAML_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-mv yaml-$PHPYAML_VERSION "$DIR/install_data/php/ext/yaml"
+#download_file "http://pecl.php.net/get/yaml-$PHPYAML_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+#mv yaml-$PHPYAML_VERSION "$DIR/install_data/php/ext/yaml"
+download_file "https://github.com/php/pecl-file_formats-yaml/archive/$PHPYAML_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+mv pecl-file_formats-yaml-$PHPYAML_VERSION "$DIR/install_data/php/ext/yaml"
 echo " done!"
 
 if [ "$COMPILE_LEVELDB" == "yes" ]; then
@@ -782,7 +798,7 @@ if [ "$COMPILE_LEVELDB" == "yes" ]; then
 	download_file "https://github.com/PocketMine/php-leveldb/archive/$PHPLEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 	mv php-leveldb-$PHPLEVELDB_VERSION "$DIR/install_data/php/ext/leveldb"
 	echo " done!"
-	HAS_LEVELDB=--with-leveldb="$DIR/bin/php5"
+	HAS_LEVELDB=--with-leveldb="$DIR/bin/php7"
 else
 	HAS_LEVELDB=""
 fi
@@ -826,7 +842,7 @@ if [ "$IS_WINDOWS" != "yes" ]; then
 else
 	HAVE_PCNTL="--disable-pcntl"
 	cp -f ./win32/build/config.* ./main >> "$DIR/install.log" 2>&1
-	sed 's:@PREFIX@:$DIR/bin/php5:' ./main/config.w32.h.in > ./wmain/config.w32.h 2>> "$DIR/install.log"
+	sed 's:@PREFIX@:$DIR/bin/php7:' ./main/config.w32.h.in > ./wmain/config.w32.h 2>> "$DIR/install.log"
 fi
 
 if [[ "$(uname -s)" == "Darwin" ]] && [[ "$IS_CROSSCOMPILE" != "yes" ]]; then
@@ -834,15 +850,23 @@ if [[ "$(uname -s)" == "Darwin" ]] && [[ "$IS_CROSSCOMPILE" != "yes" ]]; then
 	export EXTRA_CFLAGS=-lresolv
 fi
 
-RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" LDFLAGS="$LDFLAGS $FLAGS_LTO" ./configure $PHP_OPTIMIZATION --prefix="$DIR/bin/php5" \
---exec-prefix="$DIR/bin/php5" \
+#--enable-weakref \#
+
+if [[ "$COMPILE_DEBUG" == "yes" ]]; then
+	HAS_DEBUG="--enable-debug"
+else
+	HAS_DEBUG="--disable-debug"
+fi
+
+RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" LDFLAGS="$LDFLAGS $FLAGS_LTO" ./configure $PHP_OPTIMIZATION --prefix="$DIR/bin/php7" \
+--exec-prefix="$DIR/bin/php7" \
 --with-curl="$HAVE_CURL" \
---with-zlib="$DIR/bin/php5" \
---with-zlib-dir="$DIR/bin/php5" \
---with-yaml="$DIR/bin/php5" \
---with-mcrypt="$DIR/bin/php5" \
---with-gmp="$DIR/bin/php5" \
---with-png-dir="$DIR/bin/php5" \
+--with-zlib="$DIR/bin/php7" \
+--with-zlib-dir="$DIR/bin/php7" \
+--with-mcrypt="$DIR/bin/php7" \
+--with-gmp="$DIR/bin/php7" \
+--with-png-dir="$DIR/bin/php7" \
+--with-yaml="$DIR/bin/php7" \
 --with-gd \
 $HAVE_NCURSES \
 $HAVE_READLINE \
@@ -850,9 +874,9 @@ $HAS_LEVELDB \
 $HAS_POCKETMINE \
 $HAS_XDEBUG \
 $HAS_PROFILER \
+$HAS_DEBUG \
 --enable-mbstring \
 --enable-calendar \
---enable-weakref \
 --enable-pthreads \
 --disable-fileinfo \
 --disable-libxml \
@@ -863,7 +887,6 @@ $HAS_PROFILER \
 --disable-xmlwriter \
 --disable-cgi \
 --disable-session \
---disable-debug \
 --disable-pdo \
 --without-pear \
 --without-iconv \
@@ -877,7 +900,6 @@ $HAS_PROFILER \
 --enable-shmop \
 --enable-maintainer-zts \
 --disable-short-tags \
---enable-zend-signals \
 $HAVE_PCNTL \
 $HAVE_MYSQLI \
 --enable-bcmath \
@@ -885,7 +907,7 @@ $HAVE_MYSQLI \
 --enable-zip \
 --enable-ftp \
 --with-zend-vm=$ZEND_VM \
---enable-opcache=no \
+--enable-opcache=yes \
 $CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
 echo -n " compiling..."
 if [ "$COMPILE_FOR_ANDROID" == "yes" ]; then
@@ -904,66 +926,66 @@ make install >> "$DIR/install.log" 2>&1
 
 if [[ "$(uname -s)" == "Darwin" ]] && [[ "$IS_CROSSCOMPILE" != "yes" ]]; then
 	set +e
-	install_name_tool -delete_rpath "$DIR/bin/php5/lib" "$DIR/bin/php5/bin/php" >> "$DIR/install.log" 2>&1
-	install_name_tool -change "$DIR/bin/php5/lib/libz.1.dylib" "@loader_path/../lib/libz.1.dylib" "$DIR/bin/php5/bin/php" >> "$DIR/install.log" 2>&1
-	install_name_tool -change "$DIR/bin/php5/lib/libcurl.4.dylib" "@loader_path/../lib/libcurl.4.dylib" "$DIR/bin/php5/bin/php" >> "$DIR/install.log" 2>&1
-	install_name_tool -change "$DIR/bin/php5/lib/libyaml-0.2.dylib" "@loader_path/../lib/libyaml-0.2.dylib" "$DIR/bin/php5/bin/php" >> "$DIR/install.log" 2>&1
-	install_name_tool -change "$DIR/bin/php5/lib/libreadline.$READLINE_VERSION.dylib" "@loader_path/../lib/libreadline.$READLINE_VERSION.dylib" "$DIR/bin/php5/bin/php" >> "$DIR/install.log" 2>&1
-	install_name_tool -change "$DIR/bin/php5/lib/libhistory.$READLINE_VERSION.dylib" "@loader_path/../lib/libhistory.$READLINE_VERSION.dylib" "$DIR/bin/php5/bin/php" >> "$DIR/install.log" 2>&1
-	install_name_tool -change "$DIR/bin/php5/lib/libform.6.0.dylib" "@loader_path/../lib/libform.6.0.dylib" "$DIR/bin/php5/bin/php" >> "$DIR/install.log" 2>&1
-	install_name_tool -change "$DIR/bin/php5/lib/libmenu.6.0.dylib" "@loader_path/../lib/libmenu.6.0.dylib" "$DIR/bin/php5/bin/php" >> "$DIR/install.log" 2>&1
-	install_name_tool -change "$DIR/bin/php5/lib/libncurses.6.0.dylib" "@loader_path/../lib/libncurses.6.0.dylib" "$DIR/bin/php5/bin/php" >> "$DIR/install.log" 2>&1
-	install_name_tool -change "$DIR/bin/php5/lib/libpanel.6.0.dylib" "@loader_path/../lib/libpanel.6.0.dylib" "$DIR/bin/php5/bin/php" >> "$DIR/install.log" 2>&1
-	install_name_tool -change "$DIR/bin/php5/lib/libleveldb.dylib.1.18" "@loader_path/../lib/libleveldb.dylib.1.18" "$DIR/bin/php5/bin/php" >> "$DIR/install.log" 2>&1
-	install_name_tool -change "$DIR/bin/php5/lib/libpng16.16.dylib" "@loader_path/../lib/libpng16.16.dylib" "$DIR/bin/php5/bin/php" >> "$DIR/install.log" 2>&1
+	install_name_tool -delete_rpath "$DIR/bin/php7/lib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
+	install_name_tool -change "$DIR/bin/php7/lib/libz.1.dylib" "@loader_path/../lib/libz.1.dylib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
+	install_name_tool -change "$DIR/bin/php7/lib/libcurl.4.dylib" "@loader_path/../lib/libcurl.4.dylib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
+	install_name_tool -change "$DIR/bin/php7/lib/libyaml-0.2.dylib" "@loader_path/../lib/libyaml-0.2.dylib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
+	install_name_tool -change "$DIR/bin/php7/lib/libreadline.$READLINE_VERSION.dylib" "@loader_path/../lib/libreadline.$READLINE_VERSION.dylib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
+	install_name_tool -change "$DIR/bin/php7/lib/libhistory.$READLINE_VERSION.dylib" "@loader_path/../lib/libhistory.$READLINE_VERSION.dylib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
+	install_name_tool -change "$DIR/bin/php7/lib/libform.6.0.dylib" "@loader_path/../lib/libform.6.0.dylib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
+	install_name_tool -change "$DIR/bin/php7/lib/libmenu.6.0.dylib" "@loader_path/../lib/libmenu.6.0.dylib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
+	install_name_tool -change "$DIR/bin/php7/lib/libncurses.6.0.dylib" "@loader_path/../lib/libncurses.6.0.dylib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
+	install_name_tool -change "$DIR/bin/php7/lib/libpanel.6.0.dylib" "@loader_path/../lib/libpanel.6.0.dylib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
+	install_name_tool -change "$DIR/bin/php7/lib/libleveldb.dylib.1.18" "@loader_path/../lib/libleveldb.dylib.1.18" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
+	install_name_tool -change "$DIR/bin/php7/lib/libpng16.16.dylib" "@loader_path/../lib/libpng16.16.dylib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
 	
-	#install_name_tool -change "$DIR/bin/php5/lib/libssl.1.0.0.dylib" "@loader_path/../lib/libssl.1.0.0.dylib" "$DIR/bin/php5/bin/php" >> "$DIR/install.log" 2>&1
-	#install_name_tool -change "$DIR/bin/php5/lib/libssl.1.0.0.dylib" "@loader_path/../lib/libssl.1.0.0.dylib" "$DIR/bin/php5/lib/libcurl.4.dylib" >> "$DIR/install.log" 2>&1
-	#install_name_tool -change "$DIR/bin/php5/lib/libcrypto.1.0.0.dylib" "@loader_path/../lib/libcrypto.1.0.0.dylib" "$DIR/bin/php5/bin/php" >> "$DIR/install.log" 2>&1
-	#install_name_tool -change "$DIR/bin/php5/lib/libcrypto.1.0.0.dylib" "@loader_path/../lib/libcrypto.1.0.0.dylib" "$DIR/bin/php5/lib/libcurl.4.dylib" >> "$DIR/install.log" 2>&1
-	#chmod 0777 "$DIR/bin/php5/lib/libssl.1.0.0.dylib" >> "$DIR/install.log" 2>&1
-	#install_name_tool -change "$DIR/bin/php5/lib/libcrypto.1.0.0.dylib" "@loader_path/libcrypto.1.0.0.dylib" "$DIR/bin/php5/lib/libssl.1.0.0.dylib" >> "$DIR/install.log" 2>&1
-	#chmod 0755 "$DIR/bin/php5/lib/libssl.1.0.0.dylib" >> "$DIR/install.log" 2>&1
+	#install_name_tool -change "$DIR/bin/php7/lib/libssl.1.0.0.dylib" "@loader_path/../lib/libssl.1.0.0.dylib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
+	#install_name_tool -change "$DIR/bin/php7/lib/libssl.1.0.0.dylib" "@loader_path/../lib/libssl.1.0.0.dylib" "$DIR/bin/php7/lib/libcurl.4.dylib" >> "$DIR/install.log" 2>&1
+	#install_name_tool -change "$DIR/bin/php7/lib/libcrypto.1.0.0.dylib" "@loader_path/../lib/libcrypto.1.0.0.dylib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
+	#install_name_tool -change "$DIR/bin/php7/lib/libcrypto.1.0.0.dylib" "@loader_path/../lib/libcrypto.1.0.0.dylib" "$DIR/bin/php7/lib/libcurl.4.dylib" >> "$DIR/install.log" 2>&1
+	#chmod 0777 "$DIR/bin/php7/lib/libssl.1.0.0.dylib" >> "$DIR/install.log" 2>&1
+	#install_name_tool -change "$DIR/bin/php7/lib/libcrypto.1.0.0.dylib" "@loader_path/libcrypto.1.0.0.dylib" "$DIR/bin/php7/lib/libssl.1.0.0.dylib" >> "$DIR/install.log" 2>&1
+	#chmod 0755 "$DIR/bin/php7/lib/libssl.1.0.0.dylib" >> "$DIR/install.log" 2>&1
 	set -e
 fi
 
 echo -n " generating php.ini..."
 trap - DEBUG
 TIMEZONE=$(date +%Z)
-echo "date.timezone=$TIMEZONE" > "$DIR/bin/php5/bin/php.ini"
-echo "short_open_tag=0" >> "$DIR/bin/php5/bin/php.ini"
-echo "asp_tags=0" >> "$DIR/bin/php5/bin/php.ini"
-echo "phar.readonly=0" >> "$DIR/bin/php5/bin/php.ini"
-echo "phar.require_hash=1" >> "$DIR/bin/php5/bin/php.ini"
-#echo "zend_extension=uopz.so" >> "$DIR/bin/php5/bin/php.ini"
+echo "date.timezone=$TIMEZONE" > "$DIR/bin/php7/bin/php.ini"
+echo "short_open_tag=0" >> "$DIR/bin/php7/bin/php.ini"
+echo "asp_tags=0" >> "$DIR/bin/php7/bin/php.ini"
+echo "phar.readonly=0" >> "$DIR/bin/php7/bin/php.ini"
+echo "phar.require_hash=1" >> "$DIR/bin/php7/bin/php.ini"
+#echo "zend_extension=uopz.so" >> "$DIR/bin/php7/bin/php.ini"
 if [ "$IS_CROSSCOMPILE" != "yes" ] && [ "$DO_STATIC" == "no" ]; then
-	echo ";zend_extension=xdebug.so" >> "$DIR/bin/php5/bin/php.ini"
-	echo ";zend_extension=opcache.so" >> "$DIR/bin/php5/bin/php.ini"
-	echo "opcache.enable=1" >> "$DIR/bin/php5/bin/php.ini"
-	echo "opcache.enable_cli=1" >> "$DIR/bin/php5/bin/php.ini"
-	echo "opcache.save_comments=1" >> "$DIR/bin/php5/bin/php.ini"
-	echo "opcache.fast_shutdown=0" >> "$DIR/bin/php5/bin/php.ini"
-	echo "opcache.max_accelerated_files=4096" >> "$DIR/bin/php5/bin/php.ini"
-	echo "opcache.interned_strings_buffer=8" >> "$DIR/bin/php5/bin/php.ini"
-	echo "opcache.memory_consumption=128" >> "$DIR/bin/php5/bin/php.ini"
-	echo "opcache.optimization_level=0xffffffff" >> "$DIR/bin/php5/bin/php.ini"
+	echo ";zend_extension=xdebug.so" >> "$DIR/bin/php7/bin/php.ini"
+	echo "zend_extension=opcache.so" >> "$DIR/bin/php7/bin/php.ini"
+	echo "opcache.enable=1" >> "$DIR/bin/php7/bin/php.ini"
+	echo "opcache.enable_cli=1" >> "$DIR/bin/php7/bin/php.ini"
+	echo "opcache.save_comments=1" >> "$DIR/bin/php7/bin/php.ini"
+	echo "opcache.fast_shutdown=0" >> "$DIR/bin/php7/bin/php.ini"
+	echo "opcache.max_accelerated_files=4096" >> "$DIR/bin/php7/bin/php.ini"
+	echo "opcache.interned_strings_buffer=8" >> "$DIR/bin/php7/bin/php.ini"
+	echo "opcache.memory_consumption=128" >> "$DIR/bin/php7/bin/php.ini"
+	echo "opcache.optimization_level=0xffffffff" >> "$DIR/bin/php7/bin/php.ini"
 fi
 
 if [ "$HAVE_CURL" == "shared,/usr" ]; then
-	echo "extension=curl.so" >> "$DIR/bin/php5/bin/php.ini"
+	echo "extension=curl.so" >> "$DIR/bin/php7/bin/php.ini"
 fi
 
 echo " done!"
 cd "$DIR"
 echo -n "[INFO] Cleaning up..."
 rm -r -f install_data/ >> "$DIR/install.log" 2>&1
-rm -f bin/php5/bin/curl* >> "$DIR/install.log" 2>&1
-rm -f bin/php5/bin/curl-config* >> "$DIR/install.log" 2>&1
-rm -f bin/php5/bin/c_rehash* >> "$DIR/install.log" 2>&1
-rm -f bin/php5/bin/openssl* >> "$DIR/install.log" 2>&1
-rm -r -f bin/php5/man >> "$DIR/install.log" 2>&1
-rm -r -f bin/php5/php >> "$DIR/install.log" 2>&1
-rm -r -f bin/php5/misc >> "$DIR/install.log" 2>&1
+rm -f bin/php7/bin/curl* >> "$DIR/install.log" 2>&1
+rm -f bin/php7/bin/curl-config* >> "$DIR/install.log" 2>&1
+rm -f bin/php7/bin/c_rehash* >> "$DIR/install.log" 2>&1
+rm -f bin/php7/bin/openssl* >> "$DIR/install.log" 2>&1
+rm -r -f bin/php7/man >> "$DIR/install.log" 2>&1
+rm -r -f bin/php7/php >> "$DIR/install.log" 2>&1
+rm -r -f bin/php7/misc >> "$DIR/install.log" 2>&1
 date >> "$DIR/install.log" 2>&1
 echo " done!"
 echo "[PocketMine] You should start the server now using \"./start.sh.\""

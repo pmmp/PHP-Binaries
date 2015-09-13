@@ -3,6 +3,8 @@ export PATH="/opt/arm-2013.05/bin:/opt/tools/arm-bcm2708/gcc-linaro-arm-linux-gn
 export THREADS=2
 export LD_PRELOAD=""
 
+[ -z "$BRANCH" ] && BRANCH="master"
+
 #Needed to use aliases
 shopt -s expand_aliases
 type wget > /dev/null 2>&1
@@ -18,8 +20,8 @@ else
 fi
 
 rm -rf $WORKSPACE/*
-download_file "https://github.com/PocketMine/php-build-scripts/archive/master.tar.gz" | tar -xz > /dev/null
-mv -f $WORKSPACE/php-build-scripts-master/* $WORKSPACE/
+download_file "https://github.com/PocketMine/php-build-scripts/archive/${BRANCH}.tar.gz" | tar -xz > /dev/null
+mv -f $WORKSPACE/php-build-scripts-${BRANCH}/* $WORKSPACE/
 chmod +x $WORKSPACE/compile.sh
 chmod +x $WORKSPACE/windows-binaries.sh
 TESTS="$WORKSPACE/tests/test.sh"
