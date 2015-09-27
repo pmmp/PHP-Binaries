@@ -967,6 +967,12 @@ echo "asp_tags=0" >> "$DIR/bin/php7/bin/php.ini"
 echo "phar.readonly=0" >> "$DIR/bin/php7/bin/php.ini"
 echo "phar.require_hash=1" >> "$DIR/bin/php7/bin/php.ini"
 #echo "zend_extension=uopz.so" >> "$DIR/bin/php7/bin/php.ini"
+if [[ "$COMPILE_DEBUG" == "yes" ]]; then
+	echo "zend.assertions=1" >> "$DIR/bin/php7/bin/php.ini"
+else
+	echo "zend.assertions=-1" >> "$DIR/bin/php7/bin/php.ini"
+fi
+
 if [ "$IS_CROSSCOMPILE" != "yes" ] && [ "$DO_STATIC" == "no" ]; then
 	echo ";zend_extension=xdebug.so" >> "$DIR/bin/php7/bin/php.ini"
 	echo "zend_extension=opcache.so" >> "$DIR/bin/php7/bin/php.ini"
