@@ -14,7 +14,7 @@ CURL_VERSION="curl-7_44_0"
 READLINE_VERSION="6.3"
 NCURSES_VERSION="5.9"
 PHPNCURSES_VERSION="1.0.2"
-PTHREADS_VERSION="ba6ea8a5cd42c958b1499c0cfb2cdef21e5cb428"
+PTHREADS_VERSION="3.0.7"
 XDEBUG_VERSION="2.2.6"
 PHP_POCKETMINE_VERSION="0.0.6"
 #UOPZ_VERSION="2.0.4"
@@ -764,8 +764,8 @@ echo " done!"
 
 #pthreads
 echo -n "[PHP pthreads] downloading $PTHREADS_VERSION..."
-#download_file "http://pecl.php.net/get/pthreads-$PTHREADS_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-download_file "https://github.com/krakjoe/pthreads/archive/$PTHREADS_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+download_file "http://pecl.php.net/get/pthreads-$PTHREADS_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+#download_file "https://github.com/krakjoe/pthreads/archive/$PTHREADS_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 mv pthreads-$PTHREADS_VERSION "$DIR/install_data/php/ext/pthreads"
 echo " done!"
 
