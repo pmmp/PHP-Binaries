@@ -159,6 +159,7 @@ echo ";zend_extension=php_xdebug.dll" >> php.ini
 echo "cli_server.color = On" >> php.ini
 echo "phar.readonly = Off" >> php.ini
 echo "phar.require_hash = On" >> php.ini
+echo "zend.assertions=-1" >> php.ini
 echo "opcache.enable=1" >> php.ini
 echo "opcache.enable_cli=1" >> php.ini
 echo "opcache.memory_consumption=128" >> php.ini
