@@ -262,7 +262,7 @@ else
 				echo "asp_tags=0" >> "./bin/php7/bin/php.ini"
 				echo "phar.readonly=0" >> "./bin/php7/bin/php.ini"
 				echo "phar.require_hash=1" >> "./bin/php7/bin/php.ini"
-				echo "zend.assertions=-1" >> "$DIR/bin/php7/bin/php.ini"
+				echo "zend.assertions=-1" >> "./bin/php7/bin/php.ini"
 				echo " done"
 				alldone=yes
 			else
@@ -306,7 +306,7 @@ else
 				echo "asp_tags=0" >> "./bin/php7/bin/php.ini"
 				echo "phar.readonly=0" >> "./bin/php7/bin/php.ini"
 				echo "phar.require_hash=1" >> "./bin/php7/bin/php.ini"
-				echo "zend.assertions=-1" >> "$DIR/bin/php7/bin/php.ini"
+				echo "zend.assertions=-1" >> "./bin/php7/bin/php.ini"
 				echo " done"
 				alldone=yes
 			else
@@ -354,7 +354,7 @@ else
 				echo "asp_tags=0" >> "./bin/php7/bin/php.ini"
 				echo "phar.readonly=0" >> "./bin/php7/bin/php.ini"
 				echo "phar.require_hash=1" >> "./bin/php7/bin/php.ini"
-				echo "zend.assertions=-1" >> "$DIR/bin/php7/bin/php.ini"
+				echo "zend.assertions=-1" >> "./bin/php7/bin/php.ini"
 				echo " done"
 				alldone=yes
 			else
@@ -391,7 +391,7 @@ else
 				echo "asp_tags=0" >> "./bin/php7/bin/php.ini"
 				echo "phar.readonly=0" >> "./bin/php7/bin/php.ini"
 				echo "phar.require_hash=1" >> "./bin/php7/bin/php.ini"
-				echo "zend.assertions=-1" >> "$DIR/bin/php7/bin/php.ini"
+				echo "zend.assertions=-1" >> "./bin/php7/bin/php.ini"
 				echo " done"
 				alldone=yes
 			else
@@ -445,7 +445,7 @@ else
 				echo "asp_tags=0" >> "./bin/php7/bin/php.ini"
 				echo "phar.readonly=0" >> "./bin/php7/bin/php.ini"
 				echo "phar.require_hash=1" >> "./bin/php7/bin/php.ini"
-				echo "zend.assertions=-1" >> "$DIR/bin/php7/bin/php.ini"
+				echo "zend.assertions=-1" >> "./bin/php7/bin/php.ini"
 				echo " done"
 				alldone=yes
 			else
