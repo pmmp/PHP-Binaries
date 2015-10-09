@@ -296,7 +296,7 @@ else
 			fi
 		fi
 	else
-		grep -q BCM2708 /proc/cpuinfo > /dev/null 2>&1
+		grep -q BCM270[89] /proc/cpuinfo > /dev/null 2>&1
 		IS_RPI=$?
 		grep -q sun7i /proc/cpuinfo > /dev/null 2>&1
 		IS_BPI=$?
