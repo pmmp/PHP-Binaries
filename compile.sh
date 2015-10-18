@@ -527,7 +527,7 @@ if [ "$(uname -s)" != "Darwin" ] || [ "$IS_CROSSCOMPILE" == "yes" ] || [ "$COMPI
 
 	#PolarSSL
 	echo -n "[PolarSSL] downloading $POLARSSL_VERSION..."
-	download_file "https://polarssl.org/download/polarssl-${POLARSSL_VERSION}-gpl.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+	download_file "https://tls.mbed.org/download/polarssl-${POLARSSL_VERSION}-gpl.tgz" | tar -zx >> "$DIR/install.log" 2>&1
 	mv polarssl-${POLARSSL_VERSION} polarssl
 	echo -n " checking..."
 	cd polarssl
