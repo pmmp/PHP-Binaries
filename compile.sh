@@ -1,32 +1,32 @@
 #!/bin/bash
-[ -z "$PHP_VERSION" ] && PHP_VERSION="7.0.0RC3"
+[ -z "$PHP_VERSION" ] && PHP_VERSION="7.0.1"
 
-PHP_IS_BETA="yes"
+PHP_IS_BETA="no"
 
 ZEND_VM="GOTO"
 
 ZLIB_VERSION="1.2.8"
-POLARSSL_VERSION="1.3.8"
+MBEDTLS_VERSION="2.2.0"
 LIBMCRYPT_VERSION="2.5.8"
-GMP_VERSION="6.0.0a"
-GMP_VERSION_DIR="6.0.0"
-CURL_VERSION="curl-7_44_0"
+GMP_VERSION="6.1.0"
+GMP_VERSION_DIR="6.1.0"
+CURL_VERSION="curl-7_46_0"
 READLINE_VERSION="6.3"
 NCURSES_VERSION="5.9"
 PHPNCURSES_VERSION="1.0.2"
-PTHREADS_VERSION="3.0.7"
+PTHREADS_VERSION="3.1.5"
 XDEBUG_VERSION="2.2.6"
 PHP_POCKETMINE_VERSION="0.0.6"
 #UOPZ_VERSION="2.0.4"
 WEAKREF_VERSION="0.2.6"
-PHPYAML_VERSION="d222b607f0791a9bf15245672d5d95baf565c33f"
-YAML_VERSION="0.1.4"
+PHPYAML_VERSION="2.0.0RC6"
+YAML_VERSION="0.1.6"
 #PHPLEVELDB_VERSION="0.1.4"
 PHPLEVELDB_VERSION="2963815338edfebc5ab8c512bcd2b72f0357ac6e"
 #LEVELDB_VERSION="1.18"
 LEVELDB_VERSION="b633756b51390a9970efde9068f60188ca06a724" #Check MacOS
 LIBXML_VERSION="2.9.1"
-LIBPNG_VERSION="1.6.17"
+LIBPNG_VERSION="1.6.20"
 BCOMPILER_VERSION="1.0.2"
 
 echo "[PocketMine] PHP compiler for Linux, MacOS and Android"
@@ -274,7 +274,7 @@ elif [ "$COMPILE_TARGET" == "armv7" ]; then
 elif [[ "$COMPILE_TARGET" == "mac" ]] || [[ "$COMPILE_TARGET" == "mac32" ]]; then
 	[ -z "$march" ] && march=prescott;
 	[ -z "$mtune" ] && mtune=generic;
-	CFLAGS="$CFLAGS -m32 -arch i386 -fomit-frame-pointer -mmacosx-version-min=10.5";
+	CFLAGS="$CFLAGS -m32 -arch i386 -fomit-frame-pointer -mmacosx-version-min=10.7";
 	if [ "$DO_STATIC" == "no" ]; then
 		LDFLAGS="$LDFLAGS -Wl,-rpath,@loader_path/../lib";
 		export DYLD_LIBRARY_PATH="@loader_path/../lib"
@@ -287,7 +287,7 @@ elif [[ "$COMPILE_TARGET" == "mac" ]] || [[ "$COMPILE_TARGET" == "mac32" ]]; the
 elif [ "$COMPILE_TARGET" == "mac64" ]; then
 	[ -z "$march" ] && march=core2;
 	[ -z "$mtune" ] && mtune=generic;
-	CFLAGS="$CFLAGS -m64 -arch x86_64 -fomit-frame-pointer -mmacosx-version-min=10.5";
+	CFLAGS="$CFLAGS -m64 -arch x86_64 -fomit-frame-pointer -mmacosx-version-min=10.7";
 	if [ "$DO_STATIC" == "no" ]; then
 		LDFLAGS="$LDFLAGS -Wl,-rpath,@loader_path/../lib";
 		export DYLD_LIBRARY_PATH="@loader_path/../lib"
@@ -296,6 +296,7 @@ elif [ "$COMPILE_TARGET" == "mac64" ]; then
 	CFLAGS="$CFLAGS -Qunused-arguments -Wno-error=unused-command-line-argument-hard-error-in-future"
 	ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
 	GMP_ABI="64"
+	CXXFLAGS="$CXXFLAGS -stdlib=libc++"
 	echo "[INFO] Compiling for Intel MacOS x86_64"
 elif [ "$COMPILE_TARGET" == "ios" ]; then
 	[ -z "$march" ] && march=armv7-a;
@@ -360,7 +361,7 @@ rm test >> "$DIR/install.log" 2>&1
 export CC="$CC"
 export CXX="$CXX"
 export CFLAGS="-O2 -fPIC $CFLAGS"
-export CXXFLAGS="$CFLAGS"
+export CXXFLAGS="$CFLAGS $CXXFLAGS"
 export LDFLAGS="$LDFLAGS"
 export CPPFLAGS="$CPPFLAGS"
 export LIBRARY_PATH="$DIR/bin/php7/lib:$LIBRARY_PATH"
@@ -547,12 +548,12 @@ if [ "$(uname -s)" != "Darwin" ] || [ "$IS_CROSSCOMPILE" == "yes" ] || [ "$COMPI
 	#fi
 
 
-	#PolarSSL
-	echo -n "[PolarSSL] downloading $POLARSSL_VERSION..."
-	download_file "https://polarssl.org/download/polarssl-${POLARSSL_VERSION}-gpl.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv polarssl-${POLARSSL_VERSION} polarssl
+	#mbed TLS
+	echo -n "[mbed TLS] downloading $MBEDTLS_VERSION..."
+	download_file "https://tls.mbed.org/download/mbedtls-${MBEDTLS_VERSION}-gpl.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv mbedtls-${MBEDTLS_VERSION} mbedtls
 	echo -n " checking..."
-	cd polarssl
+	cd mbedtls
 	sed -i=".backup" 's,DESTDIR=/usr/local,,g' Makefile
 	echo -n " compiling..."
 	DESTDIR="$DIR/bin/php7" RANLIB=$RANLIB make -j $THREADS lib >> "$DIR/install.log" 2>&1
@@ -560,7 +561,7 @@ if [ "$(uname -s)" != "Darwin" ] || [ "$IS_CROSSCOMPILE" == "yes" ] || [ "$COMPI
 	DESTDIR="$DIR/bin/php7" make install >> "$DIR/install.log" 2>&1
 	echo -n " cleaning..."
 	cd ..
-	rm -r -f ./polarssl
+	rm -r -f ./mbedtls
 	echo " done!"
 fi
 
