@@ -44,6 +44,8 @@ type wget >> "$DIR/install.log" 2>&1 || type curl >> "$DIR/install.log" 2>&1 || 
 type getconf >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"getconf\""; read -p "Press [Enter] to continue..."; exit 1; }
 type gzip >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"gzip\""; read -p "Press [Enter] to continue..."; exit 1; }
 type bzip2 >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"bzip2\""; read -p "Press [Enter] to continue..."; exit 1; }
+type bison >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"bison\""; read -p "Press [Enter] to continue..."; exit 1; }
+type g++ >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"g++\""; read -p "Press [Enter] to continue..."; exit 1; }
 
 #Needed to use aliases
 shopt -s expand_aliases
