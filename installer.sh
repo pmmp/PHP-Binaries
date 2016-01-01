@@ -19,13 +19,17 @@ forcecompile=off
 alldone=no
 checkRoot=on
 XDEBUG="off"
+alternateurl=on
 
 INSTALL_DIRECTORY="./"
 
 IGNORE_CERT="yes"
 
-while getopts "rxucid:v:" opt; do
+while getopts "arxucid:v:" opt; do
   case $opt in
+    a)
+      alternateurl=on
+      ;;
     r)
 	  checkRoot=off
       ;;
@@ -116,6 +120,10 @@ BUILD=$(echo "$VERSION_DATA" | grep build | cut -d ':' -f2- | tr -d ' ",')
 API_VERSION=$(echo "$VERSION_DATA" | grep api_version | cut -d ':' -f2- | tr -d ' ",')
 VERSION_DATE=$(echo "$VERSION_DATA" | grep '"date"' | cut -d ':' -f2- | tr -d ' ",')
 VERSION_DOWNLOAD=$(echo "$VERSION_DATA" | grep '"download_url"' | cut -d ':' -f2- | tr -d ' ",')
+
+if [ "$alternateurl" == "on" ]; then
+    VERSION_DOWNLOAD=$(echo "$VERSION_DATA" | grep '"alternate_download_url"' | cut -d ':' -f2- | tr -d ' ",')
+fi
 
 if [ "$(uname -s)" == "Darwin" ]; then
 	BASE_VERSION=$(echo "$VERSION" | sed -E 's/([A-Za-z0-9_\.]*).*/\1/')
