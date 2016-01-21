@@ -18,7 +18,7 @@ PTHREADS_VERSION="3.1.5"
 XDEBUG_VERSION="2.2.6"
 PHP_POCKETMINE_VERSION="0.0.6"
 #UOPZ_VERSION="2.0.4"
-WEAKREF_VERSION="0.2.6"
+WEAKREF_VERSION="0.3.1"
 PHPYAML_VERSION="2.0.0RC6"
 YAML_VERSION="0.1.6"
 #PHPLEVELDB_VERSION="0.1.4"
@@ -790,10 +790,10 @@ fi
 
 #WeakRef
 #TODO Remove when there is support for PHP7
-#echo -n "[PHP Weakref] downloading $WEAKREF_VERSION..."
-#download_file "http://pecl.php.net/get/Weakref-$WEAKREF_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-#mv Weakref-$WEAKREF_VERSION "$DIR/install_data/php/ext/weakref"
-#echo " done!"
+echo -n "[PHP Weakref] downloading $WEAKREF_VERSION..."
+download_file "http://pecl.php.net/get/Weakref-$WEAKREF_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+mv Weakref-$WEAKREF_VERSION "$DIR/install_data/php/ext/weakref"
+echo " done!"
 
 #PHP YAML
 echo -n "[PHP YAML] downloading $PHPYAML_VERSION..."
@@ -862,8 +862,6 @@ if [[ "$(uname -s)" == "Darwin" ]] && [[ "$IS_CROSSCOMPILE" != "yes" ]]; then
 	export EXTRA_CFLAGS=-lresolv
 fi
 
-#--enable-weakref \#
-
 if [[ "$COMPILE_DEBUG" == "yes" ]]; then
 	HAS_DEBUG="--enable-debug"
 else
@@ -920,6 +918,7 @@ $HAVE_MYSQLI \
 --enable-ftp \
 --with-zend-vm=$ZEND_VM \
 --enable-opcache=yes \
+--enable-weakref \
 $CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
 echo -n " compiling..."
 if [ "$COMPILE_FOR_ANDROID" == "yes" ]; then
