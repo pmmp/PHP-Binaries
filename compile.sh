@@ -603,7 +603,7 @@ else
 	--without-libidn \
 	--with-zlib="$DIR/bin/php7" \
 	--without-ssl \
-	--with-polarssl="$DIR/bin/php7" \
+	--with-mbedtls="$DIR/bin/php7" \
 	--enable-threaded-resolver \
 	--prefix="$DIR/bin/php7" \
 	$EXTRA_FLAGS \
