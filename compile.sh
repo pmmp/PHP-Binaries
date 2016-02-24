@@ -10,17 +10,18 @@ MBEDTLS_VERSION="2.2.1"
 LIBMCRYPT_VERSION="2.5.8"
 GMP_VERSION="6.1.0"
 GMP_VERSION_DIR="6.1.0"
-CURL_VERSION="curl-7_47_0"
+CURL_VERSION="curl-7_47_1"
 READLINE_VERSION="6.3"
 NCURSES_VERSION="6.0"
 PHPNCURSES_VERSION="1.0.2"
-PTHREADS_VERSION="3.1.5"
+PTHREADS_VERSION="3.1.6"
 XDEBUG_VERSION="2.2.6"
 PHP_POCKETMINE_VERSION="0.0.6"
 #UOPZ_VERSION="2.0.4"
 WEAKREF_VERSION="0.3.2"
 PHPYAML_VERSION="2.0.0RC7"
 YAML_VERSION="0.1.6"
+YAML_VERSION_ANDROID="0.1.4"
 #PHPLEVELDB_VERSION="0.1.4"
 PHPLEVELDB_VERSION="2963815338edfebc5ab8c512bcd2b72f0357ac6e"
 #LEVELDB_VERSION="1.18"
@@ -139,7 +140,7 @@ while getopts "::t:oj:srcdlxzff:" OPTION; do
 			if [ "$COMPILE_TARGET" != "mac" ] && [ "$COMPILE_TARGET" != "mac32" ] && [ "$COMPILE_TARGET" != "mac64" ]; then
 				CFLAGS="$CFLAGS -funsafe-loop-optimizations -fpredictive-commoning -ftracer -ftree-loop-im -frename-registers -fcx-limited-range"
 			fi
-			
+
 			if [ "$OPTARG" == "arm" ]; then
 				CFLAGS="$CFLAGS -mfpu=vfp"
 			elif [ "$OPTARG" == "x86_64" ]; then
@@ -640,10 +641,10 @@ fi
 #YAML
 echo -n "[YAML] downloading $YAML_VERSION..."
 if [ "$COMPILE_FOR_ANDROID" == "yes" ]; then
-	download_file "https://github.com/yaml/libyaml/archive/$YAML_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	download_file "https://github.com/yaml/libyaml/archive/$YAML_VERSION_ANDROID.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 	mv libyaml-$YAML_VERSION yaml
 	cd yaml
-	./bootstrap >> "$DIR/install.log" 2>&1	
+	./bootstrap >> "$DIR/install.log" 2>&1
 else
 	download_file "http://pyyaml.org/download/libyaml/yaml-$YAML_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 	mv yaml-$YAML_VERSION yaml
@@ -949,7 +950,7 @@ if [[ "$(uname -s)" == "Darwin" ]] && [[ "$IS_CROSSCOMPILE" != "yes" ]]; then
 	install_name_tool -change "$DIR/bin/php7/lib/libpanel.6.0.dylib" "@loader_path/../lib/libpanel.6.0.dylib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
 	install_name_tool -change "$DIR/bin/php7/lib/libleveldb.dylib.1.18" "@loader_path/../lib/libleveldb.dylib.1.18" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
 	install_name_tool -change "$DIR/bin/php7/lib/libpng16.16.dylib" "@loader_path/../lib/libpng16.16.dylib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
-	
+
 	#install_name_tool -change "$DIR/bin/php7/lib/libssl.1.0.0.dylib" "@loader_path/../lib/libssl.1.0.0.dylib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
 	#install_name_tool -change "$DIR/bin/php7/lib/libssl.1.0.0.dylib" "@loader_path/../lib/libssl.1.0.0.dylib" "$DIR/bin/php7/lib/libcurl.4.dylib" >> "$DIR/install.log" 2>&1
 	#install_name_tool -change "$DIR/bin/php7/lib/libcrypto.1.0.0.dylib" "@loader_path/../lib/libcrypto.1.0.0.dylib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1

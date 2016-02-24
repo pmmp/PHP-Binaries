@@ -32,3 +32,17 @@ Script to install PocketMine-MP and PHP binaries.
 ## jenkins.sh
 
 PHP binaries provided by PocketMine are build using this script. The script runs the ``compile.sh`` with some default arguments.
+
+## Extra libraries
+
+### Unix
+- https://github.com/madler/zlib/
+- http://sourceforge.net/projects/mcrypt/
+- https://gmplib.org/
+- https://tls.mbed.org/
+- https://github.com/bagder/curl/
+- http://pyyaml.org/ or https://github.com/yaml/libyaml/
+- https://sourceforge.net/projects/libpng/
+- https://pecl.php.net/package/pthreads
+- https://pecl.php.net/package/Weakref
+- https://github.com/php/pecl-file_formats-yaml/
