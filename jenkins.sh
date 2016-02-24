@@ -3,6 +3,8 @@ export PATH="/opt/arm-2013.05/bin:/opt/tools/arm-bcm2708/gcc-linaro-arm-linux-gn
 export THREADS=2
 export LD_PRELOAD=""
 
+[ -z "$BRANCH" ] && BRANCH="master"
+
 #Needed to use aliases
 shopt -s expand_aliases
 type wget > /dev/null 2>&1
@@ -18,8 +20,8 @@ else
 fi
 
 rm -rf $WORKSPACE/*
-download_file "https://github.com/PocketMine/php-build-scripts/archive/master.tar.gz" | tar -xz > /dev/null
-mv -f $WORKSPACE/php-build-scripts-master/* $WORKSPACE/
+download_file "https://github.com/PocketMine/php-build-scripts/archive/${BRANCH}.tar.gz" | tar -xz > /dev/null
+mv -f $WORKSPACE/php-build-scripts-${BRANCH}/* $WORKSPACE/
 chmod +x $WORKSPACE/compile.sh
 chmod +x $WORKSPACE/windows-binaries.sh
 TESTS="$WORKSPACE/tests/test.sh"
@@ -68,11 +70,11 @@ then
     
     tar -czf PHP_${PHP_VERSION_NAME}_x86_Linux.tar.gz bin/
     cp -r $COMPILEDIR/linux/32bit/{install.log,PHP_${PHP_VERSION_NAME}_x86_Linux.tar.gz} $ARCHIVE/linux/32bit/
-	if [ ! -f $COMPILEDIR/linux/32bit/bin/php5/bin/php ]; then
+	if [ ! -f $COMPILEDIR/linux/32bit/bin/php7/bin/php ]; then
 		exit 1
 	fi
 	
-	$TESTS generic $COMPILEDIR/linux/32bit/bin/php5/bin/php
+	$TESTS generic $COMPILEDIR/linux/32bit/bin/php7/bin/php
 fi
 
 if [ "$COMPILE_LINUX_64BIT" = "true" ];
@@ -84,11 +86,11 @@ then
     
     tar -czf PHP_${PHP_VERSION_NAME}_x86-64_Linux.tar.gz bin/
     cp -r $COMPILEDIR/linux/64bit/{install.log,PHP_${PHP_VERSION_NAME}_x86-64_Linux.tar.gz} $ARCHIVE/linux/64bit/
-	if [ ! -f $COMPILEDIR/linux/64bit/bin/php5/bin/php ]; then
+	if [ ! -f $COMPILEDIR/linux/64bit/bin/php7/bin/php ]; then
 		exit 1
 	fi
 	
-	$TESTS generic $COMPILEDIR/linux/64bit/bin/php5/bin/php
+	$TESTS generic $COMPILEDIR/linux/64bit/bin/php7/bin/php
 fi
 
 if [ "$COMPILE_MAC_32" = "true" ];
@@ -109,11 +111,11 @@ then
     
     tar -czf PHP_${PHP_VERSION_NAME}_x86_MacOS.tar.gz bin/
     cp -r $COMPILEDIR/mac32/{install.log,PHP_${PHP_VERSION_NAME}_x86_MacOS.tar.gz} $ARCHIVE/mac32/
-	if [ ! -f $COMPILEDIR/mac32/bin/php5/bin/php ]; then
+	if [ ! -f $COMPILEDIR/mac32/bin/php7/bin/php ]; then
 		exit 1
 	fi
 	
-	$TESTS generic $COMPILEDIR/mac32/bin/php5/bin/php
+	$TESTS generic $COMPILEDIR/mac32/bin/php7/bin/php
 fi
 
 if [ "$COMPILE_MAC_64" = "true" ];
@@ -134,11 +136,11 @@ then
     
     tar -czf PHP_${PHP_VERSION_NAME}_x86-64_MacOS.tar.gz bin/
     cp -r $COMPILEDIR/mac64/{install.log,PHP_${PHP_VERSION_NAME}_x86-64_MacOS.tar.gz} $ARCHIVE/mac64
-	if [ ! -f $COMPILEDIR/mac64/bin/php5/bin/php ]; then
+	if [ ! -f $COMPILEDIR/mac64/bin/php7/bin/php ]; then
 		exit 1
 	fi
 	
-	$TESTS generic $COMPILEDIR/mac64/bin/php5/bin/php
+	$TESTS generic $COMPILEDIR/mac64/bin/php7/bin/php
 fi
 
 if [ "$COMPILE_RPI" = "true" ];
@@ -150,11 +152,11 @@ then
     
     tar -czf PHP_${PHP_VERSION_NAME}_ARM_Raspbian_hard.tar.gz bin/
     cp -r $COMPILEDIR/rpi/{install.log,PHP_${PHP_VERSION_NAME}_ARM_Raspbian_hard.tar.gz} $ARCHIVE/rpi/
-	if [ ! -f $COMPILEDIR/rpi/bin/php5/bin/php ]; then
+	if [ ! -f $COMPILEDIR/rpi/bin/php7/bin/php ]; then
 		exit 1
 	fi
 	
-	$TESTS generic $COMPILEDIR/rpi/bin/php5/bin/php
+	$TESTS generic $COMPILEDIR/rpi/bin/php7/bin/php
 fi
 
 if [ "$CROSSCOMPILE_ANDROID_ARMV6" = "true" ];
@@ -166,11 +168,11 @@ then
     
     tar -czf PHP_${PHP_VERSION_NAME}_ARMv6_Android.tar.gz bin/
     cp -r $COMPILEDIR/crosscompile/android-armv6/{install.log,PHP_${PHP_VERSION_NAME}_ARMv6_Android.tar.gz} $ARCHIVE/crosscompile/android-armv6/
-	if [ ! -f $COMPILEDIR/crosscompile/android-armv6/bin/php5/bin/php ]; then
+	if [ ! -f $COMPILEDIR/crosscompile/android-armv6/bin/php7/bin/php ]; then
 		exit 1
 	fi
 	
-	$TESTS android $COMPILEDIR/crosscompile/android-armv6/bin/php5/bin/php
+	$TESTS android $COMPILEDIR/crosscompile/android-armv6/bin/php7/bin/php
 fi
 
 if [ "$CROSSCOMPILE_ANDROID_ARMV7" = "true" ];
@@ -182,11 +184,11 @@ then
     
     tar -czf PHP_${PHP_VERSION_NAME}_ARMv7_Android.tar.gz bin/
     cp -r $COMPILEDIR/crosscompile/android-armv7/{install.log,PHP_${PHP_VERSION_NAME}_ARMv7_Android.tar.gz} $ARCHIVE/crosscompile/android-armv7/
-	if [ ! -f $COMPILEDIR/crosscompile/android-armv7/bin/php5/bin/php ]; then
+	if [ ! -f $COMPILEDIR/crosscompile/android-armv7/bin/php7/bin/php ]; then
 		exit 1
 	fi
 	
-	$TESTS android $COMPILEDIR/crosscompile/android-armv7/bin/php5/bin/php
+	$TESTS android $COMPILEDIR/crosscompile/android-armv7/bin/php7/bin/php
 fi
 
 if [ "$CROSSCOMPILE_IOS_ARMV6" = "true" ];
@@ -205,11 +207,11 @@ then
     PATH="/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:$PATH" $SCRIPT -t ios-armv6 -j $THREADS -c -x $EXTRA_FLAGS -f arm
     
     cp -r $COMPILEDIR/crosscompile/ios-armv6/{install.log,bin/*} $ARCHIVE/crosscompile/ios-armv6/
-	if [ ! -f $COMPILEDIR/crosscompile/ios-armv6/bin/php5/bin/php ]; then
+	if [ ! -f $COMPILEDIR/crosscompile/ios-armv6/bin/php7/bin/php ]; then
 		exit 1
 	fi
 	
-	$TESTS arm $COMPILEDIR/crosscompile/ios-armv6/bin/php5/bin/php
+	$TESTS arm $COMPILEDIR/crosscompile/ios-armv6/bin/php7/bin/php
 fi
 
 if [ "$CROSSCOMPILE_IOS_ARMV7" = "true" ];
@@ -228,11 +230,27 @@ then
     PATH="/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin:$PATH" $SCRIPT -t ios-armv6 -j $THREADS -c -x $EXTRA_FLAGS -f arm
     
     cp -r $COMPILEDIR/crosscompile/ios-armv7/{install.log,bin/*} $ARCHIVE/crosscompile/ios-armv7/
-	if [ ! -f $COMPILEDIR/crosscompile/ios-armv7/bin/php5/bin/php ]; then
+	if [ ! -f $COMPILEDIR/crosscompile/ios-armv7/bin/php7/bin/php ]; then
 		exit 1
 	fi
 	
-	$TESTS arm $COMPILEDIR/crosscompile/ios-armv7/bin/php5/bin/php
+	$TESTS arm $COMPILEDIR/crosscompile/ios-armv7/bin/php7/bin/php
+fi
+
+if [ "$CROSSCOMPILE_ARMV7" = "true" ];
+then
+    mkdir -p {$COMPILEDIR,$ARCHIVE}/crosscompile/armv7
+    cd $COMPILEDIR/crosscompile/armv7
+    
+    $SCRIPT -t armv7 -j $THREADS -c -x $EXTRA_FLAGS -s -l -f arm
+
+    tar -czf PHP_${PHP_VERSION_NAME}_ARMv7.tar.gz bin/
+    cp -r $COMPILEDIR/crosscompile/armv7/{install.log,PHP_${PHP_VERSION_NAME}_ARMv7.tar.gz} $ARCHIVE/crosscompile/armv7/
+	if [ ! -f $COMPILEDIR/crosscompile/armv7/bin/php7/bin/php ]; then
+		exit 1
+	fi
+	
+	$TESTS arm $COMPILEDIR/crosscompile/armv7/bin/php7/bin/php
 fi
 
 if [ "$CROSSCOMPILE_RPI" = "true" ];
@@ -244,11 +262,11 @@ then
 
     tar -czf PHP_${PHP_VERSION_NAME}_ARM_Raspbian_hard.tar.gz bin/
     cp -r $COMPILEDIR/crosscompile/rpi/{install.log,PHP_${PHP_VERSION_NAME}_ARM_Raspbian_hard.tar.gz} $ARCHIVE/crosscompile/rpi/
-	if [ ! -f $COMPILEDIR/crosscompile/rpi/bin/php5/bin/php ]; then
+	if [ ! -f $COMPILEDIR/crosscompile/rpi/bin/php7/bin/php ]; then
 		exit 1
 	fi
 	
-	$TESTS arm $COMPILEDIR/crosscompile/rpi/bin/php5/bin/php
+	$TESTS arm $COMPILEDIR/crosscompile/rpi/bin/php7/bin/php
 fi
 
 if [ "$CROSSCOMPILE_MAC" = "true" ];
@@ -259,7 +277,7 @@ then
     $SCRIPT -t mac -j 1 -c $EXTRA_FLAGS -f -x
     
     cp -r $COMPILEDIR/crosscompile/mac/{install.log,bin/*} $ARCHIVE/crosscompile/mac/
-	if [ ! -f $COMPILEDIR/crosscompile/mac/bin/php5/bin/php ]; then
+	if [ ! -f $COMPILEDIR/crosscompile/mac/bin/php7/bin/php ]; then
 		exit 1
 	fi
 fi
