@@ -1,29 +1,57 @@
 #!/bin/bash
 
 BRANCH="master"
-DEVTOOLS="DevTools.phar"
-CONSOLE_SCRIPT="https://raw.githubusercontent.com/PocketMine/DevTools/master/src/DevTools/ConsoleScript.php"
-
+CONSOLE_SCRIPT="ConsoleScript.php"
+CONSOLE_SCRIPT_URL="https://raw.githubusercontent.com/PocketMine/DevTools/master/src/DevTools/ConsoleScript.php"
+OUTDIR="$(pwd)"
+IGNORE_CERT="yes"
 PHP="$(which php)"
 
 function usage {
-    echo "Usage: $0 [-b branch] [-d /path/to/DevTools.phar] [-p /path/to/php] <url>"
+    echo "Usage: $0 [-b branch] [-p /path/to/php] [-o /out/dir] <url>"
     exit 1
 }
 
-while getopts "p:b:d:h" opt; do
+#Needed to use aliases
+shopt -s expand_aliases
+type wget > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+	if [ "$IGNORE_CERT" == "yes" ]; then
+		alias download_file="wget --no-check-certificate -q -O -"
+	else
+		alias download_file="wget -q -O -"
+	fi
+else
+	type curl >> /dev/null 2>&1
+	if [ $? -eq 0 ]; then
+		if [ "$IGNORE_CERT" == "yes" ]; then
+			alias download_file="curl --insecure --silent --location"
+		else
+			alias download_file="curl --silent --location"
+		fi
+	else
+		echo "error, curl or wget not found"
+	fi
+fi
+
+while getopts "b:ho:p:h" opt; do
     case $opt in
         b)
             BRANCH="$2"
             ;;
-        d)
-            DEVTOOLS="$2"
+        h)
+            usage
+            ;;
+        o)
+            OUTDIR="$2"
             ;;
         p)
             PHP="$2"
             ;;
-        h)
+        \?)
+            echo "Invalid option: -$OPTARG" >&2
             usage
+            ;;
     esac
 done
 
@@ -35,12 +63,9 @@ if [ "$($PHP -r 'echo 1;' 2>/dev/null)" != "1" ]; then
     usage
 fi
 
-if [ ! -f $DEVTOOLS ]; then
-    if [ ! -f "ConsoleScript.php" ]; then
-        echo "[*] Downloading ConsoleScript.php"
-        wget --no-check-certificate -O - "$CONSOLE_SCRIPT" > ConsoleScript.php
-    fi
-    DEVTOOLS="$(pwd)/ConsoleScript.php"
+if [ ! -f $CONSOLE_SCRIPT ]; then
+    echo "[*] Downloading ConsoleScript.php"
+    download_file "$CONSOLE_SCRIPT_URL" > ConsoleScript.php
 fi
 
 if [ "$URL" == "" ]; then
@@ -55,5 +80,7 @@ PLUGIN_VERSION=$(grep 'version: ' plugin.yml | sed 's/^[^:]*: \(.*\)$/\1/g')
 GIT_COMMIT="$(git rev-parse HEAD)"
 cd ..
 
-$PHP -dphar.readonly=0 "$DEVTOOLS" --make="./plugin/" --relative="./plugin/" --out "${PLUGIN_NAME}_v${PLUGIN_VERSION}-${GIT_COMMIT:0:8}.phar"
-rm -fr plugin
+$PHP -dphar.readonly=0 "$CONSOLE_SCRIPT" --make="./plugin/" --relative="./plugin/" --out "$OUTDIR/${PLUGIN_NAME}_v${PLUGIN_VERSION}-${GIT_COMMIT:0:8}.phar"
+
+# cleanup
+rm -fr plugin ConsoleScript.php
