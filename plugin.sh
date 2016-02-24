@@ -68,6 +68,10 @@ if [ ! -f $CONSOLE_SCRIPT ]; then
     download_file "$CONSOLE_SCRIPT_URL" > ConsoleScript.php
 fi
 
+if [ ! -d $OUTDIR ]; then
+    mkdir -p "$OUTDIR"
+fi
+
 if [ "$URL" == "" ]; then
     usage
 fi
