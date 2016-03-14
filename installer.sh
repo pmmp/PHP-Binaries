@@ -1,16 +1,16 @@
 #!/bin/bash
 
 CHANNEL="stable"
-BRANCH="php7"
+BRANCH="master"
 NAME="PocketMine-MP"
 BUILD_URL=""
 
-LINUX_32_BUILD="PHP_7.0.0RC3_x86_Linux"
-LINUX_64_BUILD="PHP_7.0.0RC3_x86-64_Linux"
+LINUX_32_BUILD="PHP_7.0.3_x86_Linux"
+LINUX_64_BUILD="PHP_7.0.3_x86-64_Linux"
 #CENTOS_32_BUILD="PHP_5.6.2_x86_CentOS"
 #CENTOS_64_BUILD="PHP_5.6.2_x86-64_CentOS"
-MAC_32_BUILD="PHP_7.0.0RC3_x86_MacOS"
-MAC_64_BUILD="PHP_7.0.0RC3_x86-64_MacOS"
+MAC_32_BUILD="PHP_7.0.3_x86_MacOS"
+MAC_64_BUILD="PHP_7.0.3_x86-64_MacOS"
 RPI_BUILD="PHP_7.0.0RC3_ARM_Raspbian_hard"
 ARMV7_BUILD="PHP_7.0.0RC3_ARMv7"
 AND_BUILD="PHP_7.0.0RC3_ARMv7_Android"
@@ -20,7 +20,7 @@ forcecompile=off
 alldone=no
 checkRoot=on
 XDEBUG="off"
-alternateurl=on
+alternateurl=off
 
 INSTALL_DIRECTORY="./"
 
@@ -127,7 +127,8 @@ if [[ "$BUILD_URL" != "" && "$CHANNEL" == "custom" ]]; then
 	VERSION_DOWNLOAD="$BUILD_URL"
 else
 
-VERSION_DATA=$(download_file "http://www.pocketmine.net/api/?channel=$CHANNEL")
+# VERSION_DATA=$(download_file "http://www.pocketmine.net/api/?channel=$CHANNEL")
+VERSION_DATA=$(download_file "https://gist.githubusercontent.com/Intyre/ed7ff1c2e40d79fbe37b/raw/4a9753d4646b81efced684cf93c0cc703634614a/pm-release.json")
 
 VERSION=$(echo "$VERSION_DATA" | grep '"version"' | cut -d ':' -f2- | tr -d ' ",')
 BUILD=$(echo "$VERSION_DATA" | grep build | cut -d ':' -f2- | tr -d ' ",')
