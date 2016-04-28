@@ -128,7 +128,7 @@ if [[ "$BUILD_URL" != "" && "$CHANNEL" == "custom" ]]; then
 else
 
 # VERSION_DATA=$(download_file "http://www.pocketmine.net/api/?channel=$CHANNEL")
-VERSION_DATA=$(download_file "https://gist.githubusercontent.com/Intyre/ed7ff1c2e40d79fbe37b/raw/4a9753d4646b81efced684cf93c0cc703634614a/pm-release.json")
+VERSION_DATA=$(download_file "https://gist.githubusercontent.com/Intyre/ed7ff1c2e40d79fbe37b/raw/pm-release.json")
 
 VERSION=$(echo "$VERSION_DATA" | grep '"version"' | cut -d ':' -f2- | tr -d ' ",')
 BUILD=$(echo "$VERSION_DATA" | grep build | cut -d ':' -f2- | tr -d ' ",')
