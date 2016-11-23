@@ -1,5 +1,5 @@
 #!/bin/bash
-[ -z "$PHP_VERSION" ] && PHP_VERSION="7.0.12"
+[ -z "$PHP_VERSION" ] && PHP_VERSION="7.0.13"
 
 PHP_IS_BETA="no"
 
@@ -15,13 +15,13 @@ READLINE_VERSION="6.3"
 NCURSES_VERSION="6.0"
 PHPNCURSES_VERSION="1.0.2"
 PTHREADS_VERSION="3.1.6"
-XDEBUG_VERSION="2.2.6"
+XDEBUG_VERSION="2.4.1"
 PHP_POCKETMINE_VERSION="0.0.6"
 #UOPZ_VERSION="2.0.4"
 WEAKREF_VERSION="0.3.2"
-PHPYAML_VERSION="2.0.0RC7"
+PHPYAML_VERSION="2.0.0"
 YAML_VERSION="0.1.6"
-YAML_VERSION_ANDROID="0.1.4"
+YAML_VERSION_ANDROID="0.1.6"
 #PHPLEVELDB_VERSION="0.1.4"
 PHPLEVELDB_VERSION="2963815338edfebc5ab8c512bcd2b72f0357ac6e"
 #LEVELDB_VERSION="1.18"
@@ -742,18 +742,18 @@ echo " done!"
 
 # PECL libraries
 
-#TODO Uncomment this when it's ready for PHP7
-#if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
-#	#xdebug
-#	echo -n "[PHP xdebug] downloading $XDEBUG_VERSION..."
-#	download_file "http://pecl.php.net/get/xdebug-$XDEBUG_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-#	mv xdebug-$XDEBUG_VERSION "$DIR/install_data/php/ext/xdebug"
-#	echo " done!"
-#	HAS_XDEBUG="--enable-xdebug=shared"
-#else
-#	HAS_XDEBUG=""
-#fi
+if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
+	#xdebug
+	echo -n "[PHP xdebug] downloading $XDEBUG_VERSION..."
+	download_file "http://pecl.php.net/get/xdebug-$XDEBUG_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv xdebug-$XDEBUG_VERSION "$DIR/install_data/php/ext/xdebug"
+	echo " done!"
+	HAS_XDEBUG="--enable-xdebug=shared"
+else
+	HAS_XDEBUG=""
+fi
 
+#TODO Uncomment this when it's ready for PHP7
 #if [ "$COMPILE_DEBUG" == "yes" ]; then
 #	#profiler
 #	echo -n "[PHP profiler] downloading latest..."
@@ -789,7 +789,6 @@ fi
 #echo " done!"
 
 #WeakRef
-#TODO Remove when there is support for PHP7
 echo -n "[PHP Weakref] downloading $WEAKREF_VERSION..."
 download_file "http://pecl.php.net/get/Weakref-$WEAKREF_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
 mv Weakref-$WEAKREF_VERSION "$DIR/install_data/php/ext/weakref"
