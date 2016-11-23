@@ -1,5 +1,5 @@
 #!/bin/bash
-[ -z "$PHP_VERSION" ] && PHP_VERSION="7.0.3"
+[ -z "$PHP_VERSION" ] && PHP_VERSION="7.0.12"
 PHP_VERSION_BASE="${PHP_VERSION:0:3}"
 
 PHP_IS_BETA="no"
@@ -64,6 +64,9 @@ else
 	echo " done!"
 fi
 
+if [ ! -d "ext" ]; then
+	mkdir ext
+fi
 cd ext
 
 echo -n "[pthreads] downloading ${PTHREADS_VERSION}..."
@@ -85,10 +88,6 @@ if [[ "$XDEBUG_VERSION" != "" ]]; then
 	download_file "http://windows.php.net/downloads/pecl/releases/xdebug/$XDEBUG_VERSION/php_xdebug-$XDEBUG_VERSION-$PHP_VERSION_BASE-ts-vc14-$BUILD_TARGET.zip" > temp.zip && unzip -o temp.zip >/dev/null 2>&1 && rm temp.zip
 	echo " done!"
 fi
-
-#echo -n "[wxwidgets] downloading ${WXWIDGETS_VERSION}..."
-#download_file "http://windows.php.net/downloads/pecl/releases/wxwidgets/$WXWIDGETS_VERSION/php_wxwidgets-$WXWIDGETS_VERSION-$PHP_VERSION_BASE-ts-vc14-$BUILD_TARGET.zip" > temp.zip && unzip -o temp.zip >/dev/null 2>&1 && rm temp.zip
-#echo " done!"
 
 cd ../..
 
@@ -112,12 +111,12 @@ cp "$TMP_PATH/ext/php_gmp.dll" .
 cp "$TMP_PATH/ext/php_mbstring.dll" .
 cp "$TMP_PATH/ext/php_mysqli.dll" .
 cp "$TMP_PATH/ext/php_opcache.dll" .
+#cp "$TMP_PATH/ext/php_openssl.dll" .
 cp "$TMP_PATH/ext/php_pthreads.dll" .
 cp "$TMP_PATH/ext/php_sockets.dll" .
 cp "$TMP_PATH/ext/php_gd2.dll" .
 cp "$TMP_PATH/ext/php_sqlite3.dll" .
 cp "$TMP_PATH/ext/php_weakref.dll" .
-#cp "$TMP_PATH/ext/php_wxwidgets.dll" .
 cp "$TMP_PATH/ext/php_xdebug.dll" .
 cp "$TMP_PATH/ext/php_yaml.dll" .
 cp "$TMP_PATH/ext/yaml.dll" .
@@ -144,6 +143,7 @@ echo "allow_url_fopen = On" >> php.ini
 echo "extension=php_weakref.dll" >> php.ini
 echo "extension=php_curl.dll" >> php.ini
 echo "extension=php_mysqli.dll" >> php.ini
+#echo "extension=php_openssl.dll" >> php.ini
 echo "extension=php_sqlite3.dll" >> php.ini
 echo "extension=php_sockets.dll" >> php.ini
 echo "extension=php_mbstring.dll" >> php.ini
@@ -151,7 +151,6 @@ echo "extension=php_yaml.dll" >> php.ini
 echo "extension=php_pthreads.dll" >> php.ini
 echo "extension=php_com_dotnet.dll" >> php.ini
 echo "extension=php_gd2.dll" >> php.ini
-#echo "extension=php_wxwidgets.dll" >> php.ini
 
 echo "zend_extension=php_opcache.dll" >> php.ini
 echo ";zend_extension=php_xdebug.dll" >> php.ini
