@@ -2,7 +2,7 @@
 
 BRANCH="master"
 CONSOLE_SCRIPT="ConsoleScript.php"
-CONSOLE_SCRIPT_URL="https://raw.githubusercontent.com/PocketMine/DevTools/master/src/DevTools/ConsoleScript.php"
+CONSOLE_SCRIPT_URL="https://raw.githubusercontent.com/pmmp/PocketMine-DevTools/master/src/DevTools/ConsoleScript.php"
 OUTDIR="$(pwd)"
 IGNORE_CERT="yes"
 PHP="$(which php)"
