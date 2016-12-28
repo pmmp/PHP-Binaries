@@ -133,7 +133,7 @@ FILENAME=$(echo "$VERSION_DATA" | grep '"fileName"' | cut -d ':' -f2- | tr -d ' 
 VERSION=$(echo $FILENAME | cut -d '_' -f2- | cut -d '-' -f1)
 BUILD=$(echo "$VERSION_DATA" | grep '"number"' | cut -d ':' -f2- | tr -d ' ",')
 API_VERSION=$(echo $FILENAME | cut -d '-' -f4- | sed -e 's/\.[^.]*$//')
-VERSION_DATE=$(echo "$VERSION_DATA" | grep -m 1 '"timestamp"' | cut -d ':' -f2- | tr -d ' ",')
+VERSION_DATE=$(($(echo "$VERSION_DATA" | grep -m 1 '"timestamp"' | cut -d ':' -f2- | tr -d ' ",') / 1000))
 BASE_URL=$(echo "$VERSION_DATA" | grep '"url"' | cut -d ':' -f2- | tr -d ' ",')
 VERSION_DOWNLOAD="${BASE_URL}artifact/${FILENAME}"
 
@@ -143,7 +143,7 @@ fi
 
 if [ "$(uname -s)" == "Darwin" ]; then
 	BASE_VERSION=$(echo "$VERSION" | sed -E 's/([A-Za-z0-9_\.]*).*/\1/')
-	VERSION_DATE_STRING=$(date -j -f "%s" $VERSION_DATE)
+	VERSION_DATE_STRING=$(date -r $VERSION_DATE)
 else
 	BASE_VERSION=$(echo "$VERSION" | sed -r 's/([A-Za-z0-9_\.]*).*/\1/')
 	VERSION_DATE_STRING=$(date --date="@$VERSION_DATE")
