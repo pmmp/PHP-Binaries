@@ -127,7 +127,7 @@ if [[ "$BUILD_URL" != "" && "$CHANNEL" == "custom" ]]; then
 	VERSION_DOWNLOAD="$BUILD_URL"
 else
 
-VERSION_DATA=$(download_file "https://jenkins.pmmp.io/job/PocketMine-MP/lastSuccessfulBuild/api/json?pretty=true&tree=url,artifacts\[fileName\],number,timestamp")
+VERSION_DATA=$(download_file "https://jenkins.pmmp.io/job/PocketMine-MP/lastSuccessfulBuild/api/json?pretty=true&tree=url,artifacts[fileName],number,timestamp")
 
 FILENAME=$(echo "$VERSION_DATA" | grep '"fileName"' | cut -d ':' -f2- | tr -d ' ",')
 VERSION=$(echo $FILENAME | cut -d '_' -f2- | cut -d '-' -f1)
