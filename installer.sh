@@ -27,40 +27,40 @@ INSTALL_DIRECTORY="./"
 IGNORE_CERT="no"
 
 while getopts "rxucid:v:t:" opt; do
-  case $opt in
-    a)
-      alternateurl=on
-      ;;
-    r)
-	  checkRoot=off
-      ;;
-    x)
-	  XDEBUG="on"
-	  echo "[+] Enabling xdebug"
-      ;;
-    u)
-	  update=on
-      ;;
-    c)
-	  forcecompile=on
-      ;;
-	d)
-	  INSTALL_DIRECTORY="$OPTARG"
-      ;;
-	i)
-	  IGNORE_CERT="yes"
-      ;;
-	v)
-	  CHANNEL="$OPTARG"
-      ;;
-	t)
-	  BUILD_URL="$OPTARG"
-      ;;
-    \?)
-      echo "Invalid option: -$OPTARG" >&2
-	  exit 1
-      ;;
-  esac
+	case $opt in
+		a)
+			alternateurl=on
+			;;
+		r)
+			checkRoot=off
+			;;
+		x)
+			XDEBUG="on"
+			echo "[+] Enabling xdebug"
+			;;
+		u)
+			update=on
+			;;
+		c)
+			forcecompile=on
+			;;
+		d)
+			INSTALL_DIRECTORY="$OPTARG"
+			;;
+		i)
+			IGNORE_CERT="yes"
+			;;
+		v)
+			CHANNEL="$OPTARG"
+			;;
+		t)
+			BUILD_URL="$OPTARG"
+			;;
+		\?)
+			echo "Invalid option: -$OPTARG" >&2
+			exit 1
+			;;
+	esac
 done
 
 
@@ -88,10 +88,10 @@ fi
 
 if [ "$checkRoot" == "on" ]; then
 	if [ "$(id -u)" == "0" ]; then
-	   echo "This script is running as root, this is discouraged."
-	   echo "It is recommended to run it as a normal user as it doesn't need further permissions."
-	   echo "If you want to run it as root, add the -r flag."
-	   exit 1
+		echo "This script is running as root, this is discouraged."
+		echo "It is recommended to run it as a normal user as it doesn't need further permissions."
+		echo "If you want to run it as root, add the -r flag."
+		exit 1
 	fi
 fi
 
@@ -127,66 +127,70 @@ if [[ "$BUILD_URL" != "" && "$CHANNEL" == "custom" ]]; then
 	VERSION_DOWNLOAD="$BUILD_URL"
 else
 
-VERSION_DATA=$(download_file "https://jenkins.pmmp.io/job/PocketMine-MP/lastSuccessfulBuild/api/json?pretty=true&tree=url,artifacts[fileName],number,timestamp")
+	VERSION_DATA=$(download_file "https://jenkins.pmmp.io/job/PocketMine-MP/lastSuccessfulBuild/api/json?pretty=true&tree=url,artifacts[fileName],number,timestamp")
 
-FILENAME=$(echo "$VERSION_DATA" | grep '"fileName"' | cut -d ':' -f2- | tr -d ' ",')
-VERSION=$(echo $FILENAME | cut -d '_' -f2- | cut -d '-' -f1)
-BUILD=$(echo "$VERSION_DATA" | grep '"number"' | cut -d ':' -f2- | tr -d ' ",')
-API_VERSION=$(echo $FILENAME | cut -d '-' -f4- | sed -e 's/\.[^.]*$//')
-VERSION_DATE=$(($(echo "$VERSION_DATA" | grep -m 1 '"timestamp"' | cut -d ':' -f2- | tr -d ' ",') / 1000))
-BASE_URL=$(echo "$VERSION_DATA" | grep '"url"' | cut -d ':' -f2- | tr -d ' ",')
-VERSION_DOWNLOAD="${BASE_URL}artifact/${FILENAME}"
+	if [ "$VERSION_DATA" != "" ]; then
+		FILENAME=$(echo "$VERSION_DATA" | grep '"fileName"' | cut -d ':' -f2- | tr -d ' ",')
+		VERSION=$(echo $FILENAME | cut -d '_' -f2- | cut -d '-' -f1)
+		BUILD=$(echo "$VERSION_DATA" | grep '"number"' | cut -d ':' -f2- | tr -d ' ",')
+		API_VERSION=$(echo $FILENAME | cut -d '-' -f4- | sed -e 's/\.[^.]*$//')
+		VERSION_DATE=$(($(echo "$VERSION_DATA" | grep -m 1 '"timestamp"' | cut -d ':' -f2- | tr -d ' ",') / 1000))
+		BASE_URL=$(echo "$VERSION_DATA" | grep '"url"' | cut -d ':' -f2- | tr -d ' ",')
+		VERSION_DOWNLOAD="${BASE_URL}artifact/${FILENAME}"
 
-if [ "$alternateurl" == "on" ]; then
-    VERSION_DOWNLOAD=$(echo "$VERSION_DATA" | grep '"alternate_download_url"' | cut -d ':' -f2- | tr -d ' ",')
-fi
-
-if [ "$(uname -s)" == "Darwin" ]; then
-	BASE_VERSION=$(echo "$VERSION" | sed -E 's/([A-Za-z0-9_\.]*).*/\1/')
-	VERSION_DATE_STRING=$(date -r $VERSION_DATE)
-else
-	BASE_VERSION=$(echo "$VERSION" | sed -r 's/([A-Za-z0-9_\.]*).*/\1/')
-	VERSION_DATE_STRING=$(date --date="@$VERSION_DATE")
-fi
-
-GPG_SIGNATURE=$(echo "$VERSION_DATA" | grep '"signature_url"' | cut -d ':' -f2- | tr -d ' ",')
-
-if [ "$GPG_SIGNATURE" != "" ]; then
-	ENABLE_GPG="yes"
-fi
-
-if [ "$VERSION" == "" ]; then
-	echo "[!] Couldn't get the latest $NAME version"
-	exit 1
-fi
-
-GPG_BIN=""
-
-if [ "$ENABLE_GPG" == "yes" ]; then
-	type gpg > /dev/null 2>&1
-	if [ $? -eq 0 ]; then
-		GPG_BIN="gpg"
-	else
-		type gpg2 > /dev/null 2>&1
-		if [ $? -eq 0 ]; then
-			GPG_BIN="gpg2"
+		if [ "$alternateurl" == "on" ]; then
+			VERSION_DOWNLOAD=$(echo "$VERSION_DATA" | grep '"alternate_download_url"' | cut -d ':' -f2- | tr -d ' ",')
 		fi
-	fi
 
-	if [ "$GPG_BIN" != "" ]; then
-		gpg --fingerprint $PUBLICKEY_FINGERPRINT > /dev/null 2>&1
-		if [ $? -ne 0 ]; then
-			download_file $PUBLICKEY_URL | gpg --trusted-key $PUBLICKEY_LONGID --import
-			gpg --fingerprint $PUBLICKEY_FINGERPRINT > /dev/null 2>&1
-			if [ $? -ne 0 ]; then
-				gpg --trusted-key $PUBLICKEY_LONGID --keyserver "$GPG_KEYSERVER" --recv-key $PUBLICKEY_FINGERPRINT
+		if [ "$(uname -s)" == "Darwin" ]; then
+			BASE_VERSION=$(echo "$VERSION" | sed -E 's/([A-Za-z0-9_\.]*).*/\1/')
+			VERSION_DATE_STRING=$(date -r $VERSION_DATE)
+		else
+			BASE_VERSION=$(echo "$VERSION" | sed -r 's/([A-Za-z0-9_\.]*).*/\1/')
+			VERSION_DATE_STRING=$(date --date="@$VERSION_DATE")
+		fi
+
+		GPG_SIGNATURE=$(echo "$VERSION_DATA" | grep '"signature_url"' | cut -d ':' -f2- | tr -d ' ",')
+
+		if [ "$GPG_SIGNATURE" != "" ]; then
+			ENABLE_GPG="yes"
+		fi
+
+		if [ "$VERSION" == "" ]; then
+			echo "[!] Couldn't get the latest $NAME version"
+			exit 1
+		fi
+
+		GPG_BIN=""
+
+		if [ "$ENABLE_GPG" == "yes" ]; then
+			type gpg > /dev/null 2>&1
+			if [ $? -eq 0 ]; then
+				GPG_BIN="gpg"
+			else
+				type gpg2 > /dev/null 2>&1
+				if [ $? -eq 0 ]; then
+					GPG_BIN="gpg2"
+				fi
+			fi
+
+			if [ "$GPG_BIN" != "" ]; then
+				gpg --fingerprint $PUBLICKEY_FINGERPRINT > /dev/null 2>&1
+				if [ $? -ne 0 ]; then
+					download_file $PUBLICKEY_URL | gpg --trusted-key $PUBLICKEY_LONGID --import
+					gpg --fingerprint $PUBLICKEY_FINGERPRINT > /dev/null 2>&1
+					if [ $? -ne 0 ]; then
+						gpg --trusted-key $PUBLICKEY_LONGID --keyserver "$GPG_KEYSERVER" --recv-key $PUBLICKEY_FINGERPRINT
+					fi
+				fi
+			else
+				ENABLE_GPG="no"
 			fi
 		fi
 	else
-		ENABLE_GPG="no"
+		echo "[!] Couldn't download version automatically from Jenkins server"
+		exit 1
 	fi
-fi
-
 fi
 
 echo "[*] Found $NAME $BASE_VERSION (build $BUILD) using API $API_VERSION"
