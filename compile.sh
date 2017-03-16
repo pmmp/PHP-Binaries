@@ -29,6 +29,7 @@ LEVELDB_VERSION="b633756b51390a9970efde9068f60188ca06a724" #Check MacOS
 LIBXML_VERSION="2.9.1"
 LIBPNG_VERSION="1.6.28"
 BCOMPILER_VERSION="1.0.2"
+POCKETMINE_CHUNKUTILS_VERSION="master"
 
 echo "[PocketMine] PHP compiler for Linux, MacOS and Android"
 DIR="$(pwd)"
@@ -91,7 +92,9 @@ FLAGS_LTO=""
 
 LD_PRELOAD=""
 
-while getopts "::t:oj:srcdlxzff:" OPTION; do
+COMPILE_POCKETMINE_CHUNKUTILS="no"
+
+while getopts "::t:oj:srcdlxzff:u" OPTION; do
 
 	case $OPTION in
 		t)
@@ -148,6 +151,10 @@ while getopts "::t:oj:srcdlxzff:" OPTION; do
 			elif [ "$OPTARG" == "x86" ]; then
 				CFLAGS="$CFLAGS -mmmx -msse -msse2 -mfpmath=sse -m128bit-long-double -malign-double -ftree-parallelize-loops=4"
 			fi
+			;;
+		u)
+			echo "[opt] Will compile with PocketMine-ChunkUtils C extension for Anvil"
+			COMPILE_POCKETMINE_CHUNKUTILS="yes"
 			;;
 		\?)
 			echo "Invalid option: -$OPTION$OPTARG" >&2
@@ -814,6 +821,16 @@ else
 	HAS_LEVELDB=""
 fi
 
+if [ "$COMPILE_POCKETMINE_CHUNKUTILS" == "yes" ]; then
+	echo -n "[PocketMine-ChunkUtils] Downloading $POCKETMINE_CHUNKUTILS_VERSION..."
+	download_file "https://github.com/dktapps/PocketMine-C-ChunkUtils/archive/$POCKETMINE_CHUNKUTILS_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv PocketMine-C-ChunkUtils-$POCKETMINE_CHUNKUTILS_VERSION "$DIR/install_data/php/ext/pocketmine_chunkutils"
+	echo " done!"
+	HAS_POCKETMINE_CHUNKUTILS=--enable-pocketmine-chunkutils
+else
+	HAS_POCKETMINE_CHUNKUTILS=""
+fi
+
 
 echo -n "[PHP]"
 
@@ -884,6 +901,7 @@ $HAS_POCKETMINE \
 $HAS_XDEBUG \
 $HAS_PROFILER \
 $HAS_DEBUG \
+$HAS_POCKETMINE_CHUNKUTILS \
 --enable-mbstring \
 --enable-calendar \
 --enable-pthreads \
