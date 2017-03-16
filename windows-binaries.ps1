@@ -9,7 +9,7 @@ if($PSVersionTable.PSVersion.Major -lt 5){
     exit 1
 }
 
-$PHP_VERSION = "7.0.16"
+$PHP_VERSION = "7.0.17"
 $parts = $PHP_VERSION.Split(".")
 $PHP_VERSION_BASE = $parts[0] + "." + $parts[1]
 $PHP_IS_BETA = $false
