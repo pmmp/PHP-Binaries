@@ -102,7 +102,7 @@ if($debug -ne $false){
 
 echo "[PHP] Creating php.ini..."
 $php_ini = $path + "\bin\php\php.ini"
-(rm -Force $php_ini) > $null
+(rm -Force $php_ini) 2> $null
 (New-Item $php_ini) > $null
 
 function write_php_ini{
@@ -165,7 +165,13 @@ if($debug){
 
 echo "[PHP] Cleaning up temporary files..."
 rm -r -Force $tmp_path
-echo "[PHP] Done!"
+echo "[PHP] Checking PHP build works..."
 
-$cmd = $path + "\bin\php\php.exe --version"
-iex $cmd
+$cmd = "& `"$path\bin\php\php.exe`" --version"
+$output = [string] (iex $cmd)
+if($output -match "PHP"){
+	echo "[PHP] Done!"
+}else{
+	echo "[PHP] Failed to run PHP. You may need to install Microsoft Visual C++ Redistributable 2015 runtime. This can be downloaded from the Microsoft website."
+	exit 1
+}
