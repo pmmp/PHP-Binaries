@@ -383,7 +383,7 @@ mkdir -m 0755 bin/php7 >> "$DIR/install.log" 2>&1
 cd install_data
 set -e
 
-#PHP 5
+#PHP 7
 echo -n "[PHP] downloading $PHP_VERSION..."
 
 if [[ "$PHP_IS_BETA" == "yes" ]]; then
@@ -495,6 +495,12 @@ export jm_cv_func_working_malloc=yes
 export ac_cv_func_malloc_0_nonnull=yes
 export jm_cv_func_working_realloc=yes
 export ac_cv_func_realloc_0_nonnull=yes
+
+if [ "$IS_CROSSCOMPILE" == "yes" ]; then
+	EXTRA_FLAGS=""
+else
+	EXTRA_FLAGS="--disable-assembly"
+fi
 
 #GMP
 echo -n "[GMP] downloading $GMP_VERSION..."
