@@ -6,7 +6,7 @@ PHP_IS_BETA="no"
 ZEND_VM="GOTO"
 
 ZLIB_VERSION="1.2.11"
-MBEDTLS_VERSION="2.2.1"
+OPENSSL_VERSION="1.0.2j"
 LIBMCRYPT_VERSION="2.5.8"
 GMP_VERSION="6.1.0"
 GMP_VERSION_DIR="6.1.0"
@@ -550,29 +550,21 @@ cd ..
 rm -r -f ./gmp
 echo " done!"
 
-if [ "$(uname -s)" != "Darwin" ] || [ "$IS_CROSSCOMPILE" == "yes" ] || [ "$COMPILE_CURL" == "yes" ]; then
-	#if [ "$DO_STATIC" == "yes" ]; then
-	#	EXTRA_FLAGS=""
-	#else
-	#	EXTRA_FLAGS="shared no-static"
-	#fi
-
-	#mbed TLS
-	echo -n "[mbed TLS] downloading $MBEDTLS_VERSION..."
-	download_file "https://tls.mbed.org/download/mbedtls-${MBEDTLS_VERSION}-gpl.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv mbedtls-${MBEDTLS_VERSION} mbedtls
-	echo -n " checking..."
-	cd mbedtls
-	sed -i=".backup" 's,DESTDIR=/usr/local,,g' Makefile
-	echo -n " compiling..."
-	DESTDIR="$DIR/bin/php7" RANLIB=$RANLIB make -j $THREADS lib >> "$DIR/install.log" 2>&1
-	echo -n " installing..."
-	DESTDIR="$DIR/bin/php7" make install >> "$DIR/install.log" 2>&1
-	echo -n " cleaning..."
-	cd ..
-	rm -r -f ./mbedtls
-	echo " done!"
-fi
+#openssl
+echo -n "[openssl] downloading $OPENSSL_VERSION..."
+download_file "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+mv openssl-$OPENSSL_VERSION openssl
+echo -n " checking..."
+cd openssl
+RANLIB=$RANLIB ./config --prefix="$DIR/bin/php7"  >> "$DIR/install.log" 2>&1
+echo -n " compiling..."
+make -j $THREADS >> "$DIR/install.log" 2>&1
+echo -n " installing..."
+make install >> "$DIR/install.log" 2>&1
+echo -n " cleaning..."
+cd ..
+rm -r -f ./openssl
+echo " done!"
 
 if [ "$(uname -s)" == "Darwin" ] && [ "$IS_CROSSCOMPILE" != "yes" ] && [ "$COMPILE_CURL" != "yes" ]; then
    HAVE_CURL="shared,/usr"
@@ -609,8 +601,7 @@ else
 	--disable-ldaps \
 	--without-libidn \
 	--with-zlib="$DIR/bin/php7" \
-	--without-ssl \
-	--with-mbedtls="$DIR/bin/php7" \
+	--with-ssl="$DIR/bin/php7" \
 	--enable-threaded-resolver \
 	--prefix="$DIR/bin/php7" \
 	$EXTRA_FLAGS \
@@ -889,6 +880,7 @@ RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" LDFLAGS="$LDFLAGS $FLAGS_LTO" ./confi
 --with-curl="$HAVE_CURL" \
 --with-zlib="$DIR/bin/php7" \
 --with-zlib-dir="$DIR/bin/php7" \
+--with-openssl="$DIR/bin/php7" \
 --with-mcrypt="$DIR/bin/php7" \
 --with-gmp="$DIR/bin/php7" \
 --with-png-dir="$DIR/bin/php7" \
