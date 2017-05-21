@@ -1,7 +1,8 @@
 ﻿param (
     [string]$target = $(if((Get-WmiObject -Class Win32_ComputerSystem).SystemType -match "(x64)"){ "x64" }else{ "x86" }),
     [switch]$debug = $false,
-    [string]$path = $(Split-Path $script:MyInvocation.MyCommand.Path)
+    [string]$path = $(Split-Path $script:MyInvocation.MyCommand.Path),
+    [switch]$zip = $false
 )
 
 if($PSVersionTable.PSVersion.Major -lt 5){
@@ -170,8 +171,20 @@ echo "[PHP] Checking PHP build works..."
 $cmd = "& `"$path\bin\php\php.exe`" --version"
 $output = [string] (iex $cmd)
 if($output -match "PHP"){
-	echo "[PHP] Done!"
+    echo "[PHP] Done!"
 }else{
-	echo "[PHP] Failed to run PHP. You may need to install Microsoft Visual C++ Redistributable 2015 runtime. This can be downloaded from the Microsoft website."
-	exit 1
+    echo "[PHP] Failed to run PHP. You may need to install Microsoft Visual C++ Redistributable 2015 runtime. This can be downloaded from the Microsoft website."
+    exit 1
+}
+
+if($zip){
+    $zipPath = $path + "\php-$PHP_VERSION-$target" + $(if($debug){ "-debug" }) + ".zip"
+    if(Test-Path $zipPath){
+        echo "Removing old zip..."
+        rm $zipPath
+    }
+    $source = $path + "\bin"
+    echo "Creating zipped build..."
+    Compress-Archive -Path $source -DestinationPath $zipPath
+    echo $("Created zipped build on " + $zipPath)
 }
