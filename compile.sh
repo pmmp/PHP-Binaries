@@ -6,24 +6,22 @@ PHP_IS_BETA="no"
 ZEND_VM="GOTO"
 
 ZLIB_VERSION="1.2.11"
-MBEDTLS_VERSION="2.2.1"
+MBEDTLS_VERSION="2.4.2"
 LIBMCRYPT_VERSION="2.5.8"
-GMP_VERSION="6.1.0"
-GMP_VERSION_DIR="6.1.0"
-CURL_VERSION="curl-7_47_1"
+GMP_VERSION="6.1.2"
+GMP_VERSION_DIR="6.1.2"
+CURL_VERSION="curl-7_54_0"
 READLINE_VERSION="6.3"
 NCURSES_VERSION="6.0"
 PHPNCURSES_VERSION="1.0.2"
 PTHREADS_VERSION="3.1.6"
 XDEBUG_VERSION="2.5.0"
-PHP_POCKETMINE_VERSION="0.0.6"
-#UOPZ_VERSION="2.0.4"
 WEAKREF_VERSION="0.3.3"
 PHPYAML_VERSION="2.0.0"
 YAML_VERSION="0.1.7"
 YAML_VERSION_ANDROID="0.1.7"
 #PHPLEVELDB_VERSION="0.1.4"
-PHPLEVELDB_VERSION="2963815338edfebc5ab8c512bcd2b72f0357ac6e"
+PHPLEVELDB_VERSION="5d05f06b7a94608af040264ef3d3c6dc170506b6"
 #LEVELDB_VERSION="1.18"
 LEVELDB_VERSION="b633756b51390a9970efde9068f60188ca06a724" #Check MacOS
 LIBXML_VERSION="2.9.1"
@@ -163,11 +161,12 @@ while getopts "::t:oj:srcdlxzff:u" OPTION; do
 	esac
 done
 
-#TODO Uncomment this when php-leveldb supports PHP7 properly
-#if [ $(gcc -dumpversion | sed -e 's/\.\([0-9][0-9]\)/\1/g' -e 's/\.\([0-9]\)/0\1/g' -e 's/^[0-9]\{3,4\}$/&00/') -gt 40800 ]; then
-	#COMPILE_LEVELDB="yes"
-#fi
-COMPILE_LEVELDB="no"
+
+if [ $(gcc -dumpversion | sed -e 's/\.\([0-9][0-9]\)/\1/g' -e 's/\.\([0-9]\)/0\1/g' -e 's/^[0-9]\{3,4\}$/&00/') -gt 40800 ]; then
+	COMPILE_LEVELDB="yes"
+else
+	COMPILE_LEVELDB="no"
+fi
 
 GMP_ABI=""
 TOOLCHAIN_PREFIX=""
@@ -585,7 +584,7 @@ else
 
 	#curl
 	echo -n "[cURL] downloading $CURL_VERSION..."
-	download_file "https://github.com/bagder/curl/archive/$CURL_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	download_file "https://github.com/curl/curl/archive/$CURL_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 	mv curl-$CURL_VERSION curl
 	echo -n " checking..."
 	cd curl
@@ -779,22 +778,6 @@ download_file "http://pecl.php.net/get/pthreads-$PTHREADS_VERSION.tgz" | tar -zx
 mv pthreads-$PTHREADS_VERSION "$DIR/install_data/php/ext/pthreads"
 echo " done!"
 
-HAS_POCKETMINE=""
-if [ "$HAS_ZEPHIR" == "yes" ]; then
-	echo -n "[C PocketMine extension] downloading $PHP_POCKETMINE_VERSION..."
-	download_file https://github.com/PocketMine/PocketMine-MP-Zephir/archive/$PHP_POCKETMINE_VERSION.tar.gz | tar -zx >> "$DIR/install.log" 2>&1
-	mv PocketMine-MP-Zephir-$PHP_POCKETMINE_VERSION/pocketmine/ext "$DIR/install_data/php/ext/pocketmine"
-	rm -r PocketMine-MP-Zephir-$PHP_POCKETMINE_VERSION/
-	HAS_POCKETMINE="--enable-pocketmine"
-	echo " done!"
-fi
-
-#uopz
-#echo -n "[PHP uopz] downloading $UOPZ_VERSION..."
-#download_file "http://pecl.php.net/get/uopz-$UOPZ_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-#mv uopz-$UOPZ_VERSION "$DIR/install_data/php/ext/uopz"
-#echo " done!"
-
 #WeakRef
 echo -n "[PHP Weakref] downloading $WEAKREF_VERSION..."
 download_file "http://pecl.php.net/get/Weakref-$WEAKREF_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
@@ -812,8 +795,7 @@ echo " done!"
 if [ "$COMPILE_LEVELDB" == "yes" ]; then
 	#PHP LevelDB
 	echo -n "[PHP LevelDB] downloading $PHPLEVELDB_VERSION..."
-	#download_file "http://pecl.php.net/get/leveldb-$PHPLEVELDB_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-	download_file "https://github.com/PocketMine/php-leveldb/archive/$PHPLEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	download_file "https://github.com/reeze/php-leveldb/archive/$PHPLEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 	mv php-leveldb-$PHPLEVELDB_VERSION "$DIR/install_data/php/ext/leveldb"
 	echo " done!"
 	HAS_LEVELDB=--with-leveldb="$DIR/bin/php7"
@@ -897,7 +879,6 @@ RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" LDFLAGS="$LDFLAGS $FLAGS_LTO" ./confi
 $HAVE_NCURSES \
 $HAVE_READLINE \
 $HAS_LEVELDB \
-$HAS_POCKETMINE \
 $HAS_XDEBUG \
 $HAS_PROFILER \
 $HAS_DEBUG \
@@ -985,7 +966,6 @@ echo "short_open_tag=0" >> "$DIR/bin/php7/bin/php.ini"
 echo "asp_tags=0" >> "$DIR/bin/php7/bin/php.ini"
 echo "phar.readonly=0" >> "$DIR/bin/php7/bin/php.ini"
 echo "phar.require_hash=1" >> "$DIR/bin/php7/bin/php.ini"
-#echo "zend_extension=uopz.so" >> "$DIR/bin/php7/bin/php.ini"
 if [[ "$COMPILE_DEBUG" == "yes" ]]; then
 	echo "zend.assertions=1" >> "$DIR/bin/php7/bin/php.ini"
 else
