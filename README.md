@@ -4,13 +4,13 @@
 
 Use this script to build the custom PHP binary. Make sure you have ``make autoconf automake libtool m4 wget getconf gzip bzip2 bison g++``.
 
-| Flag   | Description                                                  |
-| ------ | ------------------------------------------------------------ |
-| -t     | Set target                                                   |
-| -j     | Set make threads to #                                        |
-| -c     | Will force compile cURL                                      |
-| -l     | Will compile with LevelDB support (not supported with PHP7)  |
-| -f     | Enabling abusive optimizations...                            |
+| Flag   | Description                                                |
+| ------ | ---------------------------------------------------------- |
+| -t     | Set target                                                 |
+| -j     | Set make threads to #                                      |
+| -c     | Will force compile cURL                                    |
+| -l     | Will compile with LevelDB support (experimental with PHP7) |
+| -f     | Enabling abusive optimizations...                          |
 
 ### Example:
 

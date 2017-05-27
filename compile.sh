@@ -127,10 +127,6 @@ while getopts "::t:oj:srcdlxzff:u" OPTION; do
 			DO_STATIC="yes"
 			CFLAGS="$CFLAGS -static"
 			;;
-		z)
-			echo "[opt] Will add PocketMine C PHP extension"
-			HAS_ZEPHIR="yes"
-			;;
 		f)
 			echo "[opt] Enabling abusive optimizations..."
 			DO_OPTIMIZE="yes"
