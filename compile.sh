@@ -1,5 +1,5 @@
 #!/bin/bash
-[ -z "$PHP_VERSION" ] && PHP_VERSION="7.0.19"
+[ -z "$PHP_VERSION" ] && PHP_VERSION="7.1.5"
 
 PHP_IS_BETA="no"
 
@@ -14,7 +14,7 @@ CURL_VERSION="curl-7_47_1"
 READLINE_VERSION="6.3"
 NCURSES_VERSION="6.0"
 PHPNCURSES_VERSION="1.0.2"
-PTHREADS_VERSION="3.1.6"
+PTHREADS_VERSION="5ba19781713e07e72fee8fffe27eef4edb40aab5" #using a fork due to statics issues on krakjoe's master (php 7.1)
 XDEBUG_VERSION="2.5.0"
 PHP_POCKETMINE_VERSION="0.0.6"
 #UOPZ_VERSION="2.0.4"
@@ -774,8 +774,9 @@ fi
 
 #pthreads
 echo -n "[PHP pthreads] downloading $PTHREADS_VERSION..."
-download_file "http://pecl.php.net/get/pthreads-$PTHREADS_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+#download_file "http://pecl.php.net/get/pthreads-$PTHREADS_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
 #download_file "https://github.com/krakjoe/pthreads/archive/$PTHREADS_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+download_file "https://github.com/SirSnyder/pthreads/archive/$PTHREADS_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 mv pthreads-$PTHREADS_VERSION "$DIR/install_data/php/ext/pthreads"
 echo " done!"
 
