@@ -6,23 +6,21 @@ PHP_IS_BETA="no"
 ZEND_VM="GOTO"
 
 ZLIB_VERSION="1.2.11"
-MBEDTLS_VERSION="2.2.1"
-GMP_VERSION="6.1.0"
-GMP_VERSION_DIR="6.1.0"
-CURL_VERSION="curl-7_47_1"
+MBEDTLS_VERSION="2.4.2"
+GMP_VERSION="6.1.2"
+GMP_VERSION_DIR="6.1.2"
+CURL_VERSION="curl-7_54_0"
 READLINE_VERSION="6.3"
 NCURSES_VERSION="6.0"
 PHPNCURSES_VERSION="1.0.2"
 PTHREADS_VERSION="5ba19781713e07e72fee8fffe27eef4edb40aab5" #using a fork due to statics issues on krakjoe's master (php 7.1)
 XDEBUG_VERSION="2.5.0"
-PHP_POCKETMINE_VERSION="0.0.6"
-#UOPZ_VERSION="2.0.4"
 WEAKREF_VERSION="0.3.3"
 PHPYAML_VERSION="2.0.0"
 YAML_VERSION="0.1.7"
 YAML_VERSION_ANDROID="0.1.7"
 #PHPLEVELDB_VERSION="0.1.4"
-PHPLEVELDB_VERSION="2963815338edfebc5ab8c512bcd2b72f0357ac6e"
+PHPLEVELDB_VERSION="5d05f06b7a94608af040264ef3d3c6dc170506b6"
 #LEVELDB_VERSION="1.18"
 LEVELDB_VERSION="b633756b51390a9970efde9068f60188ca06a724" #Check MacOS
 LIBXML_VERSION="2.9.1"
@@ -129,10 +127,6 @@ while getopts "::t:oj:srcdlxzff:u" OPTION; do
 			DO_STATIC="yes"
 			CFLAGS="$CFLAGS -static"
 			;;
-		z)
-			echo "[opt] Will add PocketMine C PHP extension"
-			HAS_ZEPHIR="yes"
-			;;
 		f)
 			echo "[opt] Enabling abusive optimizations..."
 			DO_OPTIMIZE="yes"
@@ -162,11 +156,10 @@ while getopts "::t:oj:srcdlxzff:u" OPTION; do
 	esac
 done
 
-#TODO Uncomment this when php-leveldb supports PHP7 properly
-#if [ $(gcc -dumpversion | sed -e 's/\.\([0-9][0-9]\)/\1/g' -e 's/\.\([0-9]\)/0\1/g' -e 's/^[0-9]\{3,4\}$/&00/') -gt 40800 ]; then
-	#COMPILE_LEVELDB="yes"
-#fi
-COMPILE_LEVELDB="no"
+
+if ! [ $(gcc -dumpversion | sed -e 's/\.\([0-9][0-9]\)/\1/g' -e 's/\.\([0-9]\)/0\1/g' -e 's/^[0-9]\{3,4\}$/&00/') -gt 40800 ]; then
+	COMPILE_LEVELDB="no"
+fi
 
 GMP_ABI=""
 TOOLCHAIN_PREFIX=""
@@ -422,9 +415,7 @@ if [ "$COMPILE_FANCY" == "yes" ]; then
 	make -j $THREADS >> "$DIR/install.log" 2>&1
 	echo -n " installing..."
 	make install >> "$DIR/install.log" 2>&1
-	echo -n " cleaning..."
 	cd ..
-	rm -r -f ./ncurses
 	echo " done!"
 	HAVE_NCURSES="--with-ncurses=$DIR/bin/php7"
 
@@ -454,9 +445,7 @@ if [ "$COMPILE_FANCY" == "yes" ]; then
 		echo -n " disabling..."
 		HAVE_READLINE="--without-readline"
 	fi
-	echo -n " cleaning..."
 	cd ..
-	rm -r -f ./readline
 	echo " done!"
 	set -e
 else
@@ -483,9 +472,7 @@ echo -n " compiling..."
 make -j $THREADS >> "$DIR/install.log" 2>&1
 echo -n " installing..."
 make install >> "$DIR/install.log" 2>&1
-echo -n " cleaning..."
 cd ..
-rm -r -f ./zlib
 	if [ "$DO_STATIC" != "yes" ]; then
 		rm -f "$DIR/bin/php7/lib/libz.a"
 	fi
@@ -518,9 +505,7 @@ echo -n " compiling..."
 make -j $THREADS >> "$DIR/install.log" 2>&1
 echo -n " installing..."
 make install >> "$DIR/install.log" 2>&1
-echo -n " cleaning..."
 cd ..
-rm -r -f ./gmp
 echo " done!"
 
 if [ "$(uname -s)" != "Darwin" ] || [ "$IS_CROSSCOMPILE" == "yes" ] || [ "$COMPILE_CURL" == "yes" ]; then
@@ -541,9 +526,7 @@ if [ "$(uname -s)" != "Darwin" ] || [ "$IS_CROSSCOMPILE" == "yes" ] || [ "$COMPI
 	DESTDIR="$DIR/bin/php7" RANLIB=$RANLIB make -j $THREADS lib >> "$DIR/install.log" 2>&1
 	echo -n " installing..."
 	DESTDIR="$DIR/bin/php7" make install >> "$DIR/install.log" 2>&1
-	echo -n " cleaning..."
 	cd ..
-	rm -r -f ./mbedtls
 	echo " done!"
 fi
 
@@ -558,7 +541,7 @@ else
 
 	#curl
 	echo -n "[cURL] downloading $CURL_VERSION..."
-	download_file "https://github.com/bagder/curl/archive/$CURL_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	download_file "https://github.com/curl/curl/archive/$CURL_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 	mv curl-$CURL_VERSION curl
 	echo -n " checking..."
 	cd curl
@@ -592,9 +575,7 @@ else
 	make -j $THREADS >> "$DIR/install.log" 2>&1
 	echo -n " installing..."
 	make install >> "$DIR/install.log" 2>&1
-	echo -n " cleaning..."
 	cd ..
-	rm -r -f ./curl
 	echo " done!"
 	HAVE_CURL="$DIR/bin/php7"
 fi
@@ -641,9 +622,7 @@ echo -n " compiling..."
 make -j $THREADS all >> "$DIR/install.log" 2>&1
 echo -n " installing..."
 make install >> "$DIR/install.log" 2>&1
-echo -n " cleaning..."
 cd ..
-rm -r -f ./yaml
 echo " done!"
 
 if [ "$COMPILE_LEVELDB" == "yes" ]; then
@@ -663,9 +642,7 @@ if [ "$COMPILE_LEVELDB" == "yes" ]; then
 	echo -n " installing..."
 	cp libleveldb* "$DIR/bin/php7/lib/"
 	cp -r include/leveldb "$DIR/bin/php7/include/leveldb"
-	echo -n " cleaning..."
 	cd ..
-	rm -r -f ./leveldb
 	echo " done!"
 fi
 
@@ -689,9 +666,7 @@ echo -n " compiling..."
 make -j $THREADS >> "$DIR/install.log" 2>&1
 echo -n " installing..."
 make install >> "$DIR/install.log" 2>&1
-echo -n " cleaning..."
 cd ..
-rm -r -f ./libpng
 echo " done!"
 
 #libxml2
@@ -710,9 +685,7 @@ echo " done!"
 #make -j $THREADS >> "$DIR/install.log" 2>&1
 #echo -n " installing..."
 #make install >> "$DIR/install.log" 2>&1
-#echo -n " cleaning..."
 #cd ..
-#rm -r -f ./libxml2
 #echo " done!"
 
 
@@ -722,16 +695,17 @@ echo " done!"
 
 # PECL libraries
 
-if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
-	#xdebug
-	echo -n "[PHP xdebug] downloading $XDEBUG_VERSION..."
-	download_file "http://pecl.php.net/get/xdebug-$XDEBUG_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv xdebug-$XDEBUG_VERSION "$DIR/install_data/php/ext/xdebug"
-	echo " done!"
-	HAS_XDEBUG="--enable-xdebug=shared"
-else
+#TODO: fix xdebug (needs to be compiled separately)
+#if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
+#	#xdebug
+#	echo -n "[PHP xdebug] downloading $XDEBUG_VERSION..."
+#	download_file "http://pecl.php.net/get/xdebug-$XDEBUG_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+#	mv xdebug-$XDEBUG_VERSION "$DIR/install_data/php/ext/xdebug"
+#	echo " done!"
+#	HAS_XDEBUG="--enable-xdebug=shared"
+#else
 	HAS_XDEBUG=""
-fi
+#fi
 
 #TODO Uncomment this when it's ready for PHP7
 #if [ "$COMPILE_DEBUG" == "yes" ]; then
@@ -753,22 +727,6 @@ download_file "https://github.com/SirSnyder/pthreads/archive/$PTHREADS_VERSION.t
 mv pthreads-$PTHREADS_VERSION "$DIR/install_data/php/ext/pthreads"
 echo " done!"
 
-HAS_POCKETMINE=""
-if [ "$HAS_ZEPHIR" == "yes" ]; then
-	echo -n "[C PocketMine extension] downloading $PHP_POCKETMINE_VERSION..."
-	download_file https://github.com/PocketMine/PocketMine-MP-Zephir/archive/$PHP_POCKETMINE_VERSION.tar.gz | tar -zx >> "$DIR/install.log" 2>&1
-	mv PocketMine-MP-Zephir-$PHP_POCKETMINE_VERSION/pocketmine/ext "$DIR/install_data/php/ext/pocketmine"
-	rm -r PocketMine-MP-Zephir-$PHP_POCKETMINE_VERSION/
-	HAS_POCKETMINE="--enable-pocketmine"
-	echo " done!"
-fi
-
-#uopz
-#echo -n "[PHP uopz] downloading $UOPZ_VERSION..."
-#download_file "http://pecl.php.net/get/uopz-$UOPZ_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-#mv uopz-$UOPZ_VERSION "$DIR/install_data/php/ext/uopz"
-#echo " done!"
-
 #WeakRef
 echo -n "[PHP Weakref] downloading $WEAKREF_VERSION..."
 download_file "http://pecl.php.net/get/Weakref-$WEAKREF_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
@@ -786,8 +744,7 @@ echo " done!"
 if [ "$COMPILE_LEVELDB" == "yes" ]; then
 	#PHP LevelDB
 	echo -n "[PHP LevelDB] downloading $PHPLEVELDB_VERSION..."
-	#download_file "http://pecl.php.net/get/leveldb-$PHPLEVELDB_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-	download_file "https://github.com/PocketMine/php-leveldb/archive/$PHPLEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	download_file "https://github.com/reeze/php-leveldb/archive/$PHPLEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 	mv php-leveldb-$PHPLEVELDB_VERSION "$DIR/install_data/php/ext/leveldb"
 	echo " done!"
 	HAS_LEVELDB=--with-leveldb="$DIR/bin/php7"
@@ -870,7 +827,6 @@ RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" LDFLAGS="$LDFLAGS $FLAGS_LTO" ./confi
 $HAVE_NCURSES \
 $HAVE_READLINE \
 $HAS_LEVELDB \
-$HAS_POCKETMINE \
 $HAS_XDEBUG \
 $HAS_PROFILER \
 $HAS_DEBUG \
@@ -958,7 +914,6 @@ echo "short_open_tag=0" >> "$DIR/bin/php7/bin/php.ini"
 echo "asp_tags=0" >> "$DIR/bin/php7/bin/php.ini"
 echo "phar.readonly=0" >> "$DIR/bin/php7/bin/php.ini"
 echo "phar.require_hash=1" >> "$DIR/bin/php7/bin/php.ini"
-#echo "zend_extension=uopz.so" >> "$DIR/bin/php7/bin/php.ini"
 if [[ "$COMPILE_DEBUG" == "yes" ]]; then
 	echo "zend.assertions=1" >> "$DIR/bin/php7/bin/php.ini"
 else
@@ -984,15 +939,17 @@ fi
 
 echo " done!"
 cd "$DIR"
+if [ "$COMPILE_DEBUG" != "yes" ]; then
 echo -n "[INFO] Cleaning up..."
-rm -r -f install_data/ >> "$DIR/install.log" 2>&1
-rm -f bin/php7/bin/curl* >> "$DIR/install.log" 2>&1
-rm -f bin/php7/bin/curl-config* >> "$DIR/install.log" 2>&1
-rm -f bin/php7/bin/c_rehash* >> "$DIR/install.log" 2>&1
-rm -f bin/php7/bin/openssl* >> "$DIR/install.log" 2>&1
-rm -r -f bin/php7/man >> "$DIR/install.log" 2>&1
-rm -r -f bin/php7/php >> "$DIR/install.log" 2>&1
-rm -r -f bin/php7/misc >> "$DIR/install.log" 2>&1
+	rm -r -f install_data/ >> "$DIR/install.log" 2>&1
+	rm -f bin/php7/bin/curl* >> "$DIR/install.log" 2>&1
+	rm -f bin/php7/bin/curl-config* >> "$DIR/install.log" 2>&1
+	rm -f bin/php7/bin/c_rehash* >> "$DIR/install.log" 2>&1
+	rm -f bin/php7/bin/openssl* >> "$DIR/install.log" 2>&1
+	rm -r -f bin/php7/man >> "$DIR/install.log" 2>&1
+	rm -r -f bin/php7/php >> "$DIR/install.log" 2>&1
+	rm -r -f bin/php7/misc >> "$DIR/install.log" 2>&1
+fi
 date >> "$DIR/install.log" 2>&1
 echo " done!"
 echo "[PocketMine] You should start the server now using \"./start.sh.\""
