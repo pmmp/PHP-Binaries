@@ -415,9 +415,7 @@ if [ "$COMPILE_FANCY" == "yes" ]; then
 	make -j $THREADS >> "$DIR/install.log" 2>&1
 	echo -n " installing..."
 	make install >> "$DIR/install.log" 2>&1
-	echo -n " cleaning..."
 	cd ..
-	rm -r -f ./ncurses
 	echo " done!"
 	HAVE_NCURSES="--with-ncurses=$DIR/bin/php7"
 
@@ -447,9 +445,7 @@ if [ "$COMPILE_FANCY" == "yes" ]; then
 		echo -n " disabling..."
 		HAVE_READLINE="--without-readline"
 	fi
-	echo -n " cleaning..."
 	cd ..
-	rm -r -f ./readline
 	echo " done!"
 	set -e
 else
@@ -476,9 +472,7 @@ echo -n " compiling..."
 make -j $THREADS >> "$DIR/install.log" 2>&1
 echo -n " installing..."
 make install >> "$DIR/install.log" 2>&1
-echo -n " cleaning..."
 cd ..
-rm -r -f ./zlib
 	if [ "$DO_STATIC" != "yes" ]; then
 		rm -f "$DIR/bin/php7/lib/libz.a"
 	fi
@@ -511,9 +505,7 @@ echo -n " compiling..."
 make -j $THREADS >> "$DIR/install.log" 2>&1
 echo -n " installing..."
 make install >> "$DIR/install.log" 2>&1
-echo -n " cleaning..."
 cd ..
-rm -r -f ./gmp
 echo " done!"
 
 if [ "$(uname -s)" != "Darwin" ] || [ "$IS_CROSSCOMPILE" == "yes" ] || [ "$COMPILE_CURL" == "yes" ]; then
@@ -534,9 +526,7 @@ if [ "$(uname -s)" != "Darwin" ] || [ "$IS_CROSSCOMPILE" == "yes" ] || [ "$COMPI
 	DESTDIR="$DIR/bin/php7" RANLIB=$RANLIB make -j $THREADS lib >> "$DIR/install.log" 2>&1
 	echo -n " installing..."
 	DESTDIR="$DIR/bin/php7" make install >> "$DIR/install.log" 2>&1
-	echo -n " cleaning..."
 	cd ..
-	rm -r -f ./mbedtls
 	echo " done!"
 fi
 
@@ -585,9 +575,7 @@ else
 	make -j $THREADS >> "$DIR/install.log" 2>&1
 	echo -n " installing..."
 	make install >> "$DIR/install.log" 2>&1
-	echo -n " cleaning..."
 	cd ..
-	rm -r -f ./curl
 	echo " done!"
 	HAVE_CURL="$DIR/bin/php7"
 fi
@@ -634,9 +622,7 @@ echo -n " compiling..."
 make -j $THREADS all >> "$DIR/install.log" 2>&1
 echo -n " installing..."
 make install >> "$DIR/install.log" 2>&1
-echo -n " cleaning..."
 cd ..
-rm -r -f ./yaml
 echo " done!"
 
 if [ "$COMPILE_LEVELDB" == "yes" ]; then
@@ -656,9 +642,7 @@ if [ "$COMPILE_LEVELDB" == "yes" ]; then
 	echo -n " installing..."
 	cp libleveldb* "$DIR/bin/php7/lib/"
 	cp -r include/leveldb "$DIR/bin/php7/include/leveldb"
-	echo -n " cleaning..."
 	cd ..
-	rm -r -f ./leveldb
 	echo " done!"
 fi
 
@@ -682,9 +666,7 @@ echo -n " compiling..."
 make -j $THREADS >> "$DIR/install.log" 2>&1
 echo -n " installing..."
 make install >> "$DIR/install.log" 2>&1
-echo -n " cleaning..."
 cd ..
-rm -r -f ./libpng
 echo " done!"
 
 #libxml2
@@ -703,9 +685,7 @@ echo " done!"
 #make -j $THREADS >> "$DIR/install.log" 2>&1
 #echo -n " installing..."
 #make install >> "$DIR/install.log" 2>&1
-#echo -n " cleaning..."
 #cd ..
-#rm -r -f ./libxml2
 #echo " done!"
 
 
@@ -715,16 +695,17 @@ echo " done!"
 
 # PECL libraries
 
-if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
-	#xdebug
-	echo -n "[PHP xdebug] downloading $XDEBUG_VERSION..."
-	download_file "http://pecl.php.net/get/xdebug-$XDEBUG_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv xdebug-$XDEBUG_VERSION "$DIR/install_data/php/ext/xdebug"
-	echo " done!"
-	HAS_XDEBUG="--enable-xdebug=shared"
-else
+#TODO: fix xdebug (needs to be compiled separately)
+#if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
+#	#xdebug
+#	echo -n "[PHP xdebug] downloading $XDEBUG_VERSION..."
+#	download_file "http://pecl.php.net/get/xdebug-$XDEBUG_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+#	mv xdebug-$XDEBUG_VERSION "$DIR/install_data/php/ext/xdebug"
+#	echo " done!"
+#	HAS_XDEBUG="--enable-xdebug=shared"
+#else
 	HAS_XDEBUG=""
-fi
+#fi
 
 #TODO Uncomment this when it's ready for PHP7
 #if [ "$COMPILE_DEBUG" == "yes" ]; then
@@ -957,15 +938,17 @@ fi
 
 echo " done!"
 cd "$DIR"
+if [ "$COMPILE_DEBUG" != "yes" ]; then
 echo -n "[INFO] Cleaning up..."
-rm -r -f install_data/ >> "$DIR/install.log" 2>&1
-rm -f bin/php7/bin/curl* >> "$DIR/install.log" 2>&1
-rm -f bin/php7/bin/curl-config* >> "$DIR/install.log" 2>&1
-rm -f bin/php7/bin/c_rehash* >> "$DIR/install.log" 2>&1
-rm -f bin/php7/bin/openssl* >> "$DIR/install.log" 2>&1
-rm -r -f bin/php7/man >> "$DIR/install.log" 2>&1
-rm -r -f bin/php7/php >> "$DIR/install.log" 2>&1
-rm -r -f bin/php7/misc >> "$DIR/install.log" 2>&1
+	rm -r -f install_data/ >> "$DIR/install.log" 2>&1
+	rm -f bin/php7/bin/curl* >> "$DIR/install.log" 2>&1
+	rm -f bin/php7/bin/curl-config* >> "$DIR/install.log" 2>&1
+	rm -f bin/php7/bin/c_rehash* >> "$DIR/install.log" 2>&1
+	rm -f bin/php7/bin/openssl* >> "$DIR/install.log" 2>&1
+	rm -r -f bin/php7/man >> "$DIR/install.log" 2>&1
+	rm -r -f bin/php7/php >> "$DIR/install.log" 2>&1
+	rm -r -f bin/php7/misc >> "$DIR/install.log" 2>&1
+fi
 date >> "$DIR/install.log" 2>&1
 echo " done!"
 echo "[PocketMine] You should start the server now using \"./start.sh.\""
