@@ -19,9 +19,10 @@ Use this script to build the custom PHP binary. Make sure you have ``make autoco
 | linux64 | ``-t linux64 -l -j 2 -c -f x86_64`` |
 | mac64   | ``-t mac64 -l -j -c -f``            |
 
+
 ## installer.sh
 
-Script to install PocketMine-MP and PHP binaries.
+Script to install PocketMine-MP and PHP binaries on Unix platforms.
 
 | Flag   | Description                         |
 | ------ | ----------------------------------- |
@@ -29,9 +30,20 @@ Script to install PocketMine-MP and PHP binaries.
 | -d     | Install directory                   |
 | -v     | Channel (stable or development)     |
 
-## jenkins.sh
 
-PHP binaries provided by PocketMine are build using this script. The script runs the ``compile.sh`` with some default arguments.
+## windows-binaries.ps1
+
+PowerShell script which can be executed on Windows to assemble a PHP binary with the extensions needed to run PocketMine-MP. Note that this script requires **PowerShell version 5** or later.
+
+| Option | Description |
+|:-------|:------------|
+| -t, -target | Arch to build for (x86 (32-bit) or x64 (64-bit)) |
+| -d, -debug | Include xdebug and enable debugging assertions by default. |
+| -p, -path | Where to create the build. |
+| -z, -zip | Zip the build after creation. Used by CI for distribution. |
+
+Additionally, prebuilt Windows binaries can be downloaded from [AppVeyor](https://ci.appveyor.com/project/pmmp/php-build-scripts/build/artifacts).
+
 
 ## Extra libraries
 
