@@ -39,18 +39,18 @@ if((Test-Path $tmp_path) -eq $true){
 $wc = New-Object System.Net.WebClient
 
 function download_file{
-	param(
+    param(
         [string] $url,
-	    [string] $saveFile
+        [string] $saveFile
     )
 
-	try{
-		$wc.DownloadFile("$url", "$tmp_path" + "$saveFile")
-	}catch [System.Net.WebException]{
-		Write-Host ("[ERROR] " + $_.Exception.Message) -ForegroundColor Red -BackgroundColor Black
+    try{
+        $wc.DownloadFile("$url", "$tmp_path" + "$saveFile")
+    }catch [System.Net.WebException]{
+        Write-Host ("[ERROR] " + $_.Exception.Message) -ForegroundColor Red -BackgroundColor Black
         Write-Host "Please check the version you are trying to download is still available from the download server. ($url)" -ForegroundColor Red -BackgroundColor Black
         exit 1
-	}
+    }
 }
 
 echo "[PHP] Downloading $PHP_VERSION..."
