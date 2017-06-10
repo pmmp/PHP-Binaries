@@ -376,7 +376,7 @@ mkdir -m 0755 bin/php7 >> "$DIR/install.log" 2>&1
 cd install_data
 set -e
 
-#PHP 5
+#PHP 7
 echo -n "[PHP] downloading $PHP_VERSION..."
 
 if [[ "$PHP_IS_BETA" == "yes" ]]; then
