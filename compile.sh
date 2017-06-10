@@ -1,7 +1,7 @@
 #!/bin/bash
-[ -z "$PHP_VERSION" ] && PHP_VERSION="7.1.5"
+[ -z "$PHP_VERSION" ] && PHP_VERSION="7.2.0alpha1"
 
-PHP_IS_BETA="no"
+PHP_IS_BETA="yes"
 
 ZEND_VM="GOTO"
 
@@ -380,7 +380,7 @@ set -e
 echo -n "[PHP] downloading $PHP_VERSION..."
 
 if [[ "$PHP_IS_BETA" == "yes" ]]; then
-	download_file "https://downloads.php.net/~ab/php-$PHP_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	download_file "https://downloads.php.net/~pollita/php-$PHP_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 	mv php-$PHP_VERSION php
 else
 	download_file "http://php.net/get/php-$PHP_VERSION.tar.gz/from/this/mirror" | tar -zx >> "$DIR/install.log" 2>&1
