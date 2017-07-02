@@ -5,9 +5,5 @@ build_script:
     .\windows-binaries.ps1 -t x64 -z
 
     rm -r -Force bin
-
-    .\windows-binaries.ps1 -t x86 -z
-
-    rm -r -Force bin
 artifacts:
 - path: '*php-*.zip'
