@@ -20,7 +20,7 @@ PHPYAML_VERSION="2.0.0"
 YAML_VERSION="0.1.7"
 YAML_VERSION_ANDROID="0.1.7"
 #PHPLEVELDB_VERSION="0.1.4"
-PHPLEVELDB_VERSION="da24acf75bdb69e870d04eb554583c9bc58df3af"
+PHPLEVELDB_VERSION="5cfe735dac5ceafc6848c96177509450febc12d0"
 #LEVELDB_VERSION="1.18"
 LEVELDB_VERSION="b633756b51390a9970efde9068f60188ca06a724" #Check MacOS
 LIBXML_VERSION="2.9.1"
@@ -119,8 +119,13 @@ while getopts "::t:oj:srcdlxzff:u" OPTION; do
 			IS_CROSSCOMPILE="yes"
 			;;
 		l)
-			echo "[opt] Will compile with LevelDB support"
-			COMPILE_LEVELDB="yes"
+			if [ $(gcc -dumpversion | sed -e 's/\.\([0-9][0-9]\)/\1/g' -e 's/\.\([0-9]\)/0\1/g' -e 's/^[0-9]\{3,4\}$/&00/') -lt 40800 ]; then
+				echo "[ERROR] gcc version 4.8 or newer is required to compile leveldb";
+				COMPILE_LEVELDB="no"
+			else
+				echo "[opt] Will compile with LevelDB support"
+				COMPILE_LEVELDB="yes"
+			fi
 			;;
 		s)
 			echo "[opt] Will compile everything statically"
@@ -155,11 +160,6 @@ while getopts "::t:oj:srcdlxzff:u" OPTION; do
 			;;
 	esac
 done
-
-
-if ! [ $(gcc -dumpversion | sed -e 's/\.\([0-9][0-9]\)/\1/g' -e 's/\.\([0-9]\)/0\1/g' -e 's/^[0-9]\{3,4\}$/&00/') -gt 40800 ]; then
-	COMPILE_LEVELDB="no"
-fi
 
 GMP_ABI=""
 TOOLCHAIN_PREFIX=""
