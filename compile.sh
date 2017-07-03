@@ -628,9 +628,9 @@ echo " done!"
 if [ "$COMPILE_LEVELDB" == "yes" ]; then
 	#LevelDB
 	echo -n "[LevelDB] downloading $LEVELDB_VERSION..."
-	download_file "https://github.com/PocketMine/leveldb/archive/$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	download_file "https://github.com/pmmp/leveldb-mcpe/archive/$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 	#download_file "https://github.com/Mojang/leveldb-mcpe/archive/$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv leveldb-$LEVELDB_VERSION leveldb
+	mv leveldb-mcpe-$LEVELDB_VERSION leveldb
 	echo -n " checking..."
 	cd leveldb
 	echo -n " compiling..."
@@ -640,7 +640,7 @@ if [ "$COMPILE_LEVELDB" == "yes" ]; then
 		CFLAGS="$CFLAGS -I$DIR/bin/php7/include" CXXFLAGS="$CXXFLAGS -I$DIR/bin/php7/include" LDFLAGS="$LDFLAGS -L$DIR/bin/php7/lib" make -j $THREADS >> "$DIR/install.log" 2>&1
 	fi
 	echo -n " installing..."
-	cp libleveldb* "$DIR/bin/php7/lib/"
+	cp out-shared/libleveldb* "$DIR/bin/php7/lib/"
 	cp -r include/leveldb "$DIR/bin/php7/include/leveldb"
 	cd ..
 	echo " done!"
