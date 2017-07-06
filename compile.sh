@@ -20,11 +20,11 @@ PHPYAML_VERSION="2.0.0"
 YAML_VERSION="0.1.7"
 YAML_VERSION_ANDROID="0.1.7"
 #PHPLEVELDB_VERSION="0.1.4"
-PHPLEVELDB_VERSION="5d05f06b7a94608af040264ef3d3c6dc170506b6"
+PHPLEVELDB_VERSION="5cfe735dac5ceafc6848c96177509450febc12d0"
 #LEVELDB_VERSION="1.18"
-LEVELDB_VERSION="b633756b51390a9970efde9068f60188ca06a724" #Check MacOS
+LEVELDB_VERSION="f4022ac7c5a022f7a08a1b6dc98c06ef3eed352a" #Check MacOS
 LIBXML_VERSION="2.9.1"
-LIBPNG_VERSION="1.6.28"
+LIBPNG_VERSION="1.6.30"
 BCOMPILER_VERSION="1.0.2"
 POCKETMINE_CHUNKUTILS_VERSION="master"
 
@@ -33,7 +33,7 @@ DIR="$(pwd)"
 date > "$DIR/install.log" 2>&1
 #trap "echo \"# \$(eval echo \$BASH_COMMAND)\" >> \"$DIR/install.log\" 2>&1" DEBUG
 uname -a >> "$DIR/install.log" 2>&1
-echo "[INFO] Checking dependecies"
+echo "[INFO] Checking dependencies"
 type make >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"make\""; read -p "Press [Enter] to continue..."; exit 1; }
 type autoconf >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"autoconf\""; read -p "Press [Enter] to continue..."; exit 1; }
 type automake >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"automake\""; read -p "Press [Enter] to continue..."; exit 1; }
@@ -119,8 +119,13 @@ while getopts "::t:oj:srcdlxzff:u" OPTION; do
 			IS_CROSSCOMPILE="yes"
 			;;
 		l)
-			echo "[opt] Will compile with LevelDB support"
-			COMPILE_LEVELDB="yes"
+			if [ $(gcc -dumpversion | sed -e 's/\.\([0-9][0-9]\)/\1/g' -e 's/\.\([0-9]\)/0\1/g' -e 's/^[0-9]\{3,4\}$/&00/') -lt 40800 ]; then
+				echo "[ERROR] gcc version 4.8 or newer is required to compile leveldb";
+				COMPILE_LEVELDB="no"
+			else
+				echo "[opt] Will compile with LevelDB support"
+				COMPILE_LEVELDB="yes"
+			fi
 			;;
 		s)
 			echo "[opt] Will compile everything statically"
@@ -155,11 +160,6 @@ while getopts "::t:oj:srcdlxzff:u" OPTION; do
 			;;
 	esac
 done
-
-
-if ! [ $(gcc -dumpversion | sed -e 's/\.\([0-9][0-9]\)/\1/g' -e 's/\.\([0-9]\)/0\1/g' -e 's/^[0-9]\{3,4\}$/&00/') -gt 40800 ]; then
-	COMPILE_LEVELDB="no"
-fi
 
 GMP_ABI=""
 TOOLCHAIN_PREFIX=""
@@ -376,7 +376,7 @@ mkdir -m 0755 bin/php7 >> "$DIR/install.log" 2>&1
 cd install_data
 set -e
 
-#PHP 5
+#PHP 7
 echo -n "[PHP] downloading $PHP_VERSION..."
 
 if [[ "$PHP_IS_BETA" == "yes" ]]; then
@@ -628,9 +628,9 @@ echo " done!"
 if [ "$COMPILE_LEVELDB" == "yes" ]; then
 	#LevelDB
 	echo -n "[LevelDB] downloading $LEVELDB_VERSION..."
-	download_file "https://github.com/PocketMine/leveldb/archive/$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	download_file "https://github.com/pmmp/leveldb-mcpe/archive/$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 	#download_file "https://github.com/Mojang/leveldb-mcpe/archive/$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv leveldb-$LEVELDB_VERSION leveldb
+	mv leveldb-mcpe-$LEVELDB_VERSION leveldb
 	echo -n " checking..."
 	cd leveldb
 	echo -n " compiling..."
@@ -640,7 +640,7 @@ if [ "$COMPILE_LEVELDB" == "yes" ]; then
 		CFLAGS="$CFLAGS -I$DIR/bin/php7/include" CXXFLAGS="$CXXFLAGS -I$DIR/bin/php7/include" LDFLAGS="$LDFLAGS -L$DIR/bin/php7/lib" make -j $THREADS >> "$DIR/install.log" 2>&1
 	fi
 	echo -n " installing..."
-	cp libleveldb* "$DIR/bin/php7/lib/"
+	cp out-shared/libleveldb* "$DIR/bin/php7/lib/"
 	cp -r include/leveldb "$DIR/bin/php7/include/leveldb"
 	cd ..
 	echo " done!"

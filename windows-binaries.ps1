@@ -6,11 +6,11 @@
 )
 
 if($PSVersionTable.PSVersion.Major -lt 5){
-    echo "This script requires PowerShell version 5 or later"
+    Write-Host "This script requires PowerShell version 5 or later" -ForegroundColor Red -BackgroundColor Black
     exit 1
 }
 
-$PHP_VERSION = "7.0.19"
+$PHP_VERSION = "7.0.21"
 $parts = $PHP_VERSION.Split(".")
 $PHP_VERSION_BASE = $parts[0] + "." + $parts[1]
 $PHP_IS_BETA = $false
@@ -38,12 +38,27 @@ if((Test-Path $tmp_path) -eq $true){
 
 $wc = New-Object System.Net.WebClient
 
+function download_file{
+    param(
+        [string] $url,
+        [string] $saveFile
+    )
+
+    try{
+        $wc.DownloadFile("$url", "$tmp_path" + "$saveFile")
+    }catch [System.Net.WebException]{
+        Write-Host ("[ERROR] " + $_.Exception.Message) -ForegroundColor Red -BackgroundColor Black
+        Write-Host "Please check the version you are trying to download is still available from the download server. ($url)" -ForegroundColor Red -BackgroundColor Black
+        exit 1
+    }
+}
+
 echo "[PHP] Downloading $PHP_VERSION..."
 
 if($PHP_IS_BETA){
-    $wc.DownloadFile("http://windows.php.net/downloads/qa/php-$PHP_VERSION-Win32-VC14-$target.zip", $tmp_path + "php.zip")
+    download_file "http://windows.php.net/downloads/qa/php-$PHP_VERSION-Win32-VC14-$target.zip" "php.zip"
 }else{
-    $wc.DownloadFile("http://windows.php.net/downloads/releases/php-$PHP_VERSION-Win32-VC14-$target.zip", $tmp_path + "php.zip")
+    download_file "http://windows.php.net/downloads/releases/php-$PHP_VERSION-Win32-VC14-$target.zip" "php.zip"
 }
 
 #php
@@ -54,7 +69,7 @@ Expand-Archive ($tmp_path + "php.zip") -DestinationPath ($path + "\bin\php") -Fo
 
 #pthreads
 echo "[pthreads] Downloading $PTHREADS_VERSION..."
-$wc.DownloadFile("http://windows.php.net/downloads/pecl/releases/pthreads/$PTHREADS_VERSION/php_pthreads-$PTHREADS_VERSION-$PHP_VERSION_BASE-ts-vc14-$target.zip", $tmp_path + "pthreads.zip")
+download_file "http://windows.php.net/downloads/pecl/releases/pthreads/$PTHREADS_VERSION/php_pthreads-$PTHREADS_VERSION-$PHP_VERSION_BASE-ts-vc14-$target.zip" "pthreads.zip"
 
 echo "[pthreads] Extracting..."
 Expand-Archive ($tmp_path + "pthreads.zip") -DestinationPath ($tmp_path + "pthreads") -Force
@@ -67,7 +82,7 @@ Copy-Item ($tmp_path + "pthreads\php_pthreads.dll") -Destination ($path + "\bin\
 
 #yaml
 echo "[yaml] Downloading $YAML_VERSION..."
-$wc.DownloadFile("http://windows.php.net/downloads/pecl/releases/yaml/$YAML_VERSION/php_yaml-$YAML_VERSION-$PHP_VERSION_BASE-ts-vc14-$target.zip", $tmp_path + "yaml.zip")
+download_file "http://windows.php.net/downloads/pecl/releases/yaml/$YAML_VERSION/php_yaml-$YAML_VERSION-$PHP_VERSION_BASE-ts-vc14-$target.zip" "yaml.zip"
 
 echo "[yaml] Extracting..."
 Expand-Archive ($tmp_path + "yaml.zip") -DestinationPath ($tmp_path + "yaml") -Force
@@ -79,7 +94,7 @@ Copy-Item ($tmp_path + "yaml\php_yaml.dll") -Destination ($path + "\bin\php\ext"
 
 #weakref
 echo "[weakref] Downloading $WEAKREF_VERSION..."
-$wc.DownloadFile("http://windows.php.net/downloads/pecl/releases/weakref/$WEAKREF_VERSION/php_weakref-$WEAKREF_VERSION-$PHP_VERSION_BASE-ts-vc14-$target.zip", $tmp_path + "weakref.zip")
+download_file "http://windows.php.net/downloads/pecl/releases/weakref/$WEAKREF_VERSION/php_weakref-$WEAKREF_VERSION-$PHP_VERSION_BASE-ts-vc14-$target.zip" "weakref.zip"
 
 echo "[weakref] Extracting..."
 Expand-Archive ($tmp_path + "weakref.zip") -DestinationPath ($tmp_path + "weakref") -Force
@@ -92,7 +107,7 @@ Copy-Item ($tmp_path + "weakref\php_weakref.dll") -Destination ($path + "\bin\ph
 #xdebug
 if($debug -ne $false){
     echo "[xdebug] Downloading $XDEBUG_VERSION..."
-    $wc.DownloadFile("http://windows.php.net/downloads/pecl/releases/xdebug/$XDEBUG_VERSION/php_xdebug-$XDEBUG_VERSION-$PHP_VERSION_BASE-ts-vc14-$target.zip", $tmp_path + "xdebug.zip")
+    download_file "http://windows.php.net/downloads/pecl/releases/xdebug/$XDEBUG_VERSION/php_xdebug-$XDEBUG_VERSION-$PHP_VERSION_BASE-ts-vc14-$target.zip" "xdebug.zip"
 
     echo "[xdebug] Extracting..."
     Expand-Archive ($tmp_path + "xdebug.zip") -DestinationPath ($tmp_path + "xdebug") -Force
@@ -173,7 +188,7 @@ $output = [string] (iex $cmd)
 if($output -match "PHP"){
     echo "[PHP] Done!"
 }else{
-    echo "[PHP] Failed to run PHP. You may need to install Microsoft Visual C++ Redistributable 2015 runtime. This can be downloaded from the Microsoft website."
+    Write-Host "[PHP] Failed to run PHP. You may need to install Microsoft Visual C++ Redistributable 2015 runtime. This can be downloaded from the Microsoft website." -ForegroundColor Red -BackgroundColor Black
     exit 1
 }
 
