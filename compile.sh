@@ -695,17 +695,13 @@ echo " done!"
 
 # PECL libraries
 
-#TODO: fix xdebug (needs to be compiled separately)
-#if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
-#	#xdebug
-#	echo -n "[PHP xdebug] downloading $XDEBUG_VERSION..."
-#	download_file "http://pecl.php.net/get/xdebug-$XDEBUG_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-#	mv xdebug-$XDEBUG_VERSION "$DIR/install_data/php/ext/xdebug"
-#	echo " done!"
-#	HAS_XDEBUG="--enable-xdebug=shared"
-#else
-	HAS_XDEBUG=""
-#fi
+if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
+	#xdebug
+	echo -n "[PHP xdebug] downloading $XDEBUG_VERSION..."
+	download_file "http://pecl.php.net/get/xdebug-$XDEBUG_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv xdebug-$XDEBUG_VERSION "$DIR/install_data/php/ext/xdebug"
+	echo " done!"
+fi
 
 #TODO Uncomment this when it's ready for PHP7
 #if [ "$COMPILE_DEBUG" == "yes" ]; then
@@ -826,7 +822,6 @@ RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" LDFLAGS="$LDFLAGS $FLAGS_LTO" ./confi
 $HAVE_NCURSES \
 $HAVE_READLINE \
 $HAS_LEVELDB \
-$HAS_XDEBUG \
 $HAS_PROFILER \
 $HAS_DEBUG \
 $HAS_POCKETMINE_CHUNKUTILS \
@@ -920,7 +915,6 @@ else
 fi
 
 if [ "$IS_CROSSCOMPILE" != "yes" ] && [ "$DO_STATIC" == "no" ]; then
-	echo ";zend_extension=xdebug.so" >> "$DIR/bin/php7/bin/php.ini"
 	echo "zend_extension=opcache.so" >> "$DIR/bin/php7/bin/php.ini"
 	echo "opcache.enable=1" >> "$DIR/bin/php7/bin/php.ini"
 	echo "opcache.enable_cli=1" >> "$DIR/bin/php7/bin/php.ini"
@@ -937,6 +931,20 @@ if [ "$HAVE_CURL" == "shared,/usr" ]; then
 fi
 
 echo " done!"
+
+if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
+	echo -n "[xdebug] checking..."
+	cd "$DIR/install_data/php/ext/xdebug"
+	$DIR/bin/php7/bin/phpize >> "$DIR/install.log" 2>&1
+	./configure --with-php-config="$DIR/bin/php7/bin/php-config" >> "$DIR/install.log" 2>&1
+	echo -n " compiling..."
+	make -j4 >> "$DIR/install.log" 2>&1
+	echo -n " installing..."
+	make install >> "$DIR/install.log" 2>&1
+	echo "zend_extension=xdebug.so" >> "$DIR/bin/php7/bin/php.ini"
+	echo " done!"
+fi
+
 cd "$DIR"
 if [ "$COMPILE_DEBUG" != "yes" ]; then
 echo -n "[INFO] Cleaning up..."
@@ -948,8 +956,8 @@ echo -n "[INFO] Cleaning up..."
 	rm -r -f bin/php7/man >> "$DIR/install.log" 2>&1
 	rm -r -f bin/php7/php >> "$DIR/install.log" 2>&1
 	rm -r -f bin/php7/misc >> "$DIR/install.log" 2>&1
+	echo " done!"
 fi
 date >> "$DIR/install.log" 2>&1
-echo " done!"
 echo "[PocketMine] You should start the server now using \"./start.sh.\""
 echo "[PocketMine] If it doesn't work, please send the \"install.log\" file to the Bug Tracker."
