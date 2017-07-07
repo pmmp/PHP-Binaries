@@ -16,7 +16,7 @@ $PHP_VERSION_BASE = $parts[0] + "." + $parts[1]
 $PHP_IS_BETA = $false
 
 $PTHREADS_VERSION = "3.1.6"
-$XDEBUG_VERSION = "2.5.1"
+$XDEBUG_VERSION = "2.5.5"
 $WEAKREF_VERSION = "0.3.3"
 $YAML_VERSION = "2.0.0"
 
