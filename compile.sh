@@ -634,13 +634,13 @@ if [ "$COMPILE_LEVELDB" == "yes" ]; then
 	echo -n " checking..."
 	cd leveldb
 	echo -n " compiling..."
-	if [ "$DO_STATIC" == "yes" ]; then
-		CFLAGS="$CFLAGS -I$DIR/bin/php7/include" CXXFLAGS="$CXXFLAGS -I$DIR/bin/php7/include" LDFLAGS="$LDFLAGS -L$DIR/bin/php7/lib" make -j $THREADS libleveldb.a >> "$DIR/install.log" 2>&1
-	else
-		CFLAGS="$CFLAGS -I$DIR/bin/php7/include" CXXFLAGS="$CXXFLAGS -I$DIR/bin/php7/include" LDFLAGS="$LDFLAGS -L$DIR/bin/php7/lib" make -j $THREADS >> "$DIR/install.log" 2>&1
-	fi
+	CFLAGS="$CFLAGS -I$DIR/bin/php7/include" CXXFLAGS="$CXXFLAGS -I$DIR/bin/php7/include" LDFLAGS="$LDFLAGS -L$DIR/bin/php7/lib" make -j $THREADS >> "$DIR/install.log" 2>&1
 	echo -n " installing..."
-	cp out-shared/libleveldb* "$DIR/bin/php7/lib/"
+	if [ "$DO_STATIC" == "yes" ]; then
+		cp out-static/libleveldb* "$DIR/bin/php7/lib/"
+	else
+		cp out-shared/libleveldb* "$DIR/bin/php7/lib/"
+	fi
 	cp -r include/leveldb "$DIR/bin/php7/include/leveldb"
 	cd ..
 	echo " done!"
