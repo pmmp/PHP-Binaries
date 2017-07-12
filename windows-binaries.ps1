@@ -34,6 +34,7 @@ if((Test-Path $tmp_path) -eq $true){
     echo "[PHP] cleaning old install data..."
     rm -r -Force $tmp_path
 }
+
 (mkdir $tmp_path) > $null
 
 $wc = New-Object System.Net.WebClient
@@ -65,6 +66,18 @@ if($PHP_IS_BETA){
 echo "[PHP] Extracting..."
 Expand-Archive ($tmp_path + "php.zip") -DestinationPath ($path + "\bin\php") -Force
 
+if($debug){
+    echo "[PHP] Downloading debugging symbols..."
+    if($PHP_IS_BETA){
+        download_file "http://windows.php.net/downloads/qa/php-debug-pack-$PHP_VERSION-Win32-VC14-$target.zip" "php-debug-pack.zip"
+    }else{
+        download_file "http://windows.php.net/downloads/releases/php-debug-pack-$PHP_VERSION-Win32-VC14-$target.zip" "php-debug-pack.zip"
+    }
+
+    echo "[PHP] Extracting debugging symbols..."
+    Expand-Archive ($tmp_path + "php-debug-pack.zip") -DestinationPath ($path + "\bin\php\symbols") -Force
+}
+
 
 
 #pthreads
@@ -77,6 +90,10 @@ Expand-Archive ($tmp_path + "pthreads.zip") -DestinationPath ($tmp_path + "pthre
 echo "[pthreads] Copying required files..."
 Copy-Item ($tmp_path + "pthreads\pthreadVC2.dll") -Destination ($path + "\bin\php")
 Copy-Item ($tmp_path + "pthreads\php_pthreads.dll") -Destination ($path + "\bin\php\ext")
+if($debug){
+    Copy-Item ($tmp_path + "pthreads\php_pthreads.pdb") -Destination ($path + "\bin\php\symbols")
+    Copy-Item ($tmp_path + "pthreads\pthreadVC2.pdb") -Destination ($path + "\bin\php\symbols")
+}
 
 
 
@@ -90,6 +107,10 @@ Expand-Archive ($tmp_path + "yaml.zip") -DestinationPath ($tmp_path + "yaml") -F
 echo "[yaml] Copying required files..."
 Copy-Item ($tmp_path + "yaml\yaml.dll") -Destination ($path + "\bin\php")
 Copy-Item ($tmp_path + "yaml\php_yaml.dll") -Destination ($path + "\bin\php\ext")
+if($debug){
+    Copy-Item ($tmp_path + "yaml\php_yaml.pdb") -Destination ($path + "\bin\php\symbols")
+    #Copy-Item ($tmp_path + "yaml\yaml.pdb") -Destination ($path + "\bin\php\symbols") YAML doesn't ship with debug symbols >_<
+}
 
 
 #weakref
@@ -101,7 +122,9 @@ Expand-Archive ($tmp_path + "weakref.zip") -DestinationPath ($tmp_path + "weakre
 
 echo "[weakref] Copying required files..."
 Copy-Item ($tmp_path + "weakref\php_weakref.dll") -Destination ($path + "\bin\php\ext")
-
+if($debug){
+    Copy-Item ($tmp_path + "weakref\php_weakref.pdb") -Destination ($path + "\bin\php\symbols")
+}
 
 
 #xdebug
@@ -114,6 +137,8 @@ if($debug -ne $false){
 
     echo "[xdebug] Copying required files..."
     Copy-Item ($tmp_path + "xdebug\php_xdebug.dll") -Destination ($path + "\bin\php\ext")
+
+    Copy-Item ($tmp_path + "xdebug\php_xdebug.pdb") -Destination ($path + "\bin\php\symbols")
 }
 
 echo "[PHP] Creating php.ini..."
