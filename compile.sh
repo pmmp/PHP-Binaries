@@ -90,8 +90,9 @@ FLAGS_LTO=""
 LD_PRELOAD=""
 
 COMPILE_POCKETMINE_CHUNKUTILS="no"
+COMPILE_GD="no"
 
-while getopts "::t:oj:srcdlxzff:u" OPTION; do
+while getopts "::t:oj:srcdlxzff:ug" OPTION; do
 
 	case $OPTION in
 		t)
@@ -153,6 +154,10 @@ while getopts "::t:oj:srcdlxzff:u" OPTION; do
 		u)
 			echo "[opt] Will compile with PocketMine-ChunkUtils C extension for Anvil"
 			COMPILE_POCKETMINE_CHUNKUTILS="yes"
+			;;
+		g)
+			echo "[opt] Will enable GD2"
+			COMPILE_GD="yes"
 			;;
 		\?)
 			echo "Invalid option: -$OPTION$OPTARG" >&2
@@ -652,22 +657,29 @@ else
 	EXTRA_FLAGS="--enable-shared=yes --enable-static=no"
 fi
 
-#libpng
-echo -n "[libpng] downloading $LIBPNG_VERSION..."
-download_file "https://sourceforge.net/projects/libpng/files/libpng16/$LIBPNG_VERSION/libpng-$LIBPNG_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-mv libpng-$LIBPNG_VERSION libpng
-echo -n " checking..."
-cd libpng
-LDFLAGS="$LDFLAGS -L${DIR}/bin/php7/lib" CPPFLAGS="$CPPFLAGS -I${DIR}/bin/php7/include" RANLIB=$RANLIB ./configure \
---prefix="$DIR/bin/php7" \
-$EXTRA_FLAGS \
-$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
-echo -n " compiling..."
-make -j $THREADS >> "$DIR/install.log" 2>&1
-echo -n " installing..."
-make install >> "$DIR/install.log" 2>&1
-cd ..
-echo " done!"
+if [ "$COMPILE_GD" == "yes" ]; then
+	#libpng
+	echo -n "[libpng] downloading $LIBPNG_VERSION..."
+	download_file "https://sourceforge.net/projects/libpng/files/libpng16/$LIBPNG_VERSION/libpng-$LIBPNG_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv libpng-$LIBPNG_VERSION libpng
+	echo -n " checking..."
+	cd libpng
+	LDFLAGS="$LDFLAGS -L${DIR}/bin/php7/lib" CPPFLAGS="$CPPFLAGS -I${DIR}/bin/php7/include" RANLIB=$RANLIB ./configure \
+	--prefix="$DIR/bin/php7" \
+	$EXTRA_FLAGS \
+	$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
+	echo -n " compiling..."
+	make -j $THREADS >> "$DIR/install.log" 2>&1
+	echo -n " installing..."
+	make install >> "$DIR/install.log" 2>&1
+	cd ..
+	echo " done!"
+	HAS_GD="--with-gd"
+	HAS_LIBPNG="--with-png-dir=${DIR}/bin/php7"
+else
+	HAS_GD=""
+	HAS_LIBPNG=""
+fi
 
 #libxml2
 #echo -n "[libxml2] downloading $LIBXML_VERSION..."
@@ -816,9 +828,9 @@ RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" LDFLAGS="$LDFLAGS $FLAGS_LTO" ./confi
 --with-zlib="$DIR/bin/php7" \
 --with-zlib-dir="$DIR/bin/php7" \
 --with-gmp="$DIR/bin/php7" \
---with-png-dir="$DIR/bin/php7" \
 --with-yaml="$DIR/bin/php7" \
---with-gd \
+$HAS_LIBPNG \
+$HAS_GD \
 $HAVE_NCURSES \
 $HAVE_READLINE \
 $HAS_LEVELDB \
