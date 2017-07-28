@@ -14,7 +14,7 @@ READLINE_VERSION="6.3"
 NCURSES_VERSION="6.0"
 PHPNCURSES_VERSION="1.0.2"
 PTHREADS_VERSION="fc6884fa36c59f910f9478af8aab886b5efaa66d" #using a fork due to statics issues on krakjoe's master (php 7.1)
-XDEBUG_VERSION="2.5.0"
+XDEBUG_VERSION="2.5.5"
 WEAKREF_VERSION="0.3.3"
 PHPYAML_VERSION="2.0.0"
 YAML_VERSION="0.1.7"
@@ -90,8 +90,9 @@ FLAGS_LTO=""
 LD_PRELOAD=""
 
 COMPILE_POCKETMINE_CHUNKUTILS="no"
+COMPILE_GD="no"
 
-while getopts "::t:oj:srcdlxzff:u" OPTION; do
+while getopts "::t:oj:srcdlxzff:ug" OPTION; do
 
 	case $OPTION in
 		t)
@@ -154,6 +155,10 @@ while getopts "::t:oj:srcdlxzff:u" OPTION; do
 			echo "[opt] Will compile with PocketMine-ChunkUtils C extension for Anvil"
 			COMPILE_POCKETMINE_CHUNKUTILS="yes"
 			;;
+		g)
+			echo "[opt] Will enable GD2"
+			COMPILE_GD="yes"
+			;;
 		\?)
 			echo "Invalid option: -$OPTION$OPTARG" >&2
 			exit 1
@@ -166,16 +171,7 @@ TOOLCHAIN_PREFIX=""
 
 if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 	export CROSS_COMPILER="$PATH"
-	if [[ "$COMPILE_TARGET" == "win" ]] || [[ "$COMPILE_TARGET" == "win32" ]]; then
-		TOOLCHAIN_PREFIX="i686-w64-mingw32"
-		[ -z "$march" ] && march=i686;
-		[ -z "$mtune" ] && mtune=pentium4;
-		CFLAGS="$CFLAGS -mconsole"
-		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --target=$TOOLCHAIN_PREFIX --build=$TOOLCHAIN_PREFIX"
-		IS_WINDOWS="yes"
-		GMP_ABI="32"
-		echo "[INFO] Cross-compiling for Windows 32-bit"
-	elif [ "$COMPILE_TARGET" == "win64" ]; then
+	if [[ "$COMPILE_TARGET" == "win" ]] || [[ "$COMPILE_TARGET" == "win64" ]]; then
 		TOOLCHAIN_PREFIX="x86_64-w64-mingw32"
 		[ -z "$march" ] && march=x86_64;
 		[ -z "$mtune" ] && mtune=nocona;
@@ -184,43 +180,6 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		IS_WINDOWS="yes"
 		GMP_ABI="64"
 		echo "[INFO] Cross-compiling for Windows 64-bit"
-	elif [ "$COMPILE_TARGET" == "android" ] || [ "$COMPILE_TARGET" == "android-armv6" ]; then
-		COMPILE_FOR_ANDROID=yes
-		[ -z "$march" ] && march=armv6;
-		[ -z "$mtune" ] && mtune=arm1136jf-s;
-		TOOLCHAIN_PREFIX="arm-linux-musleabi"
-		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --enable-static-link --disable-ipv6"
-		CFLAGS="-static $CFLAGS"
-		CXXFLAGS="-static $CXXFLAGS"
-		LDFLAGS="-static"
-		echo "[INFO] Cross-compiling for Android ARMv6"
-	elif [ "$COMPILE_TARGET" == "android-armv7" ]; then
-		COMPILE_FOR_ANDROID=yes
-		[ -z "$march" ] && march=armv7-a;
-		[ -z "$mtune" ] && mtune=cortex-a8;
-		TOOLCHAIN_PREFIX="arm-linux-musleabi"
-		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --enable-static-link --disable-ipv6"
-		CFLAGS="-static $CFLAGS"
-		CXXFLAGS="-static $CXXFLAGS"
-		LDFLAGS="-static"
-		echo "[INFO] Cross-compiling for Android ARMv7"
-	elif [ "$COMPILE_TARGET" == "rpi" ]; then
-		TOOLCHAIN_PREFIX="arm-linux-gnueabihf"
-		[ -z "$march" ] && march=armv6zk;
-		[ -z "$mtune" ] && mtune=arm1176jzf-s;
-		if [ "$DO_OPTIMIZE" == "yes" ]; then
-			CFLAGS="$CFLAGS -mfloat-abi=hard -mfpu=vfp"
-		fi
-		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX"
-		[ -z "$CFLAGS" ] && CFLAGS="-uclibc";
-		echo "[INFO] Cross-compiling for Raspberry Pi ARMv6zk hard float"
-	elif [ "$COMPILE_TARGET" == "armv7" ]; then
-		TOOLCHAIN_PREFIX="arm-linux-gnueabihf"
-		[ -z "$march" ] && march=armv7-a;
-		[ -z "$mtune" ] && mtune=cortex-a8;
-		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX"
-		[ -z "$CFLAGS" ] && CFLAGS="-uclibc";
-		echo "[INFO] Cross-compiling for ARMv7"
 	elif [ "$COMPILE_TARGET" == "mac" ]; then
 		[ -z "$march" ] && march=prescott;
 		[ -z "$mtune" ] && mtune=generic;
@@ -234,59 +193,28 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
 		GMP_ABI="32"
 		echo "[INFO] Cross-compiling for Intel MacOS"
-	elif [ "$COMPILE_TARGET" == "ios" ] || [ "$COMPILE_TARGET" == "ios-armv6" ]; then
-		[ -z "$march" ] && march=armv6;
-		[ -z "$mtune" ] && mtune=arm1176jzf-s;
-		TOOLCHAIN_PREFIX="arm-apple-darwin10"
-		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --target=$TOOLCHAIN_PREFIX -miphoneos-version-min=4.2"
-	elif [ "$COMPILE_TARGET" == "ios-armv7" ]; then
-		[ -z "$march" ] && march=armv7-a;
-		[ -z "$mtune" ] && mtune=cortex-a8;
-		TOOLCHAIN_PREFIX="arm-apple-darwin10"
-		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --target=$TOOLCHAIN_PREFIX -miphoneos-version-min=4.2"
-		if [ "$DO_OPTIMIZE" == "yes" ]; then
-			CFLAGS="$CFLAGS -mfpu=neon"
-		fi
+	elif [ "$COMPILE_TARGET" == "android-aarch64" ]; then
+		COMPILE_FOR_ANDROID=yes
+		[ -z "$march" ] && march="armv8-a";
+		[ -z "$mtune" ] && mtune=generic;
+		TOOLCHAIN_PREFIX="aarch64-linux-musl"
+		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --disable-ipv6"
+		CFLAGS="-static $CFLAGS"
+		CXXFLAGS="-static $CXXFLAGS"
+		LDFLAGS="-static"
+		echo "[INFO] Cross-compiling for Android ARMv8 (aarch64)"
+	#TODO: add cross-compile for aarch64 platforms (ios, android, rpi)
 	else
-		echo "Please supply a proper platform [android android-armv6 android-armv7 rpi mac ios ios-armv6 ios-armv7 win win32 win64] to cross-compile"
+		echo "Please supply a proper platform [mac win win64] to cross-compile"
 		exit 1
 	fi
-elif [[ "$COMPILE_TARGET" == "linux" ]] || [[ "$COMPILE_TARGET" == "linux32" ]]; then
-	[ -z "$march" ] && march=i686;
-	[ -z "$mtune" ] && mtune=pentium4;
-	CFLAGS="$CFLAGS -m32";
-	GMP_ABI="32"
-	echo "[INFO] Compiling for Linux x86"
-elif [ "$COMPILE_TARGET" == "linux64" ]; then
+elif [[ "$COMPILE_TARGET" == "linux" ]] || [[ "$COMPILE_TARGET" == "linux64" ]]; then
 	[ -z "$march" ] && march=x86-64;
 	[ -z "$mtune" ] && mtune=nocona;
 	CFLAGS="$CFLAGS -m64"
 	GMP_ABI="64"
 	echo "[INFO] Compiling for Linux x86_64"
-elif [ "$COMPILE_TARGET" == "rpi" ]; then
-	[ -z "$march" ] && march=armv6zk;
-	[ -z "$mtune" ] && mtune=arm1176jzf-s;
-	CFLAGS="$CFLAGS -mfloat-abi=hard -mfpu=vfp";
-	echo "[INFO] Compiling for Raspberry Pi ARMv6zk hard float"
-elif [ "$COMPILE_TARGET" == "armv7" ]; then
-	[ -z "$march" ] && march=armv7-a;
-	[ -z "$mtune" ] && mtune=cortex-a8;
-	CFLAGS="$CFLAGS -mfpu=vfp";
-	echo "[INFO] Compiling for ARMv7"
-elif [[ "$COMPILE_TARGET" == "mac" ]] || [[ "$COMPILE_TARGET" == "mac32" ]]; then
-	[ -z "$march" ] && march=prescott;
-	[ -z "$mtune" ] && mtune=generic;
-	CFLAGS="$CFLAGS -m32 -arch i386 -fomit-frame-pointer -mmacosx-version-min=10.7";
-	if [ "$DO_STATIC" == "no" ]; then
-		LDFLAGS="$LDFLAGS -Wl,-rpath,@loader_path/../lib";
-		export DYLD_LIBRARY_PATH="@loader_path/../lib"
-	fi
-	LEVELDB_VERSION="1bd4a335d620b395b0a587b15804f9b2ab3c403f"
-	CFLAGS="$CFLAGS -Qunused-arguments -Wno-error=unused-command-line-argument-hard-error-in-future"
-	ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
-	GMP_ABI="32"
-	echo "[INFO] Compiling for Intel MacOS x86"
-elif [ "$COMPILE_TARGET" == "mac64" ]; then
+elif [[ "$COMPILE_TARGET" == "mac" ]] || [[ "$COMPILE_TARGET" == "mac64" ]]; then
 	[ -z "$march" ] && march=core2;
 	[ -z "$mtune" ] && mtune=generic;
 	CFLAGS="$CFLAGS -m64 -arch x86_64 -fomit-frame-pointer -mmacosx-version-min=10.7";
@@ -300,19 +228,15 @@ elif [ "$COMPILE_TARGET" == "mac64" ]; then
 	GMP_ABI="64"
 	CXXFLAGS="$CXXFLAGS -stdlib=libc++"
 	echo "[INFO] Compiling for Intel MacOS x86_64"
-elif [ "$COMPILE_TARGET" == "ios" ]; then
-	[ -z "$march" ] && march=armv7-a;
-	[ -z "$mtune" ] && mtune=cortex-a8;
-	echo "[INFO] Compiling for iOS ARMv7"
+#TODO: add aarch64 platforms (ios, android, rpi)
 elif [ -z "$CFLAGS" ]; then
 	if [ `getconf LONG_BIT` == "64" ]; then
 		echo "[INFO] Compiling for current machine using 64-bit"
 		CFLAGS="-m64 $CFLAGS"
 		GMP_ABI="64"
 	else
-		echo "[INFO] Compiling for current machine using 32-bit"
-		CFLAGS="-m32 $CFLAGS"
-		GMP_ABI="32"
+		echo "[ERROR] PocketMine-MP is no longer supported on 32-bit systems"
+		exit 1
 	fi
 fi
 
@@ -628,13 +552,13 @@ if [ "$COMPILE_LEVELDB" == "yes" ]; then
 	echo -n " checking..."
 	cd leveldb
 	echo -n " compiling..."
-	if [ "$DO_STATIC" == "yes" ]; then
-		CFLAGS="$CFLAGS -I$DIR/bin/php7/include" CXXFLAGS="$CXXFLAGS -I$DIR/bin/php7/include" LDFLAGS="$LDFLAGS -L$DIR/bin/php7/lib" make -j $THREADS libleveldb.a >> "$DIR/install.log" 2>&1
-	else
-		CFLAGS="$CFLAGS -I$DIR/bin/php7/include" CXXFLAGS="$CXXFLAGS -I$DIR/bin/php7/include" LDFLAGS="$LDFLAGS -L$DIR/bin/php7/lib" make -j $THREADS >> "$DIR/install.log" 2>&1
-	fi
+	CFLAGS="$CFLAGS -I$DIR/bin/php7/include" CXXFLAGS="$CXXFLAGS -I$DIR/bin/php7/include" LDFLAGS="$LDFLAGS -L$DIR/bin/php7/lib" make -j $THREADS >> "$DIR/install.log" 2>&1
 	echo -n " installing..."
-	cp out-shared/libleveldb* "$DIR/bin/php7/lib/"
+	if [ "$DO_STATIC" == "yes" ]; then
+		cp out-static/libleveldb* "$DIR/bin/php7/lib/"
+	else
+		cp out-shared/libleveldb* "$DIR/bin/php7/lib/"
+	fi
 	cp -r include/leveldb "$DIR/bin/php7/include/leveldb"
 	cd ..
 	echo " done!"
@@ -646,22 +570,29 @@ else
 	EXTRA_FLAGS="--enable-shared=yes --enable-static=no"
 fi
 
-#libpng
-echo -n "[libpng] downloading $LIBPNG_VERSION..."
-download_file "https://sourceforge.net/projects/libpng/files/libpng16/$LIBPNG_VERSION/libpng-$LIBPNG_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-mv libpng-$LIBPNG_VERSION libpng
-echo -n " checking..."
-cd libpng
-LDFLAGS="$LDFLAGS -L${DIR}/bin/php7/lib" CPPFLAGS="$CPPFLAGS -I${DIR}/bin/php7/include" RANLIB=$RANLIB ./configure \
---prefix="$DIR/bin/php7" \
-$EXTRA_FLAGS \
-$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
-echo -n " compiling..."
-make -j $THREADS >> "$DIR/install.log" 2>&1
-echo -n " installing..."
-make install >> "$DIR/install.log" 2>&1
-cd ..
-echo " done!"
+if [ "$COMPILE_GD" == "yes" ]; then
+	#libpng
+	echo -n "[libpng] downloading $LIBPNG_VERSION..."
+	download_file "https://sourceforge.net/projects/libpng/files/libpng16/$LIBPNG_VERSION/libpng-$LIBPNG_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv libpng-$LIBPNG_VERSION libpng
+	echo -n " checking..."
+	cd libpng
+	LDFLAGS="$LDFLAGS -L${DIR}/bin/php7/lib" CPPFLAGS="$CPPFLAGS -I${DIR}/bin/php7/include" RANLIB=$RANLIB ./configure \
+	--prefix="$DIR/bin/php7" \
+	$EXTRA_FLAGS \
+	$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
+	echo -n " compiling..."
+	make -j $THREADS >> "$DIR/install.log" 2>&1
+	echo -n " installing..."
+	make install >> "$DIR/install.log" 2>&1
+	cd ..
+	echo " done!"
+	HAS_GD="--with-gd"
+	HAS_LIBPNG="--with-png-dir=${DIR}/bin/php7"
+else
+	HAS_GD=""
+	HAS_LIBPNG=""
+fi
 
 #libxml2
 #echo -n "[libxml2] downloading $LIBXML_VERSION..."
@@ -689,17 +620,13 @@ echo " done!"
 
 # PECL libraries
 
-#TODO: fix xdebug (needs to be compiled separately)
-#if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
-#	#xdebug
-#	echo -n "[PHP xdebug] downloading $XDEBUG_VERSION..."
-#	download_file "http://pecl.php.net/get/xdebug-$XDEBUG_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-#	mv xdebug-$XDEBUG_VERSION "$DIR/install_data/php/ext/xdebug"
-#	echo " done!"
-#	HAS_XDEBUG="--enable-xdebug=shared"
-#else
-	HAS_XDEBUG=""
-#fi
+if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
+	#xdebug
+	echo -n "[PHP xdebug] downloading $XDEBUG_VERSION..."
+	download_file "http://pecl.php.net/get/xdebug-$XDEBUG_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv xdebug-$XDEBUG_VERSION "$DIR/install_data/php/ext/xdebug"
+	echo " done!"
+fi
 
 #TODO Uncomment this when it's ready for PHP7
 #if [ "$COMPILE_DEBUG" == "yes" ]; then
@@ -815,13 +742,12 @@ RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" LDFLAGS="$LDFLAGS $FLAGS_LTO" ./confi
 --with-zlib="$DIR/bin/php7" \
 --with-zlib-dir="$DIR/bin/php7" \
 --with-gmp="$DIR/bin/php7" \
---with-png-dir="$DIR/bin/php7" \
 --with-yaml="$DIR/bin/php7" \
---with-gd \
+$HAS_LIBPNG \
+$HAS_GD \
 $HAVE_NCURSES \
 $HAVE_READLINE \
 $HAS_LEVELDB \
-$HAS_XDEBUG \
 $HAS_PROFILER \
 $HAS_DEBUG \
 $HAS_POCKETMINE_CHUNKUTILS \
@@ -915,7 +841,6 @@ else
 fi
 
 if [ "$IS_CROSSCOMPILE" != "yes" ] && [ "$DO_STATIC" == "no" ]; then
-	echo ";zend_extension=xdebug.so" >> "$DIR/bin/php7/bin/php.ini"
 	echo "zend_extension=opcache.so" >> "$DIR/bin/php7/bin/php.ini"
 	echo "opcache.enable=1" >> "$DIR/bin/php7/bin/php.ini"
 	echo "opcache.enable_cli=1" >> "$DIR/bin/php7/bin/php.ini"
@@ -932,6 +857,20 @@ if [ "$HAVE_CURL" == "shared,/usr" ]; then
 fi
 
 echo " done!"
+
+if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
+	echo -n "[xdebug] checking..."
+	cd "$DIR/install_data/php/ext/xdebug"
+	$DIR/bin/php7/bin/phpize >> "$DIR/install.log" 2>&1
+	./configure --with-php-config="$DIR/bin/php7/bin/php-config" >> "$DIR/install.log" 2>&1
+	echo -n " compiling..."
+	make -j4 >> "$DIR/install.log" 2>&1
+	echo -n " installing..."
+	make install >> "$DIR/install.log" 2>&1
+	echo "zend_extension=xdebug.so" >> "$DIR/bin/php7/bin/php.ini"
+	echo " done!"
+fi
+
 cd "$DIR"
 if [ "$COMPILE_DEBUG" != "yes" ]; then
 echo -n "[INFO] Cleaning up..."
@@ -943,8 +882,8 @@ echo -n "[INFO] Cleaning up..."
 	rm -r -f bin/php7/man >> "$DIR/install.log" 2>&1
 	rm -r -f bin/php7/php >> "$DIR/install.log" 2>&1
 	rm -r -f bin/php7/misc >> "$DIR/install.log" 2>&1
+	echo " done!"
 fi
 date >> "$DIR/install.log" 2>&1
-echo " done!"
 echo "[PocketMine] You should start the server now using \"./start.sh.\""
 echo "[PocketMine] If it doesn't work, please send the \"install.log\" file to the Bug Tracker."
