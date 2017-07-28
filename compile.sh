@@ -193,6 +193,16 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
 		GMP_ABI="32"
 		echo "[INFO] Cross-compiling for Intel MacOS"
+	elif [ "$COMPILE_TARGET" == "android-aarch64" ]; then
+		COMPILE_FOR_ANDROID=yes
+		[ -z "$march" ] && march="armv8-a";
+		[ -z "$mtune" ] && mtune=generic;
+		TOOLCHAIN_PREFIX="aarch64-linux-musl"
+		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --disable-ipv6"
+		CFLAGS="-static $CFLAGS"
+		CXXFLAGS="-static $CXXFLAGS"
+		LDFLAGS="-static"
+		echo "[INFO] Cross-compiling for Android ARMv8 (aarch64)"
 	#TODO: add cross-compile for aarch64 platforms (ios, android, rpi)
 	else
 		echo "Please supply a proper platform [mac win win64] to cross-compile"
