@@ -171,16 +171,7 @@ TOOLCHAIN_PREFIX=""
 
 if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 	export CROSS_COMPILER="$PATH"
-	if [[ "$COMPILE_TARGET" == "win" ]] || [[ "$COMPILE_TARGET" == "win32" ]]; then
-		TOOLCHAIN_PREFIX="i686-w64-mingw32"
-		[ -z "$march" ] && march=i686;
-		[ -z "$mtune" ] && mtune=pentium4;
-		CFLAGS="$CFLAGS -mconsole"
-		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --target=$TOOLCHAIN_PREFIX --build=$TOOLCHAIN_PREFIX"
-		IS_WINDOWS="yes"
-		GMP_ABI="32"
-		echo "[INFO] Cross-compiling for Windows 32-bit"
-	elif [ "$COMPILE_TARGET" == "win64" ]; then
+	if [[ "$COMPILE_TARGET" == "win" ]] || [[ "$COMPILE_TARGET" == "win64" ]]; then
 		TOOLCHAIN_PREFIX="x86_64-w64-mingw32"
 		[ -z "$march" ] && march=x86_64;
 		[ -z "$mtune" ] && mtune=nocona;
@@ -189,43 +180,6 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		IS_WINDOWS="yes"
 		GMP_ABI="64"
 		echo "[INFO] Cross-compiling for Windows 64-bit"
-	elif [ "$COMPILE_TARGET" == "android" ] || [ "$COMPILE_TARGET" == "android-armv6" ]; then
-		COMPILE_FOR_ANDROID=yes
-		[ -z "$march" ] && march=armv6;
-		[ -z "$mtune" ] && mtune=arm1136jf-s;
-		TOOLCHAIN_PREFIX="arm-linux-musleabi"
-		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --enable-static-link --disable-ipv6"
-		CFLAGS="-static $CFLAGS"
-		CXXFLAGS="-static $CXXFLAGS"
-		LDFLAGS="-static"
-		echo "[INFO] Cross-compiling for Android ARMv6"
-	elif [ "$COMPILE_TARGET" == "android-armv7" ]; then
-		COMPILE_FOR_ANDROID=yes
-		[ -z "$march" ] && march=armv7-a;
-		[ -z "$mtune" ] && mtune=cortex-a8;
-		TOOLCHAIN_PREFIX="arm-linux-musleabi"
-		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --enable-static-link --disable-ipv6"
-		CFLAGS="-static $CFLAGS"
-		CXXFLAGS="-static $CXXFLAGS"
-		LDFLAGS="-static"
-		echo "[INFO] Cross-compiling for Android ARMv7"
-	elif [ "$COMPILE_TARGET" == "rpi" ]; then
-		TOOLCHAIN_PREFIX="arm-linux-gnueabihf"
-		[ -z "$march" ] && march=armv6zk;
-		[ -z "$mtune" ] && mtune=arm1176jzf-s;
-		if [ "$DO_OPTIMIZE" == "yes" ]; then
-			CFLAGS="$CFLAGS -mfloat-abi=hard -mfpu=vfp"
-		fi
-		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX"
-		[ -z "$CFLAGS" ] && CFLAGS="-uclibc";
-		echo "[INFO] Cross-compiling for Raspberry Pi ARMv6zk hard float"
-	elif [ "$COMPILE_TARGET" == "armv7" ]; then
-		TOOLCHAIN_PREFIX="arm-linux-gnueabihf"
-		[ -z "$march" ] && march=armv7-a;
-		[ -z "$mtune" ] && mtune=cortex-a8;
-		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX"
-		[ -z "$CFLAGS" ] && CFLAGS="-uclibc";
-		echo "[INFO] Cross-compiling for ARMv7"
 	elif [ "$COMPILE_TARGET" == "mac" ]; then
 		[ -z "$march" ] && march=prescott;
 		[ -z "$mtune" ] && mtune=generic;
@@ -239,59 +193,18 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
 		GMP_ABI="32"
 		echo "[INFO] Cross-compiling for Intel MacOS"
-	elif [ "$COMPILE_TARGET" == "ios" ] || [ "$COMPILE_TARGET" == "ios-armv6" ]; then
-		[ -z "$march" ] && march=armv6;
-		[ -z "$mtune" ] && mtune=arm1176jzf-s;
-		TOOLCHAIN_PREFIX="arm-apple-darwin10"
-		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --target=$TOOLCHAIN_PREFIX -miphoneos-version-min=4.2"
-	elif [ "$COMPILE_TARGET" == "ios-armv7" ]; then
-		[ -z "$march" ] && march=armv7-a;
-		[ -z "$mtune" ] && mtune=cortex-a8;
-		TOOLCHAIN_PREFIX="arm-apple-darwin10"
-		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --target=$TOOLCHAIN_PREFIX -miphoneos-version-min=4.2"
-		if [ "$DO_OPTIMIZE" == "yes" ]; then
-			CFLAGS="$CFLAGS -mfpu=neon"
-		fi
+	#TODO: add cross-compile for aarch64 platforms (ios, android, rpi)
 	else
-		echo "Please supply a proper platform [android android-armv6 android-armv7 rpi mac ios ios-armv6 ios-armv7 win win32 win64] to cross-compile"
+		echo "Please supply a proper platform [mac win win64] to cross-compile"
 		exit 1
 	fi
-elif [[ "$COMPILE_TARGET" == "linux" ]] || [[ "$COMPILE_TARGET" == "linux32" ]]; then
-	[ -z "$march" ] && march=i686;
-	[ -z "$mtune" ] && mtune=pentium4;
-	CFLAGS="$CFLAGS -m32";
-	GMP_ABI="32"
-	echo "[INFO] Compiling for Linux x86"
-elif [ "$COMPILE_TARGET" == "linux64" ]; then
+elif [[ "$COMPILE_TARGET" == "linux" ]] || [[ "$COMPILE_TARGET" == "linux64" ]]; then
 	[ -z "$march" ] && march=x86-64;
 	[ -z "$mtune" ] && mtune=nocona;
 	CFLAGS="$CFLAGS -m64"
 	GMP_ABI="64"
 	echo "[INFO] Compiling for Linux x86_64"
-elif [ "$COMPILE_TARGET" == "rpi" ]; then
-	[ -z "$march" ] && march=armv6zk;
-	[ -z "$mtune" ] && mtune=arm1176jzf-s;
-	CFLAGS="$CFLAGS -mfloat-abi=hard -mfpu=vfp";
-	echo "[INFO] Compiling for Raspberry Pi ARMv6zk hard float"
-elif [ "$COMPILE_TARGET" == "armv7" ]; then
-	[ -z "$march" ] && march=armv7-a;
-	[ -z "$mtune" ] && mtune=cortex-a8;
-	CFLAGS="$CFLAGS -mfpu=vfp";
-	echo "[INFO] Compiling for ARMv7"
-elif [[ "$COMPILE_TARGET" == "mac" ]] || [[ "$COMPILE_TARGET" == "mac32" ]]; then
-	[ -z "$march" ] && march=prescott;
-	[ -z "$mtune" ] && mtune=generic;
-	CFLAGS="$CFLAGS -m32 -arch i386 -fomit-frame-pointer -mmacosx-version-min=10.7";
-	if [ "$DO_STATIC" == "no" ]; then
-		LDFLAGS="$LDFLAGS -Wl,-rpath,@loader_path/../lib";
-		export DYLD_LIBRARY_PATH="@loader_path/../lib"
-	fi
-	LEVELDB_VERSION="1bd4a335d620b395b0a587b15804f9b2ab3c403f"
-	CFLAGS="$CFLAGS -Qunused-arguments -Wno-error=unused-command-line-argument-hard-error-in-future"
-	ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
-	GMP_ABI="32"
-	echo "[INFO] Compiling for Intel MacOS x86"
-elif [ "$COMPILE_TARGET" == "mac64" ]; then
+elif [[ "$COMPILE_TARGET" == "mac" ]] || [[ "$COMPILE_TARGET" == "mac64" ]]; then
 	[ -z "$march" ] && march=core2;
 	[ -z "$mtune" ] && mtune=generic;
 	CFLAGS="$CFLAGS -m64 -arch x86_64 -fomit-frame-pointer -mmacosx-version-min=10.7";
@@ -305,19 +218,15 @@ elif [ "$COMPILE_TARGET" == "mac64" ]; then
 	GMP_ABI="64"
 	CXXFLAGS="$CXXFLAGS -stdlib=libc++"
 	echo "[INFO] Compiling for Intel MacOS x86_64"
-elif [ "$COMPILE_TARGET" == "ios" ]; then
-	[ -z "$march" ] && march=armv7-a;
-	[ -z "$mtune" ] && mtune=cortex-a8;
-	echo "[INFO] Compiling for iOS ARMv7"
+#TODO: add aarch64 platforms (ios, android, rpi)
 elif [ -z "$CFLAGS" ]; then
 	if [ `getconf LONG_BIT` == "64" ]; then
 		echo "[INFO] Compiling for current machine using 64-bit"
 		CFLAGS="-m64 $CFLAGS"
 		GMP_ABI="64"
 	else
-		echo "[INFO] Compiling for current machine using 32-bit"
-		CFLAGS="-m32 $CFLAGS"
-		GMP_ABI="32"
+		echo "[ERROR] PocketMine-MP is no longer supported on 32-bit systems"
+		exit 1
 	fi
 fi
 
