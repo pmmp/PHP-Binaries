@@ -20,7 +20,7 @@ if [ $? -eq 0 ]; then
 else
 	type curl >/dev/null 2>&1
 	if [ $? -eq 0 ]; then
-		alias download_file="curl --insecure --silent --location"
+		alias download_file="curl --insecure --silent --show-error --location"
 	else
 		echo "error, curl or wget not found"
 	fi
