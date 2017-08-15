@@ -27,6 +27,7 @@ LIBXML_VERSION="2.9.1"
 LIBPNG_VERSION="1.6.30"
 BCOMPILER_VERSION="1.0.2"
 POCKETMINE_CHUNKUTILS_VERSION="master"
+OPENSSL_VERSION="1.1.0f"
 
 echo "[PocketMine] PHP compiler for Linux, MacOS and Android"
 DIR="$(pwd)"
@@ -168,6 +169,7 @@ done
 
 GMP_ABI=""
 TOOLCHAIN_PREFIX=""
+OPENSSL_TARGET=""
 
 if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 	export CROSS_COMPILER="$PATH"
@@ -178,6 +180,7 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		CFLAGS="$CFLAGS -mconsole"
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --target=$TOOLCHAIN_PREFIX --build=$TOOLCHAIN_PREFIX"
 		IS_WINDOWS="yes"
+		OPENSSL_TARGET="mingw64"
 		GMP_ABI="64"
 		echo "[INFO] Cross-compiling for Windows 64-bit"
 	elif [ "$COMPILE_TARGET" == "mac" ]; then
@@ -191,6 +194,7 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		LEVELDB_VERSION="1bd4a335d620b395b0a587b15804f9b2ab3c403f"
 		CFLAGS="$CFLAGS -Qunused-arguments -Wno-error=unused-command-line-argument-hard-error-in-future"
 		ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
+		OPENSSL_TARGET="darwin64-x86_64-cc"
 		GMP_ABI="32"
 		echo "[INFO] Cross-compiling for Intel MacOS"
 	elif [ "$COMPILE_TARGET" == "android-aarch64" ]; then
@@ -202,6 +206,7 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		CFLAGS="-static $CFLAGS"
 		CXXFLAGS="-static $CXXFLAGS"
 		LDFLAGS="-static"
+		OPENSSL_TARGET="linux-aarch64"
 		echo "[INFO] Cross-compiling for Android ARMv8 (aarch64)"
 	#TODO: add cross-compile for aarch64 platforms (ios, android, rpi)
 	else
@@ -213,6 +218,7 @@ elif [[ "$COMPILE_TARGET" == "linux" ]] || [[ "$COMPILE_TARGET" == "linux64" ]];
 	[ -z "$mtune" ] && mtune=nocona;
 	CFLAGS="$CFLAGS -m64"
 	GMP_ABI="64"
+	OPENSSL_TARGET="linux-x86_64"
 	echo "[INFO] Compiling for Linux x86_64"
 elif [[ "$COMPILE_TARGET" == "mac" ]] || [[ "$COMPILE_TARGET" == "mac64" ]]; then
 	[ -z "$march" ] && march=core2;
@@ -227,6 +233,7 @@ elif [[ "$COMPILE_TARGET" == "mac" ]] || [[ "$COMPILE_TARGET" == "mac64" ]]; the
 	ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
 	GMP_ABI="64"
 	CXXFLAGS="$CXXFLAGS -stdlib=libc++"
+	OPENSSL_TARGET="darwin64-x86_64-cc"
 	echo "[INFO] Compiling for Intel MacOS x86_64"
 #TODO: add aarch64 platforms (ios, android, rpi)
 elif [ -z "$CFLAGS" ]; then
@@ -453,6 +460,40 @@ if [ "$(uname -s)" != "Darwin" ] || [ "$IS_CROSSCOMPILE" == "yes" ] || [ "$COMPI
 	cd ..
 	echo " done!"
 fi
+
+
+
+#OpenSSL
+OPENSSL_CMD="./config"
+if [ "$OPENSSL_TARGET" != "" ]; then
+	OPENSSL_CMD="./Configure $OPENSSL_TARGET"
+fi
+
+export PKG_CONFIG_PATH="$DIR/bin/php7/lib/pkgconfig"
+WITH_OPENSSL="--with-openssl=$DIR/bin/php7"
+echo -n "[OpenSSL] downloading $OPENSSL_VERSION..."
+download_file "http://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+mv openssl-$OPENSSL_VERSION openssl
+
+echo -n " checking..."
+cd openssl
+RANLIB=$RANLIB $OPENSSL_CMD \
+--prefix="$DIR/bin/php7" \
+--openssldir="$DIR/bin/php7" \
+no-asm \
+no-hw \
+no-shared \
+no-threads \
+no-engine >> "$DIR/install.log" 2>&1
+
+echo -n " compiling..."
+make >> "$DIR/install.log" 2>&1
+echo -n " installing..."
+make install >> "$DIR/install.log" 2>&1
+cd ..
+echo " done!"
+
+
 
 if [ "$(uname -s)" == "Darwin" ] && [ "$IS_CROSSCOMPILE" != "yes" ] && [ "$COMPILE_CURL" != "yes" ]; then
    HAVE_CURL="shared,/usr"
@@ -742,6 +783,7 @@ RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" LDFLAGS="$LDFLAGS $FLAGS_LTO" ./confi
 --with-zlib-dir="$DIR/bin/php7" \
 --with-gmp="$DIR/bin/php7" \
 --with-yaml="$DIR/bin/php7" \
+--with-openssl="$DIR/bin/php7" \
 $HAS_LIBPNG \
 $HAS_GD \
 $HAVE_NCURSES \
@@ -815,13 +857,13 @@ if [[ "$(uname -s)" == "Darwin" ]] && [[ "$IS_CROSSCOMPILE" != "yes" ]]; then
 	install_name_tool -change "$DIR/bin/php7/lib/libleveldb.dylib.1.18" "@loader_path/../lib/libleveldb.dylib.1.18" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
 	install_name_tool -change "$DIR/bin/php7/lib/libpng16.16.dylib" "@loader_path/../lib/libpng16.16.dylib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
 
-	#install_name_tool -change "$DIR/bin/php7/lib/libssl.1.0.0.dylib" "@loader_path/../lib/libssl.1.0.0.dylib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
-	#install_name_tool -change "$DIR/bin/php7/lib/libssl.1.0.0.dylib" "@loader_path/../lib/libssl.1.0.0.dylib" "$DIR/bin/php7/lib/libcurl.4.dylib" >> "$DIR/install.log" 2>&1
-	#install_name_tool -change "$DIR/bin/php7/lib/libcrypto.1.0.0.dylib" "@loader_path/../lib/libcrypto.1.0.0.dylib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
-	#install_name_tool -change "$DIR/bin/php7/lib/libcrypto.1.0.0.dylib" "@loader_path/../lib/libcrypto.1.0.0.dylib" "$DIR/bin/php7/lib/libcurl.4.dylib" >> "$DIR/install.log" 2>&1
-	#chmod 0777 "$DIR/bin/php7/lib/libssl.1.0.0.dylib" >> "$DIR/install.log" 2>&1
-	#install_name_tool -change "$DIR/bin/php7/lib/libcrypto.1.0.0.dylib" "@loader_path/libcrypto.1.0.0.dylib" "$DIR/bin/php7/lib/libssl.1.0.0.dylib" >> "$DIR/install.log" 2>&1
-	#chmod 0755 "$DIR/bin/php7/lib/libssl.1.0.0.dylib" >> "$DIR/install.log" 2>&1
+	install_name_tool -change "$DIR/bin/php7/lib/libssl.1.0.0.dylib" "@loader_path/../lib/libssl.1.0.0.dylib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
+	install_name_tool -change "$DIR/bin/php7/lib/libssl.1.0.0.dylib" "@loader_path/../lib/libssl.1.0.0.dylib" "$DIR/bin/php7/lib/libcurl.4.dylib" >> "$DIR/install.log" 2>&1
+	install_name_tool -change "$DIR/bin/php7/lib/libcrypto.1.0.0.dylib" "@loader_path/../lib/libcrypto.1.0.0.dylib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
+	install_name_tool -change "$DIR/bin/php7/lib/libcrypto.1.0.0.dylib" "@loader_path/../lib/libcrypto.1.0.0.dylib" "$DIR/bin/php7/lib/libcurl.4.dylib" >> "$DIR/install.log" 2>&1
+	chmod 0777 "$DIR/bin/php7/lib/libssl.1.0.0.dylib" >> "$DIR/install.log" 2>&1
+	install_name_tool -change "$DIR/bin/php7/lib/libcrypto.1.0.0.dylib" "@loader_path/libcrypto.1.0.0.dylib" "$DIR/bin/php7/lib/libssl.1.0.0.dylib" >> "$DIR/install.log" 2>&1
+	chmod 0755 "$DIR/bin/php7/lib/libssl.1.0.0.dylib" >> "$DIR/install.log" 2>&1
 	set -e
 fi
 
