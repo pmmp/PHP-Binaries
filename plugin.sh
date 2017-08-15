@@ -25,9 +25,9 @@ else
 	type curl >> /dev/null 2>&1
 	if [ $? -eq 0 ]; then
 		if [ "$IGNORE_CERT" == "yes" ]; then
-			alias download_file="curl --insecure --silent --location"
+			alias download_file="curl --insecure --silent --show-error --location --globoff"
 		else
-			alias download_file="curl --silent --location"
+			alias download_file="curl --silent --show-error --location --globoff"
 		fi
 	else
 		echo "error, curl or wget not found"

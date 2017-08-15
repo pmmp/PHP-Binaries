@@ -1,5 +1,5 @@
 #!/bin/bash
-[ -z "$PHP_VERSION" ] && PHP_VERSION="7.0.21"
+[ -z "$PHP_VERSION" ] && PHP_VERSION="7.0.22"
 PHP_VERSION_BASE="${PHP_VERSION:0:3}"
 
 PHP_IS_BETA="no"
@@ -20,7 +20,7 @@ if [ $? -eq 0 ]; then
 else
 	type curl >/dev/null 2>&1
 	if [ $? -eq 0 ]; then
-		alias download_file="curl --insecure --silent --location"
+		alias download_file="curl --insecure --silent --show-error --location --globoff"
 	else
 		echo "error, curl or wget not found"
 	fi
