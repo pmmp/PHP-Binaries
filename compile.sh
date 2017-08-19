@@ -925,6 +925,27 @@ echo -n "[INFO] Cleaning up..."
 	rm -r -f bin/php7/misc >> "$DIR/install.log" 2>&1
 	echo " done!"
 fi
+
+
+#Composer
+echo -n "[Composer] downloading..."
+EXPECTED_SIGNATURE=$(wget -q -O - https://composer.github.io/installer.sig)
+wget -q -O composer-setup.php https://getcomposer.org/installer
+ACTUAL_SIGNATURE=$($DIR/bin/php7/bin/php -r "echo hash_file('SHA384', 'composer-setup.php');")
+
+if [ "$EXPECTED_SIGNATURE" != "$ACTUAL_SIGNATURE" ]
+then
+    >&2 echo ' ERROR: Invalid Composer installer signature'
+    rm composer-setup.php
+    exit 1
+fi
+
+echo -n " installing..."
+$DIR/bin/php7/bin/php composer-setup.php --install-dir=bin >> "$DIR/install.log" 2>&1
+rm composer-setup.php
+echo " done!"
+
+
 date >> "$DIR/install.log" 2>&1
 echo "[PocketMine] You should start the server now using \"./start.sh.\""
 echo "[PocketMine] If it doesn't work, please send the \"install.log\" file to the Bug Tracker."
