@@ -929,13 +929,14 @@ fi
 
 #Composer
 echo -n "[Composer] downloading..."
-EXPECTED_SIGNATURE=$(wget -q -O - https://composer.github.io/installer.sig)
-wget -q -O composer-setup.php https://getcomposer.org/installer
+EXPECTED_SIGNATURE=$(download_file https://composer.github.io/installer.sig)
+download_file https://getcomposer.org/installer > composer-setup.php
 ACTUAL_SIGNATURE=$($DIR/bin/php7/bin/php -r "echo hash_file('SHA384', 'composer-setup.php');")
 
 if [ "$EXPECTED_SIGNATURE" != "$ACTUAL_SIGNATURE" ]
 then
     >&2 echo ' ERROR: Invalid Composer installer signature'
+    echo 'ERROR: Invalid Composer installer signature' >> "$DIR/install.log" 2>&1
     rm composer-setup.php
     exit 1
 fi
