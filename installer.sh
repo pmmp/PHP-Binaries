@@ -126,11 +126,25 @@ if [[ "$BUILD_URL" != "" && "$CHANNEL" == "custom" ]]; then
 	ENABLE_GPG="no"
 	VERSION_DOWNLOAD="$BUILD_URL"
 else
-
+	echo "[*] Retrieving latest build data"
 	VERSION_DATA=$(download_file "https://jenkins.pmmp.io/job/PocketMine-MP/lastSuccessfulBuild/api/json?pretty=true&tree=url,artifacts[fileName],number,timestamp")
 
 	if [ "$VERSION_DATA" != "" ]; then
-		FILENAME=$(echo "$VERSION_DATA" | grep '"fileName"' | cut -d ':' -f2- | tr -d ' ",')
+		FILENAME="unknown"
+
+		IFS=$'\n' FILENAMES=($(echo "$VERSION_DATA" | grep '"fileName"' | cut -d ':' -f2- | tr -d ' ",'))
+		for (( i=0; i<${#FILENAMES[@]}; i++ ))
+		do
+			if [[ ${FILENAMES[$i]} == PocketMine*.phar ]]; then
+				FILENAME=${FILENAMES[$i]}
+				break
+			fi
+		done
+		if [ "$FILENAME" == "unknown" ]; then
+			echo "[!] Couldn't determine filename of artifact to download"
+			exit 1
+		fi
+
 		VERSION=$(echo $FILENAME | cut -d '_' -f2- | cut -d '-' -f1)
 		BUILD=$(echo "$VERSION_DATA" | grep '"number"' | cut -d ':' -f2- | tr -d ' ",')
 		API_VERSION=$(echo $FILENAME | cut -d '-' -f4- | sed -e 's/\.[^.]*$//')

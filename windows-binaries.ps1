@@ -46,9 +46,9 @@ function download_file{
     )
 
     try{
-        $wc.DownloadFile("$url", "$tmp_path" + "$saveFile")
+        $wc.DownloadFile("$url", "$tmp_path$saveFile")
     }catch [System.Net.WebException]{
-        Write-Host ("[ERROR] " + $_.Exception.Message) -ForegroundColor Red -BackgroundColor Black
+        Write-Host ("[ERROR] " + $(if($_.Exception.InnerException){ $_.Exception.InnerException.Message } else { $_.Exception.Message})) -ForegroundColor Red -BackgroundColor Black
         Write-Host "Please check the version you are trying to download is still available from the download server. ($url)" -ForegroundColor Red -BackgroundColor Black
         exit 1
     }
@@ -204,8 +204,6 @@ if($debug){
 #TIMEZONE=$(date +%Z)
 #write_php_ini("date.timezone=$TIMEZONE")
 
-echo "[PHP] Cleaning up temporary files..."
-rm -r -Force $tmp_path
 echo "[PHP] Checking PHP build works..."
 
 $cmd = "& `"$path\bin\php\php.exe`" --version"
@@ -216,6 +214,35 @@ if($output -match "PHP"){
     Write-Host "[PHP] Failed to run PHP. You may need to install Microsoft Visual C++ Redistributable 2015 runtime. This can be downloaded from the Microsoft website." -ForegroundColor Red -BackgroundColor Black
     exit 1
 }
+
+
+
+
+echo "[Composer] downloading..."
+$expectedSig = $wc.DownloadString("https://composer.github.io/installer.sig") -replace "`t|`n|`r",""
+
+download_file "https://getcomposer.org/installer" "composer-setup.php"
+
+$installerPath = ($tmp_path + "composer-setup.php")
+$actualSig = [string] $(iex ("& `"$path\bin\php\php.exe`" -r `"echo hash_file('SHA384', '" + $installerPath + "');`"")) -replace "`t|`n|`r",""
+
+if($expectedSig -ne $actualSig){
+    Write-Host "Invalid Composer installer signature" -ForegroundColor Red -BackgroundColor Black
+    exit 1
+}
+echo "[Composer] installing..."
+iex ("& `"$path\bin\php\php.exe`" `"" + $installerPath + "`" --install-dir=`"$path\bin`"")
+echo "[Composer] done!"
+
+
+
+echo "[PHP] Cleaning up temporary files..."
+rm -r -Force $tmp_path
+echo "[PHP] Done!"
+
+
+
+
 
 if($zip){
     $zipPath = $path + "\php-$PHP_VERSION-$target" + $(if($debug){ "-debug" }) + ".zip"
