@@ -1,0 +1,14 @@
+diff --git a/win32/build/mkdist.php b/win32/build/mkdist.php
+index b8c6af9d27..4b013fcefe 100644
+--- a/win32/build/mkdist.php
++++ b/win32/build/mkdist.php
+@@ -204,7 +204,8 @@ function extract_file_from_tarball($pkg, $filename, $dest_dir) /* {{{ */
+ 
+ /* the core dll */
+ copy("$build_dir/php.exe", "$dist_dir/php.exe");
+-copy("$build_dir/$phpdll", "$dist_dir/$phpdll");
++/* copy dll and its dependencies */
++copy_file_list($build_dir, "$dist_dir", [$phpdll]);
+ 
+ /* and the .lib goes into dev */
+ $phplib = str_replace(".dll", ".lib", $phpdll);

@@ -1,11 +1,9 @@
-branches:
- only:
-  - master
+image: Visual Studio 2017
 version: 1.0.{build}
 clone_folder: c:\pmmp\windows-php
 build_script:
 - ps: >-
-    .\windows-binaries.ps1 -t x64 -z
+    .\windows-compile-vs.bat
 
     rm -r -Force bin
 artifacts:
