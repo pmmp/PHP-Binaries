@@ -5,7 +5,6 @@ set PHP_VER=%PHP_MAJOR_VER%.0RC1
 set PHP_SDK_VER=2.0.10
 set PATH=C:\Program Files\7-Zip;%PATH%
 set VC_VER=vc15
-set VC_VER_UPPER=VC15
 set ARCH=x64
 set CMAKE_TARGET=Visual Studio 15 2017 Win64
 
@@ -18,15 +17,23 @@ set PHP_YAML_VER=2.0.2
 
 REM TODO CHECK REQUIREMENTS
 REM git, cmake, visual studio compilers
+where git >nul 2>nul || (call :pm-echo-error "git is required" & exit 1)
+where cmake >nul 2>nul || (call :pm-echo-error "cmake is required" & exit 1)
+where 7z >nul 2>nul || (call :pm-echo-error "7z is required" & exit 1)
 
 call :pm-echo "PHP Windows compiler"
 call :pm-echo "Setting up environment..."
-call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" %ARCH%
+call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" %ARCH% || exit 1
 
 set script_path=%~dp0
 if not exist "%script_path%win32\copy-static-deps.patch" (
 	call :pm-echo "ERROR: Required patch %script_path%win32\copy-static-deps.patch not found"
 	exit 1
+)
+
+if exist bin (
+	call :pm-echo "Deleting old binary folder..."
+	rmdir /s /q bin
 )
 
 pushd C:\
@@ -37,7 +44,7 @@ if exist pocketmine-php-sdk (
 )
 
 call :pm-echo "Getting SDK..."
-git clone https://github.com/OSTC/php-sdk-binary-tools.git -b php-sdk-2.0.10 --depth=1 -q pocketmine-php-sdk
+git clone https://github.com/OSTC/php-sdk-binary-tools.git -b php-sdk-%PHP_SDK_VER% --depth=1 -q pocketmine-php-sdk
 
 cd pocketmine-php-sdk
 
@@ -99,6 +106,7 @@ cd ..\..
 
 :skip
 cd php-src
+call :pm-echo "Configuring PHP..."
 call buildconf.bat
 
 REM Building GD would be nice, but there's some dependency issue in 7.2
@@ -129,15 +137,25 @@ call configure^
  --with-yaml^
  --without-readline
 
+call :pm-echo "Compiling PHP..."
 nmake
+
+call :pm-echo "Assembling artifacts..."
 nmake snap
 
 popd
 
-set filename=php-%PHP_VER%-Win32-%VC_VER_UPPER%-%ARCH%
-copy C:\pocketmine-php-sdk\php-src\%ARCH%\Release_TS\%filename%.zip %filename%.zip
-mkdir bin\php
-7z x -y %filename%.zip -obin\php
+call :pm-echo "Copying artifacts..."
+mkdir bin
+move C:\pocketmine-php-sdk\php-src\%ARCH%\Release_TS\php-%PHP_VER% bin\php
+REM TODO: create a php.ini
+
+call :pm-echo "Packaging build..."
+set package_filename=php-%PHP_VER%-%VC_VER%-%ARCH%.zip
+if exist %package_filename% rm %package_filename%
+7z a %package_filename% bin || (call :pm-echo-error "Failed to package the build!" & exit 1)
+
+call :pm-echo "Created build package %package_filename%"
 call :pm-echo "Done?"
 
 exit 0
@@ -146,6 +164,10 @@ exit 0
 wget %~1 --no-check-certificate -q -O temp.zip
 7z x -y temp.zip
 rm temp.zip
+exit /B 0
+
+:pm-echo-error
+call :pm-echo "[ERROR] %~1"
 exit /B 0
 
 :pm-echo
