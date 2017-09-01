@@ -15,8 +15,6 @@ set PTHREAD_W32_VER=2-9-1
 set PHP_PTHREADS_VER=caca8dc42a5d75ddfb39e6fd15337e87e967517e
 set PHP_YAML_VER=2.0.2
 
-REM TODO CHECK REQUIREMENTS
-REM git, cmake, visual studio compilers
 where git >nul 2>nul || (call :pm-echo-error "git is required" & exit 1)
 where cmake >nul 2>nul || (call :pm-echo-error "cmake is required" & exit 1)
 where 7z >nul 2>nul || (call :pm-echo-error "7z is required" & exit 1)
