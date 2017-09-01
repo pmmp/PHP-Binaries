@@ -49,7 +49,7 @@ cd php-src
 
 REM TODO: remove this (won't be needed as of RC2)
 call :pm-echo "Applying mkdist patch..."
-git apply "%script_path%\win32\copy-static-deps.patch"
+git apply --ignore-space-change --ignore-whitespace "%script_path%\win32\copy-static-deps.patch"
 cd ..
 
 call :pm-echo "Getting dependencies..."
