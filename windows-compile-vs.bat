@@ -112,6 +112,7 @@ call configure^
  --enable-zts^
  --enable-bcmath^
  --enable-ctype^
+ --enable-filter^
  --enable-hash^
  --enable-json^
  --enable-mbstring^
@@ -122,6 +123,7 @@ call configure^
  --with-curl^
  --without-gd^
  --with-gmp^
+ --with-openssl^
  --with-pthreads^
  --with-sodium^
  --with-yaml^
