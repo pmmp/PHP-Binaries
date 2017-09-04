@@ -1,7 +1,4 @@
-branches:
- only:
-  - master
-version: 1.0.{build}
+version: php-7.0-appveyor{build}
 clone_folder: c:\pmmp\windows-php
 build_script:
 - ps: >-
