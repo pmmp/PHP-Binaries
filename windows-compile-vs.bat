@@ -107,7 +107,6 @@ cd php-src
 call :pm-echo "Configuring PHP..."
 call buildconf.bat
 
-REM Building GD would be nice, but there's some dependency issue in 7.2
 call configure^
  --with-mp=auto^
  --with-prefix=pocketmine-php-bin^
@@ -122,18 +121,22 @@ call configure^
  --enable-hash^
  --enable-json^
  --enable-mbstring^
+ --enable-opcache=shared^
  --enable-phar^
  --enable-sockets^
  --enable-zip^
  --enable-zlib^
  --with-curl^
- --without-gd^
+ --with-gd=shared^
  --with-gmp^
+ --with-mysqli=shared^
+ --with-mysqlnd^
  --with-openssl^
  --with-pthreads^
  --with-sodium^
+ --with-sqlite3=shared^
  --with-yaml^
- --without-readline
+ --without-readline || (call :pm-error "Error configuring PHP" & exit 1)
 
 call :pm-echo "Compiling PHP..."
 nmake
@@ -146,7 +149,19 @@ popd
 call :pm-echo "Copying artifacts..."
 mkdir bin
 move C:\pocketmine-php-sdk\php-src\%ARCH%\Release_TS\php-%PHP_VER% bin\php
-REM TODO: create a php.ini
+cd bin\php
+
+echo extension_dir=ext >php.ini
+echo extension=php_openssl.dll >>php.ini
+echo zend_extension=php_opcache.dll
+echo zend.assertions=-1 >>php.ini
+echo ;The following extensions are included as shared extensions (DLLs) but disabled by default as they are optional. Uncomment the ones you want to enable. >>php.ini
+echo ;extension=php_gd2.dll >>php.ini
+echo ;extension=php_mysqli.dll >>php.ini
+echo ;extension=php_sqlite3.dll >>php.ini
+REM TODO: more entries
+
+cd ..\..
 
 call :pm-echo "Packaging build..."
 set package_filename=php-%PHP_VER%-%VC_VER%-%ARCH%.zip
