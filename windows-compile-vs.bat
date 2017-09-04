@@ -14,6 +14,7 @@ set PTHREAD_W32_VER=2-9-1
 
 set PHP_PTHREADS_VER=caca8dc42a5d75ddfb39e6fd15337e87e967517e
 set PHP_YAML_VER=2.0.2
+set PHP_POCKETMINE_CHUNKUTILS_VER=master
 
 where git >nul 2>nul || (call :pm-echo-error "git is required" & exit 1)
 where cmake >nul 2>nul || (call :pm-echo-error "cmake is required" & exit 1)
@@ -38,7 +39,7 @@ pushd C:\
 
 if exist pocketmine-php-sdk (
 	call :pm-echo "Deleting old workspace..."
-	rmdir /s /q pocketmine-php-sdk
+	rmdir /s /q pocketmine-php-sdk || exit 1
 )
 
 call :pm-echo "Getting SDK..."
@@ -64,11 +65,14 @@ call bin\phpsdk_deps.bat -u -t %VC_VER% -b %PHP_MAJOR_VER% -a %ARCH% -f -d deps
 call :pm-echo "Getting additional extensions..."
 cd php-src\ext
 
-call :get-zip https://github.com/krakjoe/pthreads/archive/%PHP_PTHREADS_VER%.zip
+call :get-zip https://github.com/krakjoe/pthreads/archive/%PHP_PTHREADS_VER%.zip || exit 1
 move pthreads-%PHP_PTHREADS_VER% pthreads
 
-call :get-zip https://github.com/php/pecl-file_formats-yaml/archive/%PHP_YAML_VER%.zip
+call :get-zip https://github.com/php/pecl-file_formats-yaml/archive/%PHP_YAML_VER%.zip || exit 1
 move pecl-file_formats-yaml-%PHP_YAML_VER% yaml
+
+call :get-zip https://github.com/dktapps/PocketMine-C-ChunkUtils/archive/%PHP_POCKETMINE_CHUNKUTILS_VER%.zip || exit 1
+move PocketMine-C-ChunkUtils-%PHP_POCKETMINE_CHUNKUTILS_VER% pocketmine_chunkutils
 
 cd ../..
 
@@ -76,7 +80,7 @@ call :pm-echo "Getting additional dependencies..."
 cd deps
 
 call :pm-echo "Downloading LibYAML version %LIBYAML_VER%..."
-call :get-zip https://github.com/yaml/libyaml/archive/%LIBYAML_VER%.zip
+call :get-zip https://github.com/yaml/libyaml/archive/%LIBYAML_VER%.zip || exit 1
 move libyaml-%LIBYAML_VER% libyaml
 cd libyaml
 cmake -G "%CMAKE_TARGET%"
@@ -91,7 +95,7 @@ cd ..
 
 mkdir pthread-w32
 cd pthread-w32
-call :get-zip http://www.mirrorservice.org/sites/sources.redhat.com/pub/pthreads-win32/pthreads-w32-2-9-1-release.zip
+call :get-zip http://www.mirrorservice.org/sites/sources.redhat.com/pub/pthreads-win32/pthreads-w32-2-9-1-release.zip || exit 1
 REM move pthreads-w32-2-9-1-release pthread-w32
 
 copy Pre-built.2\include\pthread.h ..\include\pthread.h
@@ -123,6 +127,7 @@ call configure^
  --enable-mbstring^
  --enable-opcache=shared^
  --enable-phar^
+ --enable-pocketmine-chunkutils=shared^
  --enable-sockets^
  --enable-zip^
  --enable-zlib^
@@ -136,7 +141,7 @@ call configure^
  --with-sodium^
  --with-sqlite3=shared^
  --with-yaml^
- --without-readline || (call :pm-error "Error configuring PHP" & exit 1)
+ --without-readline || (call :pm-echo-error "Error configuring PHP" & exit 1)
 
 call :pm-echo "Compiling PHP..."
 nmake
@@ -153,6 +158,7 @@ cd bin\php
 
 echo extension_dir=ext >php.ini
 echo extension=php_openssl.dll >>php.ini
+echo extension=php_pocketmine_chunkutils.dll >>php.ini
 echo zend_extension=php_opcache.dll >>php.ini
 echo zend.assertions=-1 >>php.ini
 echo ;The following extensions are included as shared extensions (DLLs) but disabled by default as they are optional. Uncomment the ones you want to enable. >>php.ini
