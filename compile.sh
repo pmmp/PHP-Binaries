@@ -912,7 +912,7 @@ fi
 
 cd "$DIR"
 if [ "$COMPILE_DEBUG" != "yes" ]; then
-echo -n "[INFO] Cleaning up..."
+	echo -n "[INFO] Cleaning up..."
 	rm -r -f install_data/ >> "$DIR/install.log" 2>&1
 	rm -f bin/php7/bin/curl* >> "$DIR/install.log" 2>&1
 	rm -f bin/php7/bin/curl-config* >> "$DIR/install.log" 2>&1
