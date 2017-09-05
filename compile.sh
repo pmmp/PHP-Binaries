@@ -8,7 +8,6 @@ ZEND_VM="GOTO"
 ZLIB_VERSION="1.2.11"
 MBEDTLS_VERSION="2.6.0"
 GMP_VERSION="6.1.2"
-GMP_VERSION_DIR="6.1.2"
 CURL_VERSION="curl-7_55_1"
 READLINE_VERSION="6.3"
 NCURSES_VERSION="6.0"
@@ -18,14 +17,10 @@ XDEBUG_VERSION="2.5.5"
 WEAKREF_VERSION="0.3.3"
 PHPYAML_VERSION="2.0.2"
 YAML_VERSION="0.1.7"
-YAML_VERSION_ANDROID="0.1.7"
-#PHPLEVELDB_VERSION="0.1.4"
 PHPLEVELDB_VERSION="5cfe735dac5ceafc6848c96177509450febc12d0"
-#LEVELDB_VERSION="1.18"
 LEVELDB_VERSION="f4022ac7c5a022f7a08a1b6dc98c06ef3eed352a" #Check MacOS
 LIBXML_VERSION="2.9.1"
 LIBPNG_VERSION="1.6.32"
-BCOMPILER_VERSION="1.0.2"
 POCKETMINE_CHUNKUTILS_VERSION="master"
 OPENSSL_VERSION="1.1.0f"
 
@@ -394,7 +389,6 @@ else
 	HAVE_READLINE="--without-readline"
 fi
 
-
 if [ "$DO_STATIC" == "yes" ]; then
 	EXTRA_FLAGS="--static"
 else
@@ -433,7 +427,7 @@ fi
 #GMP
 echo -n "[GMP] downloading $GMP_VERSION..."
 download_file "https://gmplib.org/download/gmp/gmp-$GMP_VERSION.tar.bz2" | tar -jx >> "$DIR/install.log" 2>&1
-mv gmp-$GMP_VERSION_DIR gmp
+mv gmp-$GMP_VERSION gmp
 echo -n " checking..."
 cd gmp
 RANLIB=$RANLIB ./configure --prefix="$DIR/bin/php7" \
@@ -555,12 +549,6 @@ else
 	HAVE_CURL="$DIR/bin/php7"
 fi
 
-#bcompiler
-#echo -n "[bcompiler] downloading $BCOMPILER_VERSION..."
-#download_file "http://pecl.php.net/get/bcompiler-$BCOMPILER_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-#mv bcompiler-$BCOMPILER_VERSION "$DIR/install_data/php/ext/bcompiler"
-#echo " done!"
-
 #PHP ncurses
 #echo -n "[PHP ncurses] downloading $PHPNCURSES_VERSION..."
 #download_file "http://pecl.php.net/get/ncurses-$PHPNCURSES_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
@@ -575,7 +563,7 @@ else
 fi
 #YAML
 echo -n "[YAML] downloading $YAML_VERSION..."
-download_file "https://github.com/yaml/libyaml/archive/$YAML_VERSION_ANDROID.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+download_file "https://github.com/yaml/libyaml/archive/$YAML_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 mv libyaml-$YAML_VERSION yaml
 cd yaml
 ./bootstrap >> "$DIR/install.log" 2>&1
