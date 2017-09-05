@@ -125,7 +125,7 @@ call configure^
  --enable-hash^
  --enable-json^
  --enable-mbstring^
- --enable-opcache=shared^
+ --disable-opcache^
  --enable-phar^
  --enable-pocketmine-chunkutils=shared^
  --enable-sockets^
@@ -159,7 +159,7 @@ cd bin\php
 echo extension_dir=ext >php.ini
 echo extension=php_openssl.dll >>php.ini
 echo extension=php_pocketmine_chunkutils.dll >>php.ini
-echo zend_extension=php_opcache.dll >>php.ini
+echo ;zend_extension=php_opcache.dll >>php.ini
 echo zend.assertions=-1 >>php.ini
 echo ;The following extensions are included as shared extensions (DLLs) but disabled by default as they are optional. Uncomment the ones you want to enable. >>php.ini
 echo ;extension=php_gd2.dll >>php.ini

@@ -822,7 +822,7 @@ $HAVE_MYSQLI \
 --enable-zip \
 --enable-ftp \
 --with-zend-vm=$ZEND_VM \
---enable-opcache=yes \
+--enable-opcache=no \
 --enable-weakref \
 $CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
 echo -n " compiling..."
@@ -880,7 +880,7 @@ else
 fi
 
 if [ "$IS_CROSSCOMPILE" != "yes" ] && [ "$DO_STATIC" == "no" ]; then
-	echo "zend_extension=opcache.so" >> "$DIR/bin/php7/bin/php.ini"
+	echo ";zend_extension=opcache.so" >> "$DIR/bin/php7/bin/php.ini"
 	echo "opcache.enable=1" >> "$DIR/bin/php7/bin/php.ini"
 	echo "opcache.enable_cli=1" >> "$DIR/bin/php7/bin/php.ini"
 	echo "opcache.save_comments=1" >> "$DIR/bin/php7/bin/php.ini"
