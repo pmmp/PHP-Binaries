@@ -126,6 +126,7 @@ call configure^
  --enable-json^
  --enable-mbstring^
  --disable-opcache^
+ --with-pcre-jit^
  --enable-phar^
  --enable-pocketmine-chunkutils=shared^
  --enable-sockets^
@@ -144,10 +145,10 @@ call configure^
  --without-readline || (call :pm-echo-error "Error configuring PHP" & exit 1)
 
 call :pm-echo "Compiling PHP..."
-nmake
+nmake || (call :pm-echo-error "Error compiling PHP" & exit 1)
 
 call :pm-echo "Assembling artifacts..."
-nmake snap
+nmake snap || (call :pm-echo-error "Error assembling artifacts" & exit 1)
 
 popd
 
