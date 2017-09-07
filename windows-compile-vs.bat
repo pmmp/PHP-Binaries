@@ -132,6 +132,7 @@ call configure^
  --enable-sockets^
  --enable-zip^
  --enable-zlib^
+ --with-bz2^
  --with-curl^
  --with-gd=shared^
  --with-gmp^
