@@ -179,6 +179,31 @@ REM TODO: more entries
 
 cd ..\..
 
+call :pm-echo "Checking PHP build works..."
+bin\php\php.exe --version >>"%log_file%" || (call :pm-echo-error "PHP build isn't working" & exit 1)
+
+
+
+call :pm-echo "Getting Composer..."
+
+set expect_signature=INVALID
+for /f %%i in ('wget --no-check-certificate -q -O - https://composer.github.io/installer.sig') do set expect_signature=%%i
+
+wget --no-check-certificate  -q -O composer-setup.php https://getcomposer.org/installer
+set actual_signature=INVALID2
+for /f %%i in ('bin\php\php.exe -r "echo hash_file(\"SHA384\", \"composer-setup.php\");"') do set actual_signature=%%i
+
+call :pm-echo "Checking Composer installer signature..."
+if "%expect_signature%" == "%actual_signature%" (
+	call :pm-echo "Installing composer to 'bin'..."
+	call bin\php\php.exe composer-setup.php --install-dir=bin >>"%log_file%" || exit 1
+	rm composer-setup.php
+) else (
+	call :pm-echo-error "Bad signature on Composer installer, skipping"
+)
+
+
+
 call :pm-echo "Packaging build..."
 set package_filename=php-%PHP_VER%-%VC_VER%-%ARCH%.zip
 if exist %package_filename% rm %package_filename%
