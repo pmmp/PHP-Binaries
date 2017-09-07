@@ -8,3 +8,4 @@ build_script:
     rm -r -Force bin
 artifacts:
 - path: '*php-*.zip'
+- path: 'compile.log'
