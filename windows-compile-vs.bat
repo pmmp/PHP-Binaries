@@ -185,6 +185,8 @@ if exist %package_filename% rm %package_filename%
 7z a -bd %package_filename% bin >nul || (call :pm-echo-error "Failed to package the build!" & exit 1)
 
 call :pm-echo "Created build package %package_filename%"
+call :pm-echo "Moving debugging symbols to output directory..."
+move C:\pocketmine-php-sdk\php-src\%ARCH%\Release_TS\php-debug-pack*.zip .
 call :pm-echo "Done?"
 
 exit 0
