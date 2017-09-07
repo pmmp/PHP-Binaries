@@ -16,15 +16,18 @@ set PHP_PTHREADS_VER=caca8dc42a5d75ddfb39e6fd15337e87e967517e
 set PHP_YAML_VER=2.0.2
 set PHP_POCKETMINE_CHUNKUTILS_VER=master
 
+set script_path=%~dp0
+set log_file=%script_path%compile.log
+echo.>"%log_file%"
+
 where git >nul 2>nul || (call :pm-echo-error "git is required" & exit 1)
 where cmake >nul 2>nul || (call :pm-echo-error "cmake is required" & exit 1)
 where 7z >nul 2>nul || (call :pm-echo-error "7z is required" & exit 1)
 
 call :pm-echo "PHP Windows compiler"
 call :pm-echo "Setting up environment..."
-call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" %ARCH% || exit 1
+call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" %ARCH% >>"%log_file%" || exit 1
 
-set script_path=%~dp0
 if not exist "%script_path%win32\copy-static-deps.patch" (
 	call :pm-echo "ERROR: Required patch %script_path%win32\copy-static-deps.patch not found"
 	exit 1
@@ -32,84 +35,88 @@ if not exist "%script_path%win32\copy-static-deps.patch" (
 
 if exist bin (
 	call :pm-echo "Deleting old binary folder..."
-	rmdir /s /q bin
+	rmdir /s /q bin >>"%log_file%"
 )
 
 pushd C:\
 
 if exist pocketmine-php-sdk (
 	call :pm-echo "Deleting old workspace..."
-	rmdir /s /q pocketmine-php-sdk || exit 1
+	rmdir /s /q pocketmine-php-sdk >>"%log_file%" || exit 1
 )
 
 call :pm-echo "Getting SDK..."
-git clone https://github.com/OSTC/php-sdk-binary-tools.git -b php-sdk-%PHP_SDK_VER% --depth=1 -q pocketmine-php-sdk
+git clone https://github.com/OSTC/php-sdk-binary-tools.git -b php-sdk-%PHP_SDK_VER% --depth=1 -q pocketmine-php-sdk >>"%log_file%"
 
 cd pocketmine-php-sdk
 
-call bin\phpsdk_setvars.bat
+call bin\phpsdk_setvars.bat >>"%log_file%"
 
 call :pm-echo "Downloading PHP source version %PHP_VER%..."
-git clone https://github.com/php/php-src -b php-%PHP_VER% --depth=1 -q php-src
+git clone https://github.com/php/php-src -b php-%PHP_VER% --depth=1 -q php-src >>"%log_file%"
 cd php-src
 
 REM TODO: remove this (won't be needed as of RC2)
 call :pm-echo "Applying mkdist patch..."
-git apply --ignore-space-change --ignore-whitespace "%script_path%\win32\copy-static-deps.patch"
+git apply --ignore-space-change --ignore-whitespace "%script_path%\win32\copy-static-deps.patch" >>"%log_file%" || exit 1
 cd ..
 
-call :pm-echo "Getting dependencies..."
-call bin\phpsdk_deps.bat -u -t %VC_VER% -b %PHP_MAJOR_VER% -a %ARCH% -f -d deps
+call :pm-echo "Getting PHP dependencies..."
+call bin\phpsdk_deps.bat -u -t %VC_VER% -b %PHP_MAJOR_VER% -a %ARCH% -f -d deps >>"%log_file%" || exit 1
 
-
-call :pm-echo "Getting additional extensions..."
-cd php-src\ext
-
-call :get-zip https://github.com/krakjoe/pthreads/archive/%PHP_PTHREADS_VER%.zip || exit 1
-move pthreads-%PHP_PTHREADS_VER% pthreads
-
-call :get-zip https://github.com/php/pecl-file_formats-yaml/archive/%PHP_YAML_VER%.zip || exit 1
-move pecl-file_formats-yaml-%PHP_YAML_VER% yaml
-
-call :get-zip https://github.com/dktapps/PocketMine-C-ChunkUtils/archive/%PHP_POCKETMINE_CHUNKUTILS_VER%.zip || exit 1
-move PocketMine-C-ChunkUtils-%PHP_POCKETMINE_CHUNKUTILS_VER% pocketmine_chunkutils
-
-cd ../..
 
 call :pm-echo "Getting additional dependencies..."
 cd deps
 
 call :pm-echo "Downloading LibYAML version %LIBYAML_VER%..."
 call :get-zip https://github.com/yaml/libyaml/archive/%LIBYAML_VER%.zip || exit 1
-move libyaml-%LIBYAML_VER% libyaml
+move libyaml-%LIBYAML_VER% libyaml >>"%log_file%"
 cd libyaml
-cmake -G "%CMAKE_TARGET%"
+cmake -G "%CMAKE_TARGET%" >>"%log_file%"
 call :pm-echo "Compiling..."
-msbuild yaml.sln /p:Configuration=RelWithDebInfo /m
+msbuild yaml.sln /p:Configuration=RelWithDebInfo /m >>"%log_file%" || exit 1
 call :pm-echo "Copying files..."
-copy RelWithDebInfo\yaml.lib ..\lib\yaml.lib
-copy RelWithDebInfo\yaml.dll ..\bin\yaml.dll
-copy RelWithDebInfo\yaml.pdb ..\bin\yaml.pdb
-copy include\yaml.h ..\include\yaml.h
+copy RelWithDebInfo\yaml.lib ..\lib\yaml.lib >>"%log_file%"
+copy RelWithDebInfo\yaml.dll ..\bin\yaml.dll >>"%log_file%"
+copy RelWithDebInfo\yaml.pdb ..\bin\yaml.pdb >>"%log_file%"
+copy include\yaml.h ..\include\yaml.h >>"%log_file%"
 cd ..
 
+call :pm-echo "Downloading pthread-w32 version %PTHREAD_W32_VER%..."
 mkdir pthread-w32
 cd pthread-w32
-call :get-zip http://www.mirrorservice.org/sites/sources.redhat.com/pub/pthreads-win32/pthreads-w32-2-9-1-release.zip || exit 1
-REM move pthreads-w32-2-9-1-release pthread-w32
+call :get-zip http://www.mirrorservice.org/sites/sources.redhat.com/pub/pthreads-win32/pthreads-w32-%PTHREAD_W32_VER%-release.zip || exit 1
 
-copy Pre-built.2\include\pthread.h ..\include\pthread.h
-copy Pre-built.2\include\sched.h ..\include\sched.h
-copy Pre-built.2\include\semaphore.h ..\include\semaphore.h
-copy Pre-built.2\lib\%ARCH%\pthreadVC2.lib ..\lib\pthreadVC2.lib
-copy Pre-built.2\dll\%ARCH%\pthreadVC2.dll ..\bin\pthreadVC2.dll
+call :pm-echo "Copying files..."
+copy Pre-built.2\include\pthread.h ..\include\pthread.h >>"%log_file%"
+copy Pre-built.2\include\sched.h ..\include\sched.h >>"%log_file%"
+copy Pre-built.2\include\semaphore.h ..\include\semaphore.h >>"%log_file%"
+copy Pre-built.2\lib\%ARCH%\pthreadVC2.lib ..\lib\pthreadVC2.lib >>"%log_file%"
+copy Pre-built.2\dll\%ARCH%\pthreadVC2.dll ..\bin\pthreadVC2.dll >>"%log_file%"
 
 cd ..\..
+
+call :pm-echo "Getting additional PHP extensions..."
+cd php-src\ext
+
+call :pm-echo "Downloading PHP pthreads version %PHP_PTHREADS_VER%..."
+call :get-zip https://github.com/krakjoe/pthreads/archive/%PHP_PTHREADS_VER%.zip || exit 1
+move pthreads-%PHP_PTHREADS_VER% pthreads >>"%log_file%"
+
+call :pm-echo "Downloading PHP YAML version %PHP_YAML_VER%..."
+call :get-zip https://github.com/php/pecl-file_formats-yaml/archive/%PHP_YAML_VER%.zip || exit 1
+move pecl-file_formats-yaml-%PHP_YAML_VER% yaml >>"%log_file%"
+
+call :pm-echo "Downloading PocketMine-ChunkUtils version %PHP_POCKETMINE_CHUNKUTILS_VER%..."
+call :get-zip https://github.com/dktapps/PocketMine-C-ChunkUtils/archive/%PHP_POCKETMINE_CHUNKUTILS_VER%.zip || exit 1
+move PocketMine-C-ChunkUtils-%PHP_POCKETMINE_CHUNKUTILS_VER% pocketmine_chunkutils >>"%log_file%"
+
+cd ../..
 
 :skip
 cd php-src
 call :pm-echo "Configuring PHP..."
-call buildconf.bat
+call buildconf.bat >>"%log_file%"
 
 call configure^
  --with-mp=auto^
@@ -143,13 +150,13 @@ call configure^
  --with-sodium^
  --with-sqlite3=shared^
  --with-yaml^
- --without-readline || (call :pm-echo-error "Error configuring PHP" & exit 1)
+ --without-readline >>"%log_file%" || (call :pm-echo-error "Error configuring PHP" & exit 1)
 
 call :pm-echo "Compiling PHP..."
-nmake || (call :pm-echo-error "Error compiling PHP" & exit 1)
+nmake >>"%log_file%" || (call :pm-echo-error "Error compiling PHP" & exit 1)
 
 call :pm-echo "Assembling artifacts..."
-nmake snap || (call :pm-echo-error "Error assembling artifacts" & exit 1)
+nmake snap >>"%log_file%" || (call :pm-echo-error "Error assembling artifacts" & exit 1)
 
 popd
 
@@ -158,6 +165,7 @@ mkdir bin
 move C:\pocketmine-php-sdk\php-src\%ARCH%\Release_TS\php-%PHP_VER% bin\php
 cd bin\php
 
+call :pm-echo "Generating php.ini..."
 echo extension_dir=ext >php.ini
 echo extension=php_openssl.dll >>php.ini
 echo extension=php_pocketmine_chunkutils.dll >>php.ini
@@ -174,7 +182,7 @@ cd ..\..
 call :pm-echo "Packaging build..."
 set package_filename=php-%PHP_VER%-%VC_VER%-%ARCH%.zip
 if exist %package_filename% rm %package_filename%
-7z a %package_filename% bin || (call :pm-echo-error "Failed to package the build!" & exit 1)
+7z a -bd %package_filename% bin >nul || (call :pm-echo-error "Failed to package the build!" & exit 1)
 
 call :pm-echo "Created build package %package_filename%"
 call :pm-echo "Done?"
@@ -183,7 +191,7 @@ exit 0
 
 :get-zip
 wget %~1 --no-check-certificate -q -O temp.zip
-7z x -y temp.zip
+7z x -y temp.zip >nul
 rm temp.zip
 exit /B 0
 
@@ -193,4 +201,5 @@ exit /B 0
 
 :pm-echo
 echo [PocketMine] %~1
+echo [PocketMine] %~1 >>"%log_file%"
 exit /B 0
