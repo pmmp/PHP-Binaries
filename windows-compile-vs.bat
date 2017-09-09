@@ -134,7 +134,6 @@ call configure^
  --enable-json^
  --enable-mbstring^
  --disable-opcache^
- --with-pcre-jit^
  --enable-phar^
  --enable-pocketmine-chunkutils=shared^
  --enable-sockets^
@@ -147,6 +146,7 @@ call configure^
  --with-mysqli=shared^
  --with-mysqlnd^
  --with-openssl^
+ --with-pcre-jit^
  --with-pthreads^
  --with-sodium^
  --with-sqlite3=shared^
