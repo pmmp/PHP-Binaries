@@ -127,6 +127,7 @@ call configure^
  --enable-cli^
  --enable-zts^
  --enable-bcmath^
+ --enable-calendar^
  --enable-ctype^
  --enable-filter^
  --enable-hash^
