@@ -31,6 +31,7 @@ else
 		fi
 	else
 		echo "error, curl or wget not found"
+		exit 1
 	fi
 fi
 

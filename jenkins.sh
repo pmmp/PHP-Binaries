@@ -16,6 +16,7 @@ else
 		alias download_file="curl --insecure --silent --show-error --location --globoff"
 	else
 		echo "error, curl or wget not found"
+		exit 1
 	fi
 fi
 
