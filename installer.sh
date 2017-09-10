@@ -5,38 +5,26 @@ BRANCH="master"
 NAME="PocketMine-MP"
 BUILD_URL=""
 
-LINUX_32_BUILD="PHP_7.0.3_x86_Linux"
-LINUX_64_BUILD="PHP_7.0.3_x86-64_Linux"
-#CENTOS_32_BUILD="PHP_5.6.2_x86_CentOS"
-#CENTOS_64_BUILD="PHP_5.6.2_x86-64_CentOS"
-MAC_32_BUILD="PHP_7.0.3_x86_MacOS"
-MAC_64_BUILD="PHP_7.0.3_x86-64_MacOS"
-RPI_BUILD="PHP_7.0.6_ARM_Raspbian_hard"
-ARMV7_BUILD="PHP_7.0.0RC3_ARMv7"
-AND_BUILD="PHP_7.0.0RC3_ARMv7_Android"
-IOS_BUILD="PHP_5.5.13_ARMv6_iOS"
+LINUX_BUILD="PHP_7.0.3_x86-64_Linux"
+#CENTOS_BUILD="PHP_5.6.2_x86-64_CentOS"
+MAC_BUILD="PHP_7.0.3_x86-64_MacOS"
 update=off
 forcecompile=off
 alldone=no
 checkRoot=on
-XDEBUG="off"
 alternateurl=off
 
 INSTALL_DIRECTORY="./"
 
 IGNORE_CERT="no"
 
-while getopts "rxucid:v:t:" opt; do
+while getopts "rucid:v:t:" opt; do
 	case $opt in
 		a)
 			alternateurl=on
 			;;
 		r)
 			checkRoot=off
-			;;
-		x)
-			XDEBUG="on"
-			echo "[+] Enabling xdebug"
 			;;
 		u)
 			update=on
@@ -63,6 +51,11 @@ while getopts "rxucid:v:t:" opt; do
 	esac
 done
 
+
+if [ `getconf LONG_BIT` == "32" ]; then
+	echo "[ERROR] PocketMine-MP is no longer supported on 32-bit systems."
+	exit 1
+fi
 
 #Needed to use aliases
 shopt -s expand_aliases
@@ -188,7 +181,6 @@ else
 					GPG_BIN="gpg2"
 				fi
 			fi
-
 			if [ "$GPG_BIN" != "" ]; then
 				gpg --fingerprint $PUBLICKEY_FINGERPRINT > /dev/null 2>&1
 				if [ $? -ne 0 ]; then
@@ -267,225 +259,65 @@ fi
 if [ "$update" == "on" ]; then
 	echo "[3/3] Skipping PHP recompilation due to user request"
 else
-	echo -n "[3/3] Obtaining PHP:"
-	echo " detecting if build is available..."
-	if [ "$forcecompile" == "off" ] && [ "$(uname -s)" == "Darwin" ]; then
-		set +e
-		UNAME_M=$(uname -m)
-		IS_IOS=$(expr match $UNAME_M 'iP[a-zA-Z0-9,]*' 2> /dev/null)
-		set -e
-		if [[ "$IS_IOS" -gt 0 ]]; then
-			rm -r -f bin/ >> /dev/null 2>&1
-			echo -n "[3/3] iOS PHP build available, downloading $IOS_BUILD.tar.gz..."
-			download_file "https://dl.bintray.com/pocketmine/PocketMine/$IOS_BUILD.tar.gz" | tar -zx > /dev/null 2>&1
-			chmod +x ./bin/php7/bin/*
-			echo -n " checking..."
-			if [ "$(./bin/php7/bin/php -r 'echo 1;' 2>/dev/null)" == "1" ]; then
-				echo -n " regenerating php.ini..."
-				TIMEZONE=$(date +%Z)
-				echo "" > "./bin/php7/bin/php.ini"
-				#UOPZ_PATH="$(find $(pwd) -name uopz.so)"
-				#echo "zend_extension=\"$UOPZ_PATH\"" >> "./bin/php7/bin/php.ini"
-				echo "date.timezone=$TIMEZONE" >> "./bin/php7/bin/php.ini"
-				echo "short_open_tag=0" >> "./bin/php7/bin/php.ini"
-				echo "asp_tags=0" >> "./bin/php7/bin/php.ini"
-				echo "phar.readonly=0" >> "./bin/php7/bin/php.ini"
-				echo "phar.require_hash=1" >> "./bin/php7/bin/php.ini"
-				echo "zend.assertions=-1" >> "./bin/php7/bin/php.ini"
-				echo " done"
-				alldone=yes
-			else
-				echo " invalid build detected"
-			fi
-		else
-			rm -r -f bin/ >> /dev/null 2>&1
-			if [ `getconf LONG_BIT` == "64" ]; then
-				echo -n "[3/3] MacOS 64-bit PHP build available, downloading $MAC_64_BUILD.tar.gz..."
-				MAC_BUILD="$MAC_64_BUILD"
-			else
-				echo -n "[3/3] MacOS 32-bit PHP build available, downloading $MAC_32_BUILD.tar.gz..."
-				MAC_BUILD="$MAC_32_BUILD"
-			fi
+	echo -n "[3/3] Obtaining PHP: detecting if build is available..."
+	while [ "$forcecompile" == "off" ]
+	do
+		rm -r -f bin/ >> /dev/null 2>&1
+
+		#TODO: this needs to check what PHP version is required by the downloaded PM version instead of using hardcoded crap
+
+		if [ "$(uname -s)" == "Darwin" ]; then
+			echo -n " MacOS PHP build available, downloading $MAC_BUILD.tar.gz..."
+
 			download_file "https://dl.bintray.com/pocketmine/PocketMine/$MAC_BUILD.tar.gz" | tar -zx > /dev/null 2>&1
-			chmod +x ./bin/php7/bin/*
-			echo -n " checking..."
-			if [ "$(./bin/php7/bin/php -r 'echo 1;' 2>/dev/null)" == "1" ]; then
-				echo -n " regenerating php.ini..."
-				TIMEZONE=$(date +%Z)
-				#OPCACHE_PATH="$(find $(pwd) -name opcache.so)"
-				XDEBUG_PATH="$(find $(pwd) -name xdebug.so)"
-				echo "" > "./bin/php7/bin/php.ini"
-				#UOPZ_PATH="$(find $(pwd) -name uopz.so)"
-				#echo "zend_extension=\"$UOPZ_PATH\"" >> "./bin/php7/bin/php.ini"
-				#echo "zend_extension=\"$OPCACHE_PATH\"" >> "./bin/php7/bin/php.ini"
-				if [ "$XDEBUG" == "on" ]; then
-					echo "zend_extension=\"$XDEBUG_PATH\"" >> "./bin/php7/bin/php.ini"
-				fi
-				echo "opcache.enable=1" >> "./bin/php7/bin/php.ini"
-				echo "opcache.enable_cli=1" >> "./bin/php7/bin/php.ini"
-				echo "opcache.save_comments=1" >> "./bin/php7/bin/php.ini"
-				echo "opcache.load_comments=1" >> "./bin/php7/bin/php.ini"
-				echo "opcache.fast_shutdown=0" >> "./bin/php7/bin/php.ini"
-				echo "opcache.max_accelerated_files=4096" >> "./bin/php7/bin/php.ini"
-				echo "opcache.interned_strings_buffer=8" >> "./bin/php7/bin/php.ini"
-				echo "opcache.memory_consumption=128" >> "./bin/php7/bin/php.ini"
-				echo "opcache.optimization_level=0xffffffff" >> "./bin/php7/bin/php.ini"
-				echo "date.timezone=$TIMEZONE" >> "./bin/php7/bin/php.ini"
-				echo "short_open_tag=0" >> "./bin/php7/bin/php.ini"
-				echo "asp_tags=0" >> "./bin/php7/bin/php.ini"
-				echo "phar.readonly=0" >> "./bin/php7/bin/php.ini"
-				echo "phar.require_hash=1" >> "./bin/php7/bin/php.ini"
-				echo "zend.assertions=-1" >> "./bin/php7/bin/php.ini"
-				echo " done"
-				alldone=yes
-			else
-				echo " invalid build detected"
-			fi
-		fi
-	else
-		grep -q BCM270[89] /proc/cpuinfo > /dev/null 2>&1
-		IS_RPI=$?
-		grep -q sun7i /proc/cpuinfo > /dev/null 2>&1
-		IS_BPI=$?
-		uname -m | grep -q armv7 > /dev/null 2>&1
-		IS_ARMV7=$?
-		if ([ "$IS_RPI" -eq 0 ] || [ "$IS_BPI" -eq 0 ]) && [ "$forcecompile" == "off" ]; then
-			rm -r -f bin/ >> /dev/null 2>&1
-			echo -n "[3/3] Raspberry Pi PHP build available, downloading $RPI_BUILD.tar.gz..."
-			download_file "https://dl.bintray.com/pocketmine/PocketMine/$RPI_BUILD.tar.gz" | tar -zx > /dev/null 2>&1
-			chmod +x ./bin/php7/bin/*
-			echo -n " checking..."
-			if [ "$(./bin/php7/bin/php -r 'echo 1;' 2>/dev/null)" == "1" ]; then
-				echo -n " regenerating php.ini..."
-				TIMEZONE=$(date +%Z)
-				#OPCACHE_PATH="$(find $(pwd) -name opcache.so)"
-				if [ "$XDEBUG" == "on" ]; then
-					echo "zend_extension=\"$XDEBUG_PATH\"" >> "./bin/php7/bin/php.ini"
-				fi
-				echo "" > "./bin/php7/bin/php.ini"
-				#UOPZ_PATH="$(find $(pwd) -name uopz.so)"
-				#echo "zend_extension=\"$UOPZ_PATH\"" >> "./bin/php7/bin/php.ini"
-				#echo "zend_extension=\"$OPCACHE_PATH\"" >> "./bin/php7/bin/php.ini"
-				if [ "$XDEBUG" == "on" ]; then
-					echo "zend_extension=\"$XDEBUG_PATH\"" >> "./bin/php7/bin/php.ini"
-				fi
-				echo "opcache.enable=1" >> "./bin/php7/bin/php.ini"
-				echo "opcache.enable_cli=1" >> "./bin/php7/bin/php.ini"
-				echo "opcache.save_comments=1" >> "./bin/php7/bin/php.ini"
-				echo "opcache.load_comments=1" >> "./bin/php7/bin/php.ini"
-				echo "opcache.fast_shutdown=1" >> "./bin/php7/bin/php.ini"
-				echo "opcache.max_accelerated_files=4096" >> "./bin/php7/bin/php.ini"
-				echo "opcache.interned_strings_buffer=8" >> "./bin/php7/bin/php.ini"
-				echo "opcache.memory_consumption=128" >> "./bin/php7/bin/php.ini"
-				echo "opcache.optimization_level=0xffffffff" >> "./bin/php7/bin/php.ini"
-				echo "date.timezone=$TIMEZONE" >> "./bin/php7/bin/php.ini"
-				echo "short_open_tag=0" >> "./bin/php7/bin/php.ini"
-				echo "asp_tags=0" >> "./bin/php7/bin/php.ini"
-				echo "phar.readonly=0" >> "./bin/php7/bin/php.ini"
-				echo "phar.require_hash=1" >> "./bin/php7/bin/php.ini"
-				echo "zend.assertions=-1" >> "./bin/php7/bin/php.ini"
-				echo " done"
-				alldone=yes
-			else
-				echo " invalid build detected"
-			fi
-		elif [ "$IS_ARMV7" -eq 0 ] && [ "$forcecompile" == "off" ]; then
-			rm -r -f bin/ >> /dev/null 2>&1
-			echo -n "[3/3] ARMv7 PHP build available, downloading $ARMV7_BUILD.tar.gz..."
-			download_file "https://dl.bintray.com/pocketmine/PocketMine/$ARMV7_BUILD.tar.gz" | tar -zx > /dev/null 2>&1
-			chmod +x ./bin/php7/bin/*
-			echo -n " checking..."
-			if [ "$(./bin/php7/bin/php -r 'echo 1;' 2>/dev/null)" == "1" ]; then
-				echo -n " regenerating php.ini..."
-				#OPCACHE_PATH="$(find $(pwd) -name opcache.so)"
-				XDEBUG_PATH="$(find $(pwd) -name xdebug.so)"
-				echo "" > "./bin/php7/bin/php.ini"
-				#UOPZ_PATH="$(find $(pwd) -name uopz.so)"
-				#echo "zend_extension=\"$UOPZ_PATH\"" >> "./bin/php7/bin/php.ini"
-				#echo "zend_extension=\"$OPCACHE_PATH\"" >> "./bin/php7/bin/php.ini"
-				if [ "$XDEBUG" == "on" ]; then
-					echo "zend_extension=\"$XDEBUG_PATH\"" >> "./bin/php7/bin/php.ini"
-				fi
-				echo "opcache.enable=1" >> "./bin/php7/bin/php.ini"
-				echo "opcache.enable_cli=1" >> "./bin/php7/bin/php.ini"
-				echo "opcache.save_comments=1" >> "./bin/php7/bin/php.ini"
-				echo "opcache.load_comments=1" >> "./bin/php7/bin/php.ini"
-				echo "opcache.fast_shutdown=1" >> "./bin/php7/bin/php.ini"
-				echo "opcache.max_accelerated_files=4096" >> "./bin/php7/bin/php.ini"
-				echo "opcache.interned_strings_buffer=8" >> "./bin/php7/bin/php.ini"
-				echo "opcache.memory_consumption=128" >> "./bin/php7/bin/php.ini"
-				echo "opcache.optimization_level=0xffffffff" >> "./bin/php7/bin/php.ini"
-				echo "date.timezone=$TIMEZONE" >> "./bin/php7/bin/php.ini"
-				echo "short_open_tag=0" >> "./bin/php7/bin/php.ini"
-				echo "asp_tags=0" >> "./bin/php7/bin/php.ini"
-				echo "phar.readonly=0" >> "./bin/php7/bin/php.ini"
-				echo "phar.require_hash=1" >> "./bin/php7/bin/php.ini"
-				echo "zend.assertions=-1" >> "./bin/php7/bin/php.ini"
-				echo " done"
-				alldone=yes
-			else
-				echo " invalid build detected"
-			fi
-		elif [ "$forcecompile" == "off" ] && [ "$(uname -s)" == "Linux" ]; then
-			rm -r -f bin/ >> /dev/null 2>&1
-
+		elif [ "$(uname -s)" == "Linux" ]; then
 			#if [[ "$(cat /etc/redhat-release 2>/dev/null)" == *CentOS* ]]; then
-				#if [ `getconf LONG_BIT` = "64" ]; then
-				#	echo -n "[3/3] CentOS 64-bit PHP build available, downloading $CENTOS_64_BUILD.tar.gz..."
-				#	LINUX_BUILD="$CENTOS_64_BUILD"
-				#else
-				#	echo -n "[3/3] CentOS 32-bit PHP build available, downloading $CENTOS_32_BUILD.tar.gz..."
-				#	LINUX_BUILD="$CENTOS_32_BUILD"
-				#fi
+			#echo -n " CentOS PHP build available, downloading $CENTOS_BUILD.tar.gz..."
+			#download_file "https://dl.bintray.com/pocketmine/PocketMine/$CENTOS_BUILD.tar.gz" | tar -zx > /dev/null 2>&1
 			#else
-				if [ `getconf LONG_BIT` = "64" ]; then
-					echo -n "[3/3] Linux 64-bit PHP build available, downloading $LINUX_64_BUILD.tar.gz..."
-					LINUX_BUILD="$LINUX_64_BUILD"
-				else
-					echo -n "[3/3] Linux 32-bit PHP build available, downloading $LINUX_32_BUILD.tar.gz..."
-					LINUX_BUILD="$LINUX_32_BUILD"
-				fi
-			#fi
 
+			#TODO: check architecture (we might not be on an x86_64 system)
+
+			echo -n " Linux PHP build available, downloading $LINUX_BUILD.tar.gz..."
 			download_file "https://dl.bintray.com/pocketmine/PocketMine/$LINUX_BUILD.tar.gz" | tar -zx > /dev/null 2>&1
-			chmod +x ./bin/php7/bin/*
-			echo -n " checking..."
-			if [ "$(./bin/php7/bin/php -r 'echo 1;' 2>/dev/null)" == "1" ]; then
-				echo -n " regenerating php.ini..."
-				#OPCACHE_PATH="$(find $(pwd) -name opcache.so)"
-				XDEBUG_PATH="$(find $(pwd) -name xdebug.so)"
-				echo "" > "./bin/php7/bin/php.ini"
-				#UOPZ_PATH="$(find $(pwd) -name uopz.so)"
-				#echo "zend_extension=\"$UOPZ_PATH\"" >> "./bin/php7/bin/php.ini"
-				#echo "zend_extension=\"$OPCACHE_PATH\"" >> "./bin/php7/bin/php.ini"
-				if [ "$XDEBUG" == "on" ]; then
-					echo "zend_extension=\"$XDEBUG_PATH\"" >> "./bin/php7/bin/php.ini"
-				fi
-				echo "opcache.enable=1" >> "./bin/php7/bin/php.ini"
-				echo "opcache.enable_cli=1" >> "./bin/php7/bin/php.ini"
-				echo "opcache.save_comments=1" >> "./bin/php7/bin/php.ini"
-				echo "opcache.fast_shutdown=1" >> "./bin/php7/bin/php.ini"
-				echo "opcache.max_accelerated_files=4096" >> "./bin/php7/bin/php.ini"
-				echo "opcache.interned_strings_buffer=8" >> "./bin/php7/bin/php.ini"
-				echo "opcache.memory_consumption=128" >> "./bin/php7/bin/php.ini"
-				echo "opcache.optimization_level=0xffffffff" >> "./bin/php7/bin/php.ini"
-				echo "date.timezone=$TIMEZONE" >> "./bin/php7/bin/php.ini"
-				echo "short_open_tag=0" >> "./bin/php7/bin/php.ini"
-				echo "asp_tags=0" >> "./bin/php7/bin/php.ini"
-				echo "phar.readonly=0" >> "./bin/php7/bin/php.ini"
-				echo "phar.require_hash=1" >> "./bin/php7/bin/php.ini"
-				echo "zend.assertions=-1" >> "./bin/php7/bin/php.ini"
-				echo " done"
-				alldone=yes
+
+			#fi
+		else
+			echo " no prebuilt PHP download available"
+			break
+		fi
+
+		chmod +x ./bin/php7/bin/*
+		echo -n " checking..."
+
+		if [ "$(./bin/php7/bin/php -r 'echo 1;' 2>/dev/null)" == "1" ]; then
+			echo -n " updating php.ini..."
+
+			sed -i'.bak' "s/date.timezone=.*/date.timezone=$(date +%Z)/" bin/php7/bin/php.ini
+
+			EXTENSION_DIR=$(find $(pwd)/bin -name *debug-zts*) #make sure this only captures from `bin` in case the user renamed their old binary folder
+
+			if [ $(grep -c "extension_dir" bin/php7/bin/php.ini) -gt 0 ]; then
+				echo -n " updating extension directory..."
+				sed -i'.bak' "s{extension_dir=.*{extension_dir=$EXTENSION_DIR{" bin/php7/bin/php.ini
 			else
-				echo " invalid build detected, please upgrade your OS"
+				echo -n " setting extension directory..."
+				echo "extension_dir=$EXTENSION_DIR" >> bin/php7/bin/php.ini
 			fi
+
+			echo " done"
+			alldone=yes
+		else
+			echo " downloaded PHP build doesn't work on this platform!"
 		fi
-		if [ "$alldone" == "no" ]; then
-			set -e
-			echo "[3/3] no build found, compiling PHP automatically"
-			exec "./compile.sh"
-		fi
+
+		break
+	done
+	if [ "$alldone" == "no" ]; then
+		set -e
+		echo "[3/3] No prebuilt PHP found, compiling PHP automatically. This might take a while."
+		echo
+		exec "./compile.sh"
 	fi
 fi
 
