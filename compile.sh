@@ -736,6 +736,10 @@ cd php
 rm -f ./aclocal.m4 >> "$DIR/install.log" 2>&1
 rm -rf ./autom4te.cache/ >> "$DIR/install.log" 2>&1
 rm -f ./configure >> "$DIR/install.log" 2>&1
+
+#TODO: HACK! (ext/curl in 7.2.0RC1 messes up LDFLAGS)
+sed -i "s#save_LDFLAGS=\"\$CFLAGS\"#save_LDFLAGS=\"\$LDFLAGS\"#" ext/curl/config.m4
+
 ./buildconf --force >> "$DIR/install.log" 2>&1
 if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 	sed -i=".backup" 's/pthreads_working=no/pthreads_working=yes/' ./configure
