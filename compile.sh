@@ -492,7 +492,7 @@ no-threads \
 no-engine >> "$DIR/install.log" 2>&1
 
 echo -n " compiling..."
-make >> "$DIR/install.log" 2>&1
+make -j $THREADS >> "$DIR/install.log" 2>&1
 echo -n " installing..."
 make install >> "$DIR/install.log" 2>&1
 cd ..
