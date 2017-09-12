@@ -236,10 +236,6 @@ echo "[Composer] generating bin\composer.bat..."
 
 @'
 @echo off
-REM This batchfile exists for convenience of using the packaged Composer on Windows.
-REM Use it from the command line: `bin\composer [...composer parameters]`
-REM NOTE: THIS EXPECTS PHP.EXE to be in (server folder)\bin\php\php.exe
-REM If your PHP is elsewhere, make sure you change the paths to indicate so.
 "%~dp0php\php.exe" "%~dp0composer.phar" %*
 '@ | Out-File -filePath $path\bin\composer.bat -Encoding ASCII
 
