@@ -199,6 +199,14 @@ if "%expect_signature%" == "%actual_signature%" (
 	call :pm-echo "Installing composer to 'bin'..."
 	call bin\php\php.exe composer-setup.php --install-dir=bin >>"%log_file%" || exit 1
 	rm composer-setup.php
+
+	call :pm-echo "Creating bin\composer.bat..."
+	echo @echo off >bin\composer.bat
+	echo REM This batchfile exists for convenience of using the packaged Composer on Windows. >>bin\composer.bat
+	echo REM Use it from the command line: `bin\composer [...composer parameters]` >>bin\composer.bat
+	echo REM NOTE: THIS EXPECTS PHP.EXE to be in (server folder)\bin\php\php.exe >>bin\composer.bat
+	echo REM If your PHP is elsewhere, make sure you change the paths to indicate so. >>bin\composer.bat
+	echo "%%~dp0php\php.exe" "%%~dp0composer.phar" %%* >>bin\composer.bat
 ) else (
 	call :pm-echo-error "Bad signature on Composer installer, skipping"
 )
