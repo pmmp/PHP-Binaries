@@ -288,6 +288,10 @@ else
 		fi
 
 		chmod +x ./bin/php7/bin/*
+		if [ -f ./bin/composer ]; then
+			chmod +x ./bin/composer
+		fi
+
 		echo -n " checking..."
 
 		if [ "$(./bin/php7/bin/php -r 'echo 1;' 2>/dev/null)" == "1" ]; then
