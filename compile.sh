@@ -948,6 +948,13 @@ if [ "$IS_CROSSCOMPILE" != "yes" ]; then
 	echo -n " installing..."
 	$DIR/bin/php7/bin/php composer-setup.php --install-dir=bin >> "$DIR/install.log" 2>&1
 	rm composer-setup.php
+
+	echo -n " generating bin/composer script..."
+	echo '#!/bin/bash' > $DIR/bin/composer
+	echo 'DIR="$(cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd)"' >> $DIR/bin/composer
+	echo '$DIR/php7/bin/php $DIR/composer.phar $@' >> $DIR/bin/composer
+	chmod +x $DIR/bin/composer
+
 	echo " done!"
 else
 	echo "WARNING: Can't get Composer for cross-compile builds, you will need to install Composer manually on the target machine."
