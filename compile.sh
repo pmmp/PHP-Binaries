@@ -90,6 +90,7 @@ IS_CROSSCOMPILE="no"
 IS_WINDOWS="no"
 DO_OPTIMIZE="no"
 DO_STATIC="no"
+DO_CLEANUP="yes"
 COMPILE_DEBUG="no"
 COMPILE_LEVELDB="no"
 FLAGS_LTO=""
@@ -99,7 +100,7 @@ LD_PRELOAD=""
 COMPILE_POCKETMINE_CHUNKUTILS="no"
 COMPILE_GD="no"
 
-while getopts "::t:oj:srcdlxzff:ug" OPTION; do
+while getopts "::t:oj:srcdlxzff:ugn" OPTION; do
 
 	case $OPTION in
 		t)
@@ -115,8 +116,9 @@ while getopts "::t:oj:srcdlxzff:ug" OPTION; do
 			COMPILE_FANCY="yes"
 			;;
 		d)
-			echo "[opt] Will compile profiler and xdebug"
+			echo "[opt] Will compile profiler and xdebug, will not remove sources"
 			COMPILE_DEBUG="yes"
+			DO_CLEANUP="no"
 			;;
 		c)
 			echo "[opt] Will force compile cURL"
@@ -165,6 +167,10 @@ while getopts "::t:oj:srcdlxzff:ug" OPTION; do
 		g)
 			echo "[opt] Will enable GD2"
 			COMPILE_GD="yes"
+			;;
+		n)
+			echo "[opt] Will not remove sources after completing compilation"
+			DO_CLEANUP="no"
 			;;
 		\?)
 			echo "Invalid option: -$OPTION$OPTARG" >&2
@@ -916,7 +922,7 @@ if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
 fi
 
 cd "$DIR"
-if [ "$COMPILE_DEBUG" != "yes" ]; then
+if [ "$DO_CLEANUP" == "yes" ]; then
 	echo -n "[INFO] Cleaning up..."
 	rm -r -f install_data/ >> "$DIR/install.log" 2>&1
 	rm -f bin/php7/bin/curl* >> "$DIR/install.log" 2>&1
