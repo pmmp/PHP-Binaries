@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CHANNEL="stable"
+CHANNEL="alpha"
 BRANCH="master"
 NAME="PocketMine-MP"
 BUILD_URL=""
@@ -120,8 +120,9 @@ if [[ "$BUILD_URL" != "" && "$CHANNEL" == "custom" ]]; then
 	ENABLE_GPG="no"
 	VERSION_DOWNLOAD="$BUILD_URL"
 else
-	echo "[*] Retrieving latest build data"
-	VERSION_DATA=$(download_file "https://jenkins.pmmp.io/job/PocketMine-MP/lastSuccessfulBuild/api/json?pretty=true&tree=url,artifacts[fileName],number,timestamp")
+	echo "[*] Retrieving latest build data for channel \"$CHANNEL\""
+
+	VERSION_DATA=$(download_file "https://jenkins.pmmp.io/job/PocketMine-MP/$(tr '[:lower:]' '[:upper:]' <<< ${CHANNEL:0:1})${CHANNEL:1}/api/json?pretty=true&tree=url,artifacts[fileName],number,timestamp")
 
 	if [ "$VERSION_DATA" != "" ]; then
 		FILENAME="unknown"
