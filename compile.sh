@@ -1,5 +1,5 @@
 #!/bin/bash
-[ -z "$PHP_VERSION" ] && PHP_VERSION="7.2.0RC1"
+[ -z "$PHP_VERSION" ] && PHP_VERSION="7.2.0RC2"
 
 PHP_IS_BETA="yes"
 
@@ -741,9 +741,6 @@ cd php
 rm -f ./aclocal.m4 >> "$DIR/install.log" 2>&1
 rm -rf ./autom4te.cache/ >> "$DIR/install.log" 2>&1
 rm -f ./configure >> "$DIR/install.log" 2>&1
-
-#TODO: HACK! (ext/curl in 7.2.0RC1 messes up LDFLAGS)
-sed -i'.bak' "s#save_LDFLAGS=\"\$CFLAGS\"#save_LDFLAGS=\"\$LDFLAGS\"#" ext/curl/config.m4
 
 ./buildconf --force >> "$DIR/install.log" 2>&1
 if [ "$IS_CROSSCOMPILE" == "yes" ]; then

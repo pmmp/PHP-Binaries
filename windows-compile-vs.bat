@@ -1,7 +1,7 @@
 @echo off
 
 set PHP_MAJOR_VER=7.2
-set PHP_VER=%PHP_MAJOR_VER%.0RC1
+set PHP_VER=%PHP_MAJOR_VER%.0RC2
 set PHP_SDK_VER=2.0.10
 set PATH=C:\Program Files\7-Zip;%PATH%
 set VC_VER=vc15
@@ -28,11 +28,6 @@ call :pm-echo "PHP Windows compiler"
 call :pm-echo "Setting up environment..."
 call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" %ARCH% >>"%log_file%" || exit 1
 
-if not exist "%script_path%win32\copy-static-deps.patch" (
-	call :pm-echo "ERROR: Required patch %script_path%win32\copy-static-deps.patch not found"
-	exit 1
-)
-
 if exist bin (
 	call :pm-echo "Deleting old binary folder..."
 	rmdir /s /q bin >>"%log_file%"
@@ -54,12 +49,6 @@ call bin\phpsdk_setvars.bat >>"%log_file%"
 
 call :pm-echo "Downloading PHP source version %PHP_VER%..."
 git clone https://github.com/php/php-src -b php-%PHP_VER% --depth=1 -q php-src >>"%log_file%"
-cd php-src
-
-REM TODO: remove this (won't be needed as of RC2)
-call :pm-echo "Applying mkdist patch..."
-git apply --ignore-space-change --ignore-whitespace "%script_path%\win32\copy-static-deps.patch" >>"%log_file%" || exit 1
-cd ..
 
 call :pm-echo "Getting PHP dependencies..."
 call bin\phpsdk_deps.bat -u -t %VC_VER% -b %PHP_MAJOR_VER% -a %ARCH% -f -d deps >>"%log_file%" || exit 1
@@ -139,7 +128,7 @@ call configure^
  --enable-sockets^
  --enable-zip^
  --enable-zlib^
- --with-bz2^
+ --with-bz2=shared^
  --with-curl^
  --with-gd=shared^
  --with-gmp^
