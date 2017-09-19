@@ -111,6 +111,10 @@ function check_signature {
 	fi
 }
 
+function parse_json {
+	echo "$1" | grep "\"$2\"" | cut -d ':' -f2- | tr -d ' ",'
+}
+
 if [[ "$BUILD_URL" != "" && "$CHANNEL" == "custom" ]]; then
 	BASE_VERSION="custom"
 	VERSION="custom"
@@ -119,6 +123,8 @@ if [[ "$BUILD_URL" != "" && "$CHANNEL" == "custom" ]]; then
 	VERSION_DATE_STRING="unknown"
 	ENABLE_GPG="no"
 	VERSION_DOWNLOAD="$BUILD_URL"
+	MCPE_VERSION="unknown"
+	PHP_VERSION="unknown"
 else
 	echo "[*] Retrieving latest build data for channel \"$CHANNEL\""
 
@@ -127,7 +133,7 @@ else
 	if [ "$VERSION_DATA" != "" ]; then
 		FILENAME="unknown"
 
-		IFS=$'\n' FILENAMES=($(echo "$VERSION_DATA" | grep '"fileName"' | cut -d ':' -f2- | tr -d ' ",'))
+		IFS=$'\n' FILENAMES=($(parse_json "$VERSION_DATA" fileName))
 		for (( i=0; i<${#FILENAMES[@]}; i++ ))
 		do
 			if [[ ${FILENAMES[$i]} == PocketMine*.phar ]]; then
@@ -140,15 +146,20 @@ else
 			exit 1
 		fi
 
-		VERSION=$(echo $FILENAME | cut -d '_' -f2- | cut -d '-' -f1)
-		BUILD=$(echo "$VERSION_DATA" | grep '"number"' | cut -d ':' -f2- | tr -d ' ",')
-		API_VERSION=$(echo $FILENAME | cut -d '-' -f4- | sed -e 's/\.[^.]*$//')
+		BUILD_INFO_JSON=$(download_file "https://jenkins.pmmp.io/job/PocketMine-MP/$(tr '[:lower:]' '[:upper:]' <<< ${CHANNEL:0:1})${CHANNEL:1}/artifact/build_info.json")
+
+		VERSION=$(parse_json "$BUILD_INFO_JSON" pm_version)
+		BUILD=$(parse_json "$BUILD_INFO_JSON" build_number)
+		API_VERSION=$(parse_json "$BUILD_INFO_JSON" api_version)
+		MCPE_VERSION=$(parse_json "$BUILD_INFO_JSON" mcpe_version)
+		PHP_VERSION=$(parse_json "$BUILD_INFO_JSON" php_version)
+
 		VERSION_DATE=$(($(echo "$VERSION_DATA" | grep -m 1 '"timestamp"' | cut -d ':' -f2- | tr -d ' ",') / 1000))
-		BASE_URL=$(echo "$VERSION_DATA" | grep '"url"' | cut -d ':' -f2- | tr -d ' ",')
+		BASE_URL=$(parse_json "$VERSION_DATA" url)
 		VERSION_DOWNLOAD="${BASE_URL}artifact/${FILENAME}"
 
 		if [ "$alternateurl" == "on" ]; then
-			VERSION_DOWNLOAD=$(echo "$VERSION_DATA" | grep '"alternate_download_url"' | cut -d ':' -f2- | tr -d ' ",')
+			VERSION_DOWNLOAD=$(parse_json "$VERSION_DATA" alternate_download_url)
 		fi
 
 		if [ "$(uname -s)" == "Darwin" ]; then
@@ -159,7 +170,7 @@ else
 			VERSION_DATE_STRING=$(date --date="@$VERSION_DATE")
 		fi
 
-		GPG_SIGNATURE=$(echo "$VERSION_DATA" | grep '"signature_url"' | cut -d ':' -f2- | tr -d ' ",')
+		GPG_SIGNATURE=$(parse_json "$VERSION_DATA" signature_url)
 
 		if [ "$GPG_SIGNATURE" != "" ]; then
 			ENABLE_GPG="yes"
@@ -196,12 +207,12 @@ else
 			fi
 		fi
 	else
-		echo "[!] Couldn't download version automatically from Jenkins server"
+		echo "[!] Couldn't download version information automatically from Jenkins server."
 		exit 1
 	fi
 fi
 
-echo "[*] Found $NAME $BASE_VERSION (build $BUILD) using API $API_VERSION"
+echo "[*] Found $NAME $BASE_VERSION (build $BUILD) for Minecraft: PE v$MCPE_VERSION (PHP $PHP_VERSION, API $API_VERSION)"
 echo "[*] This $CHANNEL build was released on $VERSION_DATE_STRING"
 
 if [ "$ENABLE_GPG" == "yes" ]; then
