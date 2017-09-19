@@ -301,14 +301,8 @@ else
 			sed -i'.bak' "s/date.timezone=.*/date.timezone=$(date +%Z)/" bin/php7/bin/php.ini
 
 			EXTENSION_DIR=$(find "$(pwd)/bin" -name *debug-zts*) #make sure this only captures from `bin` in case the user renamed their old binary folder
-
-			if [ $(grep -c "extension_dir" bin/php7/bin/php.ini) -gt 0 ]; then
-				echo -n " updating extension directory..."
-				sed -i'.bak' "s{extension_dir=.*{extension_dir=\"$EXTENSION_DIR\"{" bin/php7/bin/php.ini
-			else
-				echo -n " setting extension directory..."
-				echo "extension_dir=\"$EXTENSION_DIR\"" >> bin/php7/bin/php.ini
-			fi
+			#Modify extension_dir directive if it exists, otherwise add it
+			grep -q '^extension_dir' bin/php7/bin/php.ini && sed -i'bak' "s{^extension_dir=.*{extension_dir=\"$EXTENSION_DIR\"{" bin/php7/bin/php.ini || echo "extension_dir=\"$EXTENSION_DIR\"" >> bin/php7/bin/php.ini
 
 			echo " done"
 			alldone=yes
