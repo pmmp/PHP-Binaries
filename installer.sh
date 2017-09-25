@@ -5,9 +5,6 @@ BRANCH="master"
 NAME="PocketMine-MP"
 BUILD_URL=""
 
-LINUX_BUILD="PHP_7.0.3_x86-64_Linux"
-#CENTOS_BUILD="PHP_5.6.2_x86-64_CentOS"
-MAC_BUILD="PHP_7.0.3_x86-64_MacOS"
 update=off
 forcecompile=off
 alldone=no
@@ -276,12 +273,10 @@ else
 	do
 		rm -r -f bin/ >> /dev/null 2>&1
 
-		#TODO: this needs to check what PHP version is required by the downloaded PM version instead of using hardcoded crap
-
 		if [ "$(uname -s)" == "Darwin" ]; then
-			echo -n " MacOS PHP build available, downloading $MAC_BUILD.tar.gz..."
+			PLATFORM="MacOS-x86_64"
+			echo -n " MacOS PHP build available"
 
-			download_file "https://dl.bintray.com/pocketmine/PocketMine/$MAC_BUILD.tar.gz" | tar -zx > /dev/null 2>&1
 		elif [ "$(uname -s)" == "Linux" ]; then
 			#if [[ "$(cat /etc/redhat-release 2>/dev/null)" == *CentOS* ]]; then
 			#echo -n " CentOS PHP build available, downloading $CENTOS_BUILD.tar.gz..."
@@ -290,14 +285,17 @@ else
 
 			#TODO: check architecture (we might not be on an x86_64 system)
 
-			echo -n " Linux PHP build available, downloading $LINUX_BUILD.tar.gz..."
-			download_file "https://dl.bintray.com/pocketmine/PocketMine/$LINUX_BUILD.tar.gz" | tar -zx > /dev/null 2>&1
+			PLATFORM="Linux-x86_64"
+			echo -n " Linux PHP build available"
 
 			#fi
 		else
 			echo " no prebuilt PHP download available"
 			break
 		fi
+
+		echo -n "... downloading $PHP_VERSION ..."
+		download_file "https://jenkins.pmmp.io/job/PHP-$PHP_VERSION-Aggregate/lastSuccessfulBuild/artifact/PHP-$PHP_VERSION-$PLATFORM.tar.gz" | tar -zx > /dev/null 2>&1
 
 		chmod +x ./bin/php7/bin/*
 		if [ -f ./bin/composer ]; then
