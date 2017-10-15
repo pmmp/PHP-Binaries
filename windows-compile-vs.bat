@@ -30,7 +30,7 @@ call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary
 
 if exist bin (
 	call :pm-echo "Deleting old binary folder..."
-	rmdir /s /q bin >>"%log_file%"
+	rmdir /s /q bin >>"%log_file%" || exit 1
 )
 
 pushd C:\
@@ -90,15 +90,15 @@ cd php-src\ext
 
 call :pm-echo "Downloading PHP pthreads version %PHP_PTHREADS_VER%..."
 call :get-zip https://github.com/krakjoe/pthreads/archive/%PHP_PTHREADS_VER%.zip || exit 1
-move pthreads-%PHP_PTHREADS_VER% pthreads >>"%log_file%"
+move pthreads-%PHP_PTHREADS_VER% pthreads >>"%log_file%" || exit 1
 
 call :pm-echo "Downloading PHP YAML version %PHP_YAML_VER%..."
 call :get-zip https://github.com/php/pecl-file_formats-yaml/archive/%PHP_YAML_VER%.zip || exit 1
-move pecl-file_formats-yaml-%PHP_YAML_VER% yaml >>"%log_file%"
+move pecl-file_formats-yaml-%PHP_YAML_VER% yaml >>"%log_file%" || exit 1
 
 call :pm-echo "Downloading PocketMine-ChunkUtils version %PHP_POCKETMINE_CHUNKUTILS_VER%..."
 call :get-zip https://github.com/dktapps/PocketMine-C-ChunkUtils/archive/%PHP_POCKETMINE_CHUNKUTILS_VER%.zip || exit 1
-move PocketMine-C-ChunkUtils-%PHP_POCKETMINE_CHUNKUTILS_VER% pocketmine_chunkutils >>"%log_file%"
+move PocketMine-C-ChunkUtils-%PHP_POCKETMINE_CHUNKUTILS_VER% pocketmine_chunkutils >>"%log_file%" || exit 1
 
 cd ../..
 
