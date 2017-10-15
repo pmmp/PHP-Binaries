@@ -3,7 +3,7 @@
 set PHP_MAJOR_VER=7.2
 set PHP_VER=%PHP_MAJOR_VER%.0RC3
 set PHP_SDK_VER=2.0.10
-set PATH=C:\Program Files\7-Zip;%PATH%
+set PATH=C:\Program Files\7-Zip;C:\Program Files (x86)\GnuWin32\bin;%PATH%
 set VC_VER=vc15
 set ARCH=x64
 set CMAKE_TARGET=Visual Studio 15 2017 Win64
