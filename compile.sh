@@ -668,7 +668,7 @@ fi
 if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
 	#xdebug
 	echo -n "[PHP xdebug] downloading $XDEBUG_VERSION..."
-	#TODO Uncomment when a release is availible for PHP7.2.0
+	#TODO Uncomment when a release is available for PHP 7.2.0
 	#download_file "http://pecl.php.net/get/xdebug-$XDEBUG_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
 	download_file "https://github.com/xdebug/xdebug/archive/$XDEBUG_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 	mv xdebug-$XDEBUG_VERSION "$DIR/install_data/php/ext/xdebug"
