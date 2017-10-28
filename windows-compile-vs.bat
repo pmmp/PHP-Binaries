@@ -157,16 +157,22 @@ mkdir bin
 move C:\pocketmine-php-sdk\php-src\%ARCH%\Release_TS\php-%PHP_VER% bin\php
 cd bin\php
 
+set php_ini=php.ini
 call :pm-echo "Generating php.ini..."
-echo extension_dir=ext >php.ini
-echo extension=php_openssl.dll >>php.ini
-echo extension=php_pocketmine_chunkutils.dll >>php.ini
-echo ;zend_extension=php_opcache.dll >>php.ini
-echo zend.assertions=-1 >>php.ini
-echo ;The following extensions are included as shared extensions (DLLs) but disabled by default as they are optional. Uncomment the ones you want to enable. >>php.ini
-echo ;extension=php_gd2.dll >>php.ini
-echo ;extension=php_mysqli.dll >>php.ini
-echo ;extension=php_sqlite3.dll >>php.ini
+(echo ;Custom PocketMine-MP php.ini file)>"%php_ini%"
+(echo display_errors=1)>>"%php_ini%"
+(echo display_startup_errors=1)>>"%php_ini%"
+(echo error_reporting=-1)>>"%php_ini%"
+(echo zend.assertions=-1)>>"%php_ini%"
+(echo phar.readonly=0)>>"%php_ini%"
+(echo extension_dir=ext)>>"%php_ini%"
+(echo extension=php_openssl.dll)>>"%php_ini%"
+(echo extension=php_pocketmine_chunkutils.dll)>>"%php_ini%"
+(echo ;zend_extension=php_opcache.dll)>>"%php_ini%"
+echo ;The following extensions are included as shared extensions (DLLs) but disabled by default as they are optional. Uncomment the ones you want to enable.>>"%php_ini%"
+(echo ;extension=php_gd2.dll)>>"%php_ini%"
+(echo ;extension=php_mysqli.dll)>>"%php_ini%"
+(echo ;extension=php_sqlite3.dll)>>"%php_ini%"
 REM TODO: more entries
 
 cd ..\..
