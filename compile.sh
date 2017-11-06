@@ -13,7 +13,7 @@ READLINE_VERSION="6.3"
 NCURSES_VERSION="6.0"
 PHPNCURSES_VERSION="1.0.2"
 PTHREADS_VERSION="caca8dc42a5d75ddfb39e6fd15337e87e967517e"
-XDEBUG_VERSION="2.5.5"
+XDEBUG_VERSION="283a62be7a73746719162d3724dced18b6226a08"
 WEAKREF_VERSION="0.3.3"
 PHPYAML_VERSION="2.0.2"
 YAML_VERSION="0.1.7"
@@ -668,7 +668,9 @@ fi
 if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
 	#xdebug
 	echo -n "[PHP xdebug] downloading $XDEBUG_VERSION..."
-	download_file "http://pecl.php.net/get/xdebug-$XDEBUG_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+	#TODO Uncomment when a release is available for PHP 7.2.0
+	#download_file "http://pecl.php.net/get/xdebug-$XDEBUG_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+	download_file "https://github.com/xdebug/xdebug/archive/$XDEBUG_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 	mv xdebug-$XDEBUG_VERSION "$DIR/install_data/php/ext/xdebug"
 	echo " done!"
 fi
