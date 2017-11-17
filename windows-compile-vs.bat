@@ -3,8 +3,8 @@
 REM For future users: This file MUST have CRLF line endings. If it doesn't, lots of inexplicable undesirable strange behaviour will result.
 REM Also: Don't modify this version with sed, or it will screw up your line endings.
 set PHP_MAJOR_VER=7.2
-set PHP_VER=%PHP_MAJOR_VER%.0RC5
-set PHP_SDK_VER=2.0.12
+set PHP_VER=%PHP_MAJOR_VER%.0RC6
+set PHP_SDK_VER=2.0.13
 set PATH=C:\Program Files\7-Zip;C:\Program Files (x86)\GnuWin32\bin;%PATH%
 set VC_VER=vc15
 set ARCH=x64
@@ -14,7 +14,7 @@ REM need this version to be able to compile as a shared library
 set LIBYAML_VER=660242d6a418f0348c61057ed3052450527b3abf
 set PTHREAD_W32_VER=2-9-1
 
-set PHP_PTHREADS_VER=caca8dc42a5d75ddfb39e6fd15337e87e967517e
+set PHP_PTHREADS_VER=1c9787e5d918a3602661290ff5efe32ba3df74c8
 set PHP_YAML_VER=2.0.2
 set PHP_POCKETMINE_CHUNKUTILS_VER=master
 
