@@ -887,6 +887,9 @@ if [[ "$COMPILE_DEBUG" == "yes" ]]; then
 else
 	echo "zend.assertions=-1" >> "$DIR/bin/php7/bin/php.ini"
 fi
+echo "error_reporting=-1" >> "$DIR/bin/php7/bin/php.ini"
+echo "display_errors=1" >> "$DIR/bin/php7/bin/php.ini"
+echo "display_startup_errors=1" >> "$DIR/bin/php7/bin/php.ini"
 
 if [ "$IS_CROSSCOMPILE" != "yes" ] && [ "$DO_STATIC" == "no" ]; then
 	echo ";zend_extension=opcache.so" >> "$DIR/bin/php7/bin/php.ini"
