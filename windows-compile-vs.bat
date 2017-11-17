@@ -28,32 +28,32 @@ where 7z >nul 2>nul || (call :pm-echo-error "7z is required" & exit 1)
 
 call :pm-echo "PHP Windows compiler"
 call :pm-echo "Setting up environment..."
-call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" %ARCH% >>"%log_file%" || exit 1
+call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" %ARCH% >>"%log_file%" 2>&1 || exit 1
 
 if exist bin (
 	call :pm-echo "Deleting old binary folder..."
-	rmdir /s /q bin >>"%log_file%" || exit 1
+	rmdir /s /q bin >>"%log_file%" 2>&1 || exit 1
 )
 
 pushd C:\
 
 if exist pocketmine-php-sdk (
 	call :pm-echo "Deleting old workspace..."
-	rmdir /s /q pocketmine-php-sdk >>"%log_file%" || exit 1
+	rmdir /s /q pocketmine-php-sdk >>"%log_file%" 2>&1 || exit 1
 )
 
 call :pm-echo "Getting SDK..."
-git clone https://github.com/OSTC/php-sdk-binary-tools.git -b php-sdk-%PHP_SDK_VER% --depth=1 -q pocketmine-php-sdk >>"%log_file%"
+git clone https://github.com/OSTC/php-sdk-binary-tools.git -b php-sdk-%PHP_SDK_VER% --depth=1 -q pocketmine-php-sdk >>"%log_file%" 2>&1
 
 cd pocketmine-php-sdk
 
-call bin\phpsdk_setvars.bat >>"%log_file%"
+call bin\phpsdk_setvars.bat >>"%log_file%" 2>&1
 
 call :pm-echo "Downloading PHP source version %PHP_VER%..."
-git clone https://github.com/php/php-src -b php-%PHP_VER% --depth=1 -q php-src >>"%log_file%"
+git clone https://github.com/php/php-src -b php-%PHP_VER% --depth=1 -q php-src >>"%log_file%" 2>&1
 
 call :pm-echo "Getting PHP dependencies..."
-call bin\phpsdk_deps.bat -u -t %VC_VER% -b %PHP_MAJOR_VER% -a %ARCH% -f -d deps >>"%log_file%" || exit 1
+call bin\phpsdk_deps.bat -u -t %VC_VER% -b %PHP_MAJOR_VER% -a %ARCH% -f -d deps >>"%log_file%" 2>&1 || exit 1
 
 
 call :pm-echo "Getting additional dependencies..."
@@ -61,16 +61,16 @@ cd deps
 
 call :pm-echo "Downloading LibYAML version %LIBYAML_VER%..."
 call :get-zip https://github.com/yaml/libyaml/archive/%LIBYAML_VER%.zip || exit 1
-move libyaml-%LIBYAML_VER% libyaml >>"%log_file%"
+move libyaml-%LIBYAML_VER% libyaml >>"%log_file%" 2>&1
 cd libyaml
-cmake -G "%CMAKE_TARGET%" >>"%log_file%"
+cmake -G "%CMAKE_TARGET%" >>"%log_file%" 2>&1
 call :pm-echo "Compiling..."
-msbuild yaml.sln /p:Configuration=RelWithDebInfo /m >>"%log_file%" || exit 1
+msbuild yaml.sln /p:Configuration=RelWithDebInfo /m >>"%log_file%" 2>&1 || exit 1
 call :pm-echo "Copying files..."
-copy RelWithDebInfo\yaml.lib ..\lib\yaml.lib >>"%log_file%"
-copy RelWithDebInfo\yaml.dll ..\bin\yaml.dll >>"%log_file%"
-copy RelWithDebInfo\yaml.pdb ..\bin\yaml.pdb >>"%log_file%"
-copy include\yaml.h ..\include\yaml.h >>"%log_file%"
+copy RelWithDebInfo\yaml.lib ..\lib\yaml.lib >>"%log_file%" 2>&1
+copy RelWithDebInfo\yaml.dll ..\bin\yaml.dll >>"%log_file%" 2>&1
+copy RelWithDebInfo\yaml.pdb ..\bin\yaml.pdb >>"%log_file%" 2>&1
+copy include\yaml.h ..\include\yaml.h >>"%log_file%" 2>&1
 cd ..
 
 call :pm-echo "Downloading pthread-w32 version %PTHREAD_W32_VER%..."
@@ -79,11 +79,11 @@ cd pthread-w32
 call :get-zip http://www.mirrorservice.org/sites/sources.redhat.com/pub/pthreads-win32/pthreads-w32-%PTHREAD_W32_VER%-release.zip || exit 1
 
 call :pm-echo "Copying files..."
-copy Pre-built.2\include\pthread.h ..\include\pthread.h >>"%log_file%"
-copy Pre-built.2\include\sched.h ..\include\sched.h >>"%log_file%"
-copy Pre-built.2\include\semaphore.h ..\include\semaphore.h >>"%log_file%"
-copy Pre-built.2\lib\%ARCH%\pthreadVC2.lib ..\lib\pthreadVC2.lib >>"%log_file%"
-copy Pre-built.2\dll\%ARCH%\pthreadVC2.dll ..\bin\pthreadVC2.dll >>"%log_file%"
+copy Pre-built.2\include\pthread.h ..\include\pthread.h >>"%log_file%" 2>&1
+copy Pre-built.2\include\sched.h ..\include\sched.h >>"%log_file%" 2>&1
+copy Pre-built.2\include\semaphore.h ..\include\semaphore.h >>"%log_file%" 2>&1
+copy Pre-built.2\lib\%ARCH%\pthreadVC2.lib ..\lib\pthreadVC2.lib >>"%log_file%" 2>&1
+copy Pre-built.2\dll\%ARCH%\pthreadVC2.dll ..\bin\pthreadVC2.dll >>"%log_file%" 2>&1
 
 cd ..\..
 
@@ -92,22 +92,22 @@ cd php-src\ext
 
 call :pm-echo "Downloading PHP pthreads version %PHP_PTHREADS_VER%..."
 call :get-zip https://github.com/krakjoe/pthreads/archive/%PHP_PTHREADS_VER%.zip || exit 1
-move pthreads-%PHP_PTHREADS_VER% pthreads >>"%log_file%" || exit 1
+move pthreads-%PHP_PTHREADS_VER% pthreads >>"%log_file%" 2>&1 || exit 1
 
 call :pm-echo "Downloading PHP YAML version %PHP_YAML_VER%..."
 call :get-zip https://github.com/php/pecl-file_formats-yaml/archive/%PHP_YAML_VER%.zip || exit 1
-move pecl-file_formats-yaml-%PHP_YAML_VER% yaml >>"%log_file%" || exit 1
+move pecl-file_formats-yaml-%PHP_YAML_VER% yaml >>"%log_file%" 2>&1 || exit 1
 
 call :pm-echo "Downloading PocketMine-ChunkUtils version %PHP_POCKETMINE_CHUNKUTILS_VER%..."
 call :get-zip https://github.com/dktapps/PocketMine-C-ChunkUtils/archive/%PHP_POCKETMINE_CHUNKUTILS_VER%.zip || exit 1
-move PocketMine-C-ChunkUtils-%PHP_POCKETMINE_CHUNKUTILS_VER% pocketmine_chunkutils >>"%log_file%" || exit 1
+move PocketMine-C-ChunkUtils-%PHP_POCKETMINE_CHUNKUTILS_VER% pocketmine_chunkutils >>"%log_file%" 2>&1 || exit 1
 
 cd ../..
 
 :skip
 cd php-src
 call :pm-echo "Configuring PHP..."
-call buildconf.bat >>"%log_file%"
+call buildconf.bat >>"%log_file%" 2>&1
 
 call configure^
  --with-mp=auto^
@@ -147,13 +147,13 @@ call configure^
  --with-sqlite3=shared^
  --with-xml^
  --with-yaml^
- --without-readline >>"%log_file%" || (call :pm-echo-error "Error configuring PHP" & exit 1)
+ --without-readline >>"%log_file%" 2>&1 || (call :pm-echo-error "Error configuring PHP" & exit 1)
 
 call :pm-echo "Compiling PHP..."
-nmake >>"%log_file%" || (call :pm-echo-error "Error compiling PHP" & exit 1)
+nmake >>"%log_file%" 2>&1 || (call :pm-echo-error "Error compiling PHP" & exit 1)
 
 call :pm-echo "Assembling artifacts..."
-nmake snap >>"%log_file%" || (call :pm-echo-error "Error assembling artifacts" & exit 1)
+nmake snap >>"%log_file%" 2>&1 || (call :pm-echo-error "Error assembling artifacts" & exit 1)
 
 popd
 
@@ -183,7 +183,7 @@ REM TODO: more entries
 cd ..\..
 
 call :pm-echo "Checking PHP build works..."
-bin\php\php.exe --version >>"%log_file%" || (call :pm-echo-error "PHP build isn't working" & exit 1)
+bin\php\php.exe --version >>"%log_file%" 2>&1 || (call :pm-echo-error "PHP build isn't working" & exit 1)
 
 
 
@@ -199,7 +199,7 @@ for /f %%i in ('bin\php\php.exe -r "echo hash_file(\"SHA384\", \"composer-setup.
 call :pm-echo "Checking Composer installer signature..."
 if "%expect_signature%" == "%actual_signature%" (
 	call :pm-echo "Installing composer to 'bin'..."
-	call bin\php\php.exe composer-setup.php --install-dir=bin >>"%log_file%" || exit 1
+	call bin\php\php.exe composer-setup.php --install-dir=bin >>"%log_file%" 2>&1 || exit 1
 	rm composer-setup.php
 
 	call :pm-echo "Creating bin\composer.bat..."
@@ -235,5 +235,5 @@ exit /B 0
 
 :pm-echo
 echo [PocketMine] %~1
-echo [PocketMine] %~1 >>"%log_file%"
+echo [PocketMine] %~1 >>"%log_file%" 2>&1
 exit /B 0
