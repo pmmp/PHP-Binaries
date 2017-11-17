@@ -128,12 +128,16 @@ call configure^
  --enable-phar^
  --enable-pocketmine-chunkutils=shared^
  --enable-sockets^
+ --enable-tokenizer^
  --enable-zip^
  --enable-zlib^
  --with-bz2=shared^
  --with-curl^
+ --with-dom^
  --with-gd=shared^
  --with-gmp^
+ --with-iconv^
+ --with-libxml^
  --with-mysqli=shared^
  --with-mysqlnd^
  --with-openssl^
@@ -141,6 +145,7 @@ call configure^
  --with-pthreads^
  --with-sodium^
  --with-sqlite3=shared^
+ --with-xml^
  --with-yaml^
  --without-readline >>"%log_file%" || (call :pm-echo-error "Error configuring PHP" & exit 1)
 
