@@ -17,8 +17,8 @@ XDEBUG_VERSION="283a62be7a73746719162d3724dced18b6226a08"
 WEAKREF_VERSION="0.3.3"
 PHPYAML_VERSION="2.0.2"
 YAML_VERSION="0.1.7"
-PHPLEVELDB_VERSION="5cfe735dac5ceafc6848c96177509450febc12d0"
-LEVELDB_VERSION="f4022ac7c5a022f7a08a1b6dc98c06ef3eed352a" #Check MacOS
+PHPLEVELDB_VERSION="0a1669ce8cfb7db845c05d327ca50db57cd0787b"
+LEVELDB_VERSION="bfa465bafc95d527ae9ce316deee33c1b3b2f413" #Check MacOS
 LIBXML_VERSION="2.9.1"
 LIBPNG_VERSION="1.6.32"
 POCKETMINE_CHUNKUTILS_VERSION="master"
@@ -202,7 +202,7 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX"
 		#zlib doesn't use the correct ranlib
 		RANLIB=$TOOLCHAIN_PREFIX-ranlib
-		LEVELDB_VERSION="1bd4a335d620b395b0a587b15804f9b2ab3c403f"
+		#LEVELDB_VERSION="1bd4a335d620b395b0a587b15804f9b2ab3c403f"
 		CFLAGS="$CFLAGS -Qunused-arguments -Wno-error=unused-command-line-argument-hard-error-in-future"
 		ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
 		OPENSSL_TARGET="darwin64-x86_64-cc"
@@ -239,7 +239,7 @@ elif [[ "$COMPILE_TARGET" == "mac" ]] || [[ "$COMPILE_TARGET" == "mac64" ]]; the
 		LDFLAGS="$LDFLAGS -Wl,-rpath,@loader_path/../lib";
 		export DYLD_LIBRARY_PATH="@loader_path/../lib"
 	fi
-	LEVELDB_VERSION="1bd4a335d620b395b0a587b15804f9b2ab3c403f"
+	#LEVELDB_VERSION="1bd4a335d620b395b0a587b15804f9b2ab3c403f"
 	CFLAGS="$CFLAGS -Qunused-arguments -Wno-error=unused-command-line-argument-hard-error-in-future"
 	ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
 	GMP_ABI="64"
