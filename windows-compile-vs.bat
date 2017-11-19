@@ -203,8 +203,10 @@ if "%expect_signature%" == "%actual_signature%" (
 	rm composer-setup.php
 
 	call :pm-echo "Creating bin\composer.bat..."
-	echo @echo off >bin\composer.bat
-	echo "%%~dp0php\php.exe" "%%~dp0composer.phar" %%* >>bin\composer.bat
+	echo @echo off >>bin\composer.bat
+	echo cd "%~dp0\.." >>bin\composer.bat
+	echo "bin\php\php.exe" "bin\composer.phar" update >>bin\composer.bat
+	echo pause
 ) else (
 	call :pm-echo-error "Bad signature on Composer installer, skipping"
 )
