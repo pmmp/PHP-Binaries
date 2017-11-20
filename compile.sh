@@ -24,33 +24,44 @@ LIBPNG_VERSION="1.6.32"
 POCKETMINE_CHUNKUTILS_VERSION="master"
 OPENSSL_VERSION="1.1.0f"
 
+function write_out {
+	echo "[$1] $2"
+}
+
+function write_error {
+	write_out ERROR "$1" >&2
+}
+
 echo "[PocketMine] PHP compiler for Linux, MacOS and Android"
 DIR="$(pwd)"
 date > "$DIR/install.log" 2>&1
-#trap "echo \"# \$(eval echo \$BASH_COMMAND)\" >> \"$DIR/install.log\" 2>&1" DEBUG
+
 uname -a >> "$DIR/install.log" 2>&1
 echo "[INFO] Checking dependencies"
-type make >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"make\""; read -p "Press [Enter] to continue..."; exit 1; }
-type autoconf >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"autoconf\""; read -p "Press [Enter] to continue..."; exit 1; }
-type automake >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"automake\""; read -p "Press [Enter] to continue..."; exit 1; }
-type m4 >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"m4\""; read -p "Press [Enter] to continue..."; exit 1; }
-type wget >> "$DIR/install.log" 2>&1 || type curl >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"wget\" or \"curl\""; read -p "Press [Enter] to continue..."; exit 1; }
-type getconf >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"getconf\""; read -p "Press [Enter] to continue..."; exit 1; }
-type gzip >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"gzip\""; read -p "Press [Enter] to continue..."; exit 1; }
-type bzip2 >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"bzip2\""; read -p "Press [Enter] to continue..."; exit 1; }
-type bison >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"bison\""; read -p "Press [Enter] to continue..."; exit 1; }
-type g++ >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"g++\""; read -p "Press [Enter] to continue..."; exit 1; }
+
+COMPILE_SH_DEPENDENCIES=( make autoconf automake m4 getconf gzip bzip2 bison g++ )
+ERRORS=0
+for(( i=0; i<${#COMPILE_SH_DEPENDENCIES[@]}; i++ ))
+do
+	type "${COMPILE_SH_DEPENDENCIES[$i]}" >> "$DIR/install.log" 2>&1 || { write_error "Please install \"${COMPILE_SH_DEPENDENCIES[$i]}\""; ((ERRORS++)); }
+done
+
+type wget >> "$DIR/install.log" 2>&1 || type curl >> "$DIR/install.log" || { echo >&2 "[ERROR] Please install \"wget\" or \"curl\""; ((ERRORS++)); }
 
 if [ "$(uname -s)" == "Darwin" ]; then
-	type glibtool >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install GNU libtool"; read -p "Press [Enter] to continue..."; exit 1; }
+	type glibtool >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install GNU libtool"; ((ERRORS++)); }
 	export LIBTOOL=glibtool
 	export LIBTOOLIZE=glibtoolize
 else
-	type libtool >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"libtool\" or \"libtool-bin\""; read -p "Press [Enter] to continue..."; exit 1; }
+	type libtool >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"libtool\" or \"libtool-bin\""; ((ERRORS++)); }
 	export LIBTOOL=libtool
 	export LIBTOOLIZE=libtoolize
 fi
 
+if [ $ERRORS -ne 0 ]; then
+	read -p "Press [Enter] to continue..."
+	exit 1
+fi
 
 #Needed to use aliases
 shopt -s expand_aliases
