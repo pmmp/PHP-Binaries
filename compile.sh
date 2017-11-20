@@ -852,6 +852,7 @@ if [[ "$(uname -s)" == "Darwin" ]] && [[ "$IS_CROSSCOMPILE" != "yes" ]]; then
 	install_name_tool -change "$DIR/bin/php7/lib/libncurses.6.0.dylib" "@loader_path/../lib/libncurses.6.0.dylib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
 	install_name_tool -change "$DIR/bin/php7/lib/libpanel.6.0.dylib" "@loader_path/../lib/libpanel.6.0.dylib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
 	install_name_tool -change "$DIR/bin/php7/lib/libleveldb.dylib.1.20" "@loader_path/../lib/libleveldb.dylib.1.20" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
+	install_name_tool -change "$DIR/bin/php7/lib/libleveldb.dylib.1" "@loader_path/../lib/libleveldb.dylib.1" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
 	install_name_tool -change "$DIR/bin/php7/lib/libpng16.16.dylib" "@loader_path/../lib/libpng16.16.dylib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
 
 	install_name_tool -change "$DIR/bin/php7/lib/libssl.1.0.0.dylib" "@loader_path/../lib/libssl.1.0.0.dylib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
