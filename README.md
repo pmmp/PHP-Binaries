@@ -4,6 +4,7 @@
 
 Use this script to build the custom PHP binary. Make sure you have ``make autoconf automake libtool m4 wget getconf gzip bzip2 bison g++``.
 
+
 ### Additional notes
 #### Mac OSX (native compile)
 - Most dependencies can be installed using Homebrew
@@ -37,6 +38,9 @@ Use this script to build the custom PHP binary. Make sure you have ``make autoco
 | mac64           | ``-t mac64 -l -j4 -c -f``           |
 | android-aarch64 | ``-t android-aarch64 -x -s -j4 -f`` |
 
+### Common pitfalls
+- If used, the `-t` option (target) MUST be specified BEFORE the `-f` option (optimizations)
+- Avoid using the script in directory trees containing spaces. Some libraries don't like trying to be built in directory trees containing spaces, e.g. `/home/user/my folder/pocketmine-mp/` might experience problems.
 
 ## installer.sh
 
