@@ -18,7 +18,7 @@ WEAKREF_VERSION="0.3.3"
 PHPYAML_VERSION="2.0.2"
 YAML_VERSION="0.1.7"
 PHPLEVELDB_VERSION="0a1669ce8cfb7db845c05d327ca50db57cd0787b"
-LEVELDB_VERSION="bfa465bafc95d527ae9ce316deee33c1b3b2f413" #Check MacOS
+LEVELDB_VERSION="8758c296910988f13d737a44696c01b5000f227c"
 LIBXML_VERSION="2.9.1"
 LIBPNG_VERSION="1.6.32"
 POCKETMINE_CHUNKUTILS_VERSION="master"
@@ -128,13 +128,8 @@ while getopts "::t:oj:srcdlxzff:ugn" OPTION; do
 			IS_CROSSCOMPILE="yes"
 			;;
 		l)
-			if [ $(gcc -dumpversion | sed -e 's/\.\([0-9][0-9]\)/\1/g' -e 's/\.\([0-9]\)/0\1/g' -e 's/^[0-9]\{3,4\}$/&00/') -lt 40800 ]; then
-				echo "[ERROR] gcc version 4.8 or newer is required to compile leveldb";
-				COMPILE_LEVELDB="no"
-			else
-				echo "[opt] Will compile with LevelDB support"
-				COMPILE_LEVELDB="yes"
-			fi
+			echo "[opt] Will compile with LevelDB support"
+			COMPILE_LEVELDB="yes"
 			;;
 		s)
 			echo "[opt] Will compile everything statically"
@@ -202,7 +197,6 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX"
 		#zlib doesn't use the correct ranlib
 		RANLIB=$TOOLCHAIN_PREFIX-ranlib
-		#LEVELDB_VERSION="1bd4a335d620b395b0a587b15804f9b2ab3c403f"
 		CFLAGS="$CFLAGS -Qunused-arguments -Wno-error=unused-command-line-argument-hard-error-in-future"
 		ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
 		OPENSSL_TARGET="darwin64-x86_64-cc"
@@ -239,7 +233,6 @@ elif [[ "$COMPILE_TARGET" == "mac" ]] || [[ "$COMPILE_TARGET" == "mac64" ]]; the
 		LDFLAGS="$LDFLAGS -Wl,-rpath,@loader_path/../lib";
 		export DYLD_LIBRARY_PATH="@loader_path/../lib"
 	fi
-	#LEVELDB_VERSION="1bd4a335d620b395b0a587b15804f9b2ab3c403f"
 	CFLAGS="$CFLAGS -Qunused-arguments -Wno-error=unused-command-line-argument-hard-error-in-future"
 	ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
 	GMP_ABI="64"
@@ -597,13 +590,10 @@ if [ "$COMPILE_LEVELDB" == "yes" ]; then
 	echo -n " checking..."
 	cd leveldb
 	echo -n " compiling..."
-	CFLAGS="$CFLAGS -I$DIR/bin/php7/include" CXXFLAGS="$CXXFLAGS -I$DIR/bin/php7/include" LDFLAGS="$LDFLAGS -L$DIR/bin/php7/lib" make -j $THREADS >> "$DIR/install.log" 2>&1
+	INSTALL_PATH="$DIR/bin/php7/lib" CFLAGS="$CFLAGS -I$DIR/bin/php7/include" CXXFLAGS="$CXXFLAGS -I$DIR/bin/php7/include" LDFLAGS="$LDFLAGS -L$DIR/bin/php7/lib" make -j $THREADS >> "$DIR/install.log" 2>&1
 	echo -n " installing..."
-	if [ "$DO_STATIC" == "yes" ]; then
-		cp out-static/libleveldb* "$DIR/bin/php7/lib/"
-	else
-		cp out-shared/libleveldb* "$DIR/bin/php7/lib/"
-	fi
+	cp out-static/libleveldb* "$DIR/bin/php7/lib/"
+	cp out-shared/libleveldb* "$DIR/bin/php7/lib/"
 	cp -r include/leveldb "$DIR/bin/php7/include/leveldb"
 	cd ..
 	echo " done!"
@@ -861,7 +851,7 @@ if [[ "$(uname -s)" == "Darwin" ]] && [[ "$IS_CROSSCOMPILE" != "yes" ]]; then
 	install_name_tool -change "$DIR/bin/php7/lib/libmenu.6.0.dylib" "@loader_path/../lib/libmenu.6.0.dylib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
 	install_name_tool -change "$DIR/bin/php7/lib/libncurses.6.0.dylib" "@loader_path/../lib/libncurses.6.0.dylib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
 	install_name_tool -change "$DIR/bin/php7/lib/libpanel.6.0.dylib" "@loader_path/../lib/libpanel.6.0.dylib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
-	install_name_tool -change "$DIR/bin/php7/lib/libleveldb.dylib.1.18" "@loader_path/../lib/libleveldb.dylib.1.18" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
+	install_name_tool -change "$DIR/bin/php7/lib/libleveldb.dylib.1.20" "@loader_path/../lib/libleveldb.dylib.1.20" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
 	install_name_tool -change "$DIR/bin/php7/lib/libpng16.16.dylib" "@loader_path/../lib/libpng16.16.dylib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
 
 	install_name_tool -change "$DIR/bin/php7/lib/libssl.1.0.0.dylib" "@loader_path/../lib/libssl.1.0.0.dylib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
