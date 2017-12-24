@@ -108,7 +108,7 @@ FLAGS_LTO=""
 LD_PRELOAD=""
 
 COMPILE_POCKETMINE_CHUNKUTILS="no"
-COMPILE_GD="no"
+COMPILE_GD="yes"
 
 while getopts "::t:oj:srcdlxzff:ugn" OPTION; do
 
