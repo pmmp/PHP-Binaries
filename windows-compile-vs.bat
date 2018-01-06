@@ -36,7 +36,8 @@ if exist bin (
 	rmdir /s /q bin >>"%log_file%" 2>&1 || exit 1
 )
 
-pushd C:\
+set outpath="%cd%"
+cd C:\
 
 if exist pocketmine-php-sdk (
 	call :pm-echo "Deleting old workspace..."
@@ -160,7 +161,7 @@ nmake >>"%log_file%" 2>&1 || (call :pm-echo-error "Error compiling PHP" & exit 1
 call :pm-echo "Assembling artifacts..."
 nmake snap >>"%log_file%" 2>&1 || (call :pm-echo-error "Error assembling artifacts" & exit 1)
 
-popd
+cd "%outpath%"
 
 call :pm-echo "Copying artifacts..."
 mkdir bin
