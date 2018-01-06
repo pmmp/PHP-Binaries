@@ -1,7 +1,7 @@
 #!/bin/bash
-[ -z "$PHP_VERSION" ] && PHP_VERSION="7.2.0"
+[ -z "$PHP_VERSION" ] && PHP_VERSION="7.2.1"
 
-PHP_IS_BETA="yes"
+PHP_IS_BETA="no"
 
 ZEND_VM="GOTO"
 

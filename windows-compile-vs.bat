@@ -3,7 +3,8 @@
 REM For future users: This file MUST have CRLF line endings. If it doesn't, lots of inexplicable undesirable strange behaviour will result.
 REM Also: Don't modify this version with sed, or it will screw up your line endings.
 set PHP_MAJOR_VER=7.2
-set PHP_VER=%PHP_MAJOR_VER%.0
+set PHP_VER=%PHP_MAJOR_VER%.1
+set PHP_IS_BETA="no"
 set PHP_SDK_VER=2.0.13
 set PATH=C:\Program Files\7-Zip;C:\Program Files (x86)\GnuWin32\bin;%PATH%
 set VC_VER=vc15
@@ -50,8 +51,12 @@ cd pocketmine-php-sdk
 call bin\phpsdk_setvars.bat >>"%log_file%" 2>&1
 
 call :pm-echo "Downloading PHP source version %PHP_VER%..."
-git clone https://github.com/php/php-src -b php-%PHP_VER% --depth=1 -q php-src >>"%log_file%" 2>&1
-
+if "%PHP_IS_BETA%" == "yes" (
+	git clone https://github.com/php/php-src -b php-%PHP_VER% --depth=1 -q php-src >>"%log_file%" 2>&1
+) else (
+	call :get-zip http://windows.php.net/downloads/releases/php-%PHP_VER%-src.zip >>"%log_file%" 2>&1
+	move php-%PHP_VER%-src php-src >>"%log_file%" 2>&1
+)
 call :pm-echo "Getting PHP dependencies..."
 call bin\phpsdk_deps.bat -u -t %VC_VER% -b %PHP_MAJOR_VER% -a %ARCH% -f -d deps >>"%log_file%" 2>&1 || exit 1
 
