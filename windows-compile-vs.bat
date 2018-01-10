@@ -61,12 +61,16 @@ if "%PHP_IS_BETA%" == "yes" (
 	call :get-zip http://windows.php.net/downloads/releases/php-%PHP_VER%-src.zip >>"%log_file%" 2>&1
 	move php-%PHP_VER%-src php-src >>"%log_file%" 2>&1
 )
+
+set DEPS_DIR_NAME="deps"
+set DEPS_DIR="%cd%\%DEPS_DIR_NAME%"
+
 call :pm-echo "Getting PHP dependencies..."
-call bin\phpsdk_deps.bat -u -t %VC_VER% -b %PHP_MAJOR_VER% -a %ARCH% -f -d deps >>"%log_file%" 2>&1 || exit 1
+call bin\phpsdk_deps.bat -u -t %VC_VER% -b %PHP_MAJOR_VER% -a %ARCH% -f -d %DEPS_DIR_NAME% >>"%log_file%" 2>&1 || exit 1
 
 
 call :pm-echo "Getting additional dependencies..."
-cd deps
+cd "%DEPS_DIR%"
 
 call :pm-echo "Downloading LibYAML version %LIBYAML_VER%..."
 call :get-zip https://github.com/yaml/libyaml/archive/%LIBYAML_VER%.zip || exit 1
@@ -76,25 +80,44 @@ cmake -G "%CMAKE_TARGET%" >>"%log_file%" 2>&1
 call :pm-echo "Compiling..."
 msbuild yaml.sln /p:Configuration=RelWithDebInfo /m >>"%log_file%" 2>&1 || exit 1
 call :pm-echo "Copying files..."
-copy RelWithDebInfo\yaml.lib ..\lib\yaml.lib >>"%log_file%" 2>&1
-copy RelWithDebInfo\yaml.dll ..\bin\yaml.dll >>"%log_file%" 2>&1
-copy RelWithDebInfo\yaml.pdb ..\bin\yaml.pdb >>"%log_file%" 2>&1
-copy include\yaml.h ..\include\yaml.h >>"%log_file%" 2>&1
-cd ..
+copy RelWithDebInfo\yaml.lib "%DEPS_DIR%\lib\yaml.lib" >>"%log_file%" 2>&1
+copy RelWithDebInfo\yaml.dll "%DEPS_DIR%\bin\yaml.dll" >>"%log_file%" 2>&1
+copy RelWithDebInfo\yaml.pdb "%DEPS_DIR%\bin\yaml.pdb" >>"%log_file%" 2>&1
+copy include\yaml.h "%DEPS_DIR%\include\yaml.h" >>"%log_file%" 2>&1
+
+cd "%DEPS_DIR%"
 
 call :pm-echo "Downloading pthread-w32 version %PTHREAD_W32_VER%..."
 mkdir pthread-w32
 cd pthread-w32
 call :get-zip http://www.mirrorservice.org/sites/sources.redhat.com/pub/pthreads-win32/pthreads-w32-%PTHREAD_W32_VER%-release.zip || exit 1
+cd pthreads.2
+
+REM Hack for HAVE_STRUCT_TIMESPEC for newer VS versions - it doesn't compile in VS2017 without it
+REM really this should do some nice replacement, but text replace in batchfile is a pain
+REM hack start
+chcp 65001 & echo #ifndef HAVE_STRUCT_TIMESPEC^
+
+#define HAVE_STRUCT_TIMESPEC 1^
+
+#endif^
+ >>config.h
+REM hack end
+
+call :pm-echo "Compiling..."
+nmake VC-inlined >>"%log_file%" 2>&1 || exit 1
 
 call :pm-echo "Copying files..."
-copy Pre-built.2\include\pthread.h ..\include\pthread.h >>"%log_file%" 2>&1
-copy Pre-built.2\include\sched.h ..\include\sched.h >>"%log_file%" 2>&1
-copy Pre-built.2\include\semaphore.h ..\include\semaphore.h >>"%log_file%" 2>&1
-copy Pre-built.2\lib\%ARCH%\pthreadVC2.lib ..\lib\pthreadVC2.lib >>"%log_file%" 2>&1
-copy Pre-built.2\dll\%ARCH%\pthreadVC2.dll ..\bin\pthreadVC2.dll >>"%log_file%" 2>&1
+copy pthread.h "%DEPS_DIR%\include\pthread.h" >>"%log_file%" 2>&1
+copy sched.h "%DEPS_DIR%\include\sched.h" >>"%log_file%" 2>&1
+copy semaphore.h "%DEPS_DIR%\include\semaphore.h" >>"%log_file%" 2>&1
+copy pthreadVC2.lib "%DEPS_DIR%\lib\pthreadVC2.lib" >>"%log_file%" 2>&1
+copy pthreadVC2.dll "%DEPS_DIR%\bin\pthreadVC2.dll" >>"%log_file%" 2>&1
+copy pthreadVC2.pdb "%DEPS_DIR%\bin\pthreadVC2.pdb" >>"%log_file%" 2>&1
 
-cd ..\..
+cd "%DEPS_DIR%"
+
+cd ..
 
 call :pm-echo "Getting additional PHP extensions..."
 cd php-src\ext
@@ -111,7 +134,7 @@ call :pm-echo "Downloading PocketMine-ChunkUtils version %PHP_POCKETMINE_CHUNKUT
 call :get-zip https://github.com/dktapps/PocketMine-C-ChunkUtils/archive/%PHP_POCKETMINE_CHUNKUTILS_VER%.zip || exit 1
 move PocketMine-C-ChunkUtils-%PHP_POCKETMINE_CHUNKUTILS_VER% pocketmine_chunkutils >>"%log_file%" 2>&1 || exit 1
 
-cd ../..
+cd ..\..
 
 :skip
 cd php-src
