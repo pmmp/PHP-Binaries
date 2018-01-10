@@ -23,6 +23,8 @@ set script_path=%~dp0
 set log_file=%script_path%compile.log
 echo.>"%log_file%"
 
+set outpath="%cd%"
+
 where git >nul 2>nul || (call :pm-echo-error "git is required" & exit 1)
 where cmake >nul 2>nul || (call :pm-echo-error "cmake is required" & exit 1)
 where 7z >nul 2>nul || (call :pm-echo-error "7z is required" & exit 1)
@@ -31,12 +33,13 @@ call :pm-echo "PHP Windows compiler"
 call :pm-echo "Setting up environment..."
 call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" %ARCH% >>"%log_file%" 2>&1 || exit 1
 
+cd "%outpath%"
+
 if exist bin (
 	call :pm-echo "Deleting old binary folder..."
 	rmdir /s /q bin >>"%log_file%" 2>&1 || exit 1
 )
 
-set outpath="%cd%"
 cd C:\
 
 if exist pocketmine-php-sdk (
