@@ -174,7 +174,7 @@ call configure^
  --with-mysqlnd^
  --with-openssl^
  --with-pcre-jit^
- --with-pthreads^
+ --with-pthreads=shared^
  --with-sodium^
  --with-sqlite3=shared^
  --with-xml^
@@ -203,6 +203,7 @@ call :pm-echo "Generating php.ini..."
 (echo zend.assertions=-1)>>"%php_ini%"
 (echo phar.readonly=0)>>"%php_ini%"
 (echo extension_dir=ext)>>"%php_ini%"
+(echo extension=php_pthreads.dll)>>"%php_ini%"
 (echo extension=php_openssl.dll)>>"%php_ini%"
 (echo extension=php_pocketmine_chunkutils.dll)>>"%php_ini%"
 (echo ;zend_extension=php_opcache.dll)>>"%php_ini%"
