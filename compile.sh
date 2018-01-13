@@ -12,7 +12,6 @@ NCURSES_VERSION="6.0"
 PHPNCURSES_VERSION="1.0.2"
 PTHREADS_VERSION="1c9787e5d918a3602661290ff5efe32ba3df74c8"
 XDEBUG_VERSION="283a62be7a73746719162d3724dced18b6226a08"
-WEAKREF_VERSION="0.3.3"
 PHPYAML_VERSION="2.0.2"
 YAML_VERSION="0.1.7"
 PHPLEVELDB_VERSION="0a1669ce8cfb7db845c05d327ca50db57cd0787b"
@@ -693,12 +692,6 @@ download_file "https://github.com/krakjoe/pthreads/archive/$PTHREADS_VERSION.tar
 mv pthreads-$PTHREADS_VERSION "$DIR/install_data/php/ext/pthreads"
 echo " done!"
 
-#WeakRef
-echo -n "[PHP Weakref] downloading $WEAKREF_VERSION..."
-download_file "http://pecl.php.net/get/Weakref-$WEAKREF_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-mv Weakref-$WEAKREF_VERSION "$DIR/install_data/php/ext/weakref"
-echo " done!"
-
 #PHP YAML
 echo -n "[PHP YAML] downloading $PHPYAML_VERSION..."
 #download_file "http://pecl.php.net/get/yaml-$PHPYAML_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
@@ -830,7 +823,6 @@ $HAVE_MYSQLI \
 --enable-zip \
 --enable-ftp \
 --enable-opcache=no \
---enable-weakref \
 $CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
 echo -n " compiling..."
 if [ "$COMPILE_FOR_ANDROID" == "yes" ]; then
