@@ -15,12 +15,12 @@ LIBXML_VERSION="2.9.1"
 LIBPNG_VERSION="1.6.32"
 OPENSSL_VERSION="1.1.0f"
 
-PHPNCURSES_VERSION="1.0.2"
-PTHREADS_VERSION="1c9787e5d918a3602661290ff5efe32ba3df74c8"
-PHPYAML_VERSION="2.0.2"
-PHPLEVELDB_VERSION="0a1669ce8cfb7db845c05d327ca50db57cd0787b"
-POCKETMINE_CHUNKUTILS_VERSION="master"
-XDEBUG_VERSION="283a62be7a73746719162d3724dced18b6226a08"
+EXT_NCURSES_VERSION="1.0.2"
+EXT_PTHREADS_VERSION="1c9787e5d918a3602661290ff5efe32ba3df74c8"
+EXT_YAML_VERSION="2.0.2"
+EXT_LEVELDB_VERSION="0a1669ce8cfb7db845c05d327ca50db57cd0787b"
+EXT_POCKETMINE_CHUNKUTILS_VERSION="master"
+EXT_XDEBUG_VERSION="283a62be7a73746719162d3724dced18b6226a08"
 
 
 function write_out {
@@ -559,9 +559,9 @@ else
 fi
 
 #PHP ncurses
-#echo -n "[PHP ncurses] downloading $PHPNCURSES_VERSION..."
-#download_file "http://pecl.php.net/get/ncurses-$PHPNCURSES_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-#mv ncurses-$PHPNCURSES_VERSION "$DIR/install_data/php/ext/ncurses"
+#echo -n "[PHP ncurses] downloading $EXT_NCURSES_VERSION..."
+#download_file "http://pecl.php.net/get/ncurses-$EXT_NCURSES_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+#mv ncurses-$EXT_NCURSES_VERSION "$DIR/install_data/php/ext/ncurses"
 #echo " done!"
 
 
@@ -667,11 +667,11 @@ fi
 
 if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
 	#xdebug
-	echo -n "[PHP xdebug] downloading $XDEBUG_VERSION..."
+	echo -n "[PHP xdebug] downloading $EXT_XDEBUG_VERSION..."
 	#TODO Uncomment when a release is available for PHP 7.2.0
-	#download_file "http://pecl.php.net/get/xdebug-$XDEBUG_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-	download_file "https://github.com/xdebug/xdebug/archive/$XDEBUG_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv xdebug-$XDEBUG_VERSION "$DIR/install_data/php/ext/xdebug"
+	#download_file "http://pecl.php.net/get/xdebug-$EXT_XDEBUG_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+	download_file "https://github.com/xdebug/xdebug/archive/$EXT_XDEBUG_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv xdebug-$EXT_XDEBUG_VERSION "$DIR/install_data/php/ext/xdebug"
 	echo " done!"
 fi
 
@@ -688,25 +688,25 @@ fi
 #fi
 
 #pthreads
-echo -n "[PHP pthreads] downloading $PTHREADS_VERSION..."
-#download_file "http://pecl.php.net/get/pthreads-$PTHREADS_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-download_file "https://github.com/krakjoe/pthreads/archive/$PTHREADS_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-mv pthreads-$PTHREADS_VERSION "$DIR/install_data/php/ext/pthreads"
+echo -n "[PHP pthreads] downloading $EXT_PTHREADS_VERSION..."
+#download_file "http://pecl.php.net/get/pthreads-$EXT_PTHREADS_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+download_file "https://github.com/krakjoe/pthreads/archive/$EXT_PTHREADS_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+mv pthreads-$EXT_PTHREADS_VERSION "$DIR/install_data/php/ext/pthreads"
 echo " done!"
 
 #PHP YAML
-echo -n "[PHP YAML] downloading $PHPYAML_VERSION..."
-#download_file "http://pecl.php.net/get/yaml-$PHPYAML_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-#mv yaml-$PHPYAML_VERSION "$DIR/install_data/php/ext/yaml"
-download_file "https://github.com/php/pecl-file_formats-yaml/archive/$PHPYAML_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-mv pecl-file_formats-yaml-$PHPYAML_VERSION "$DIR/install_data/php/ext/yaml"
+echo -n "[PHP YAML] downloading $EXT_YAML_VERSION..."
+#download_file "http://pecl.php.net/get/yaml-$EXT_YAML_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+#mv yaml-$EXT_YAML_VERSION "$DIR/install_data/php/ext/yaml"
+download_file "https://github.com/php/pecl-file_formats-yaml/archive/$EXT_YAML_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+mv pecl-file_formats-yaml-$EXT_YAML_VERSION "$DIR/install_data/php/ext/yaml"
 echo " done!"
 
 if [ "$COMPILE_LEVELDB" == "yes" ]; then
 	#PHP LevelDB
-	echo -n "[PHP LevelDB] downloading $PHPLEVELDB_VERSION..."
-	download_file "https://github.com/reeze/php-leveldb/archive/$PHPLEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv php-leveldb-$PHPLEVELDB_VERSION "$DIR/install_data/php/ext/leveldb"
+	echo -n "[PHP LevelDB] downloading $EXT_LEVELDB_VERSION..."
+	download_file "https://github.com/reeze/php-leveldb/archive/$EXT_LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv php-leveldb-$EXT_LEVELDB_VERSION "$DIR/install_data/php/ext/leveldb"
 	echo " done!"
 	HAS_LEVELDB=--with-leveldb="$DIR/bin/php7"
 else
@@ -714,9 +714,9 @@ else
 fi
 
 if [ "$COMPILE_POCKETMINE_CHUNKUTILS" == "yes" ]; then
-	echo -n "[PocketMine-ChunkUtils] Downloading $POCKETMINE_CHUNKUTILS_VERSION..."
-	download_file "https://github.com/dktapps/PocketMine-C-ChunkUtils/archive/$POCKETMINE_CHUNKUTILS_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv PocketMine-C-ChunkUtils-$POCKETMINE_CHUNKUTILS_VERSION "$DIR/install_data/php/ext/pocketmine_chunkutils"
+	echo -n "[PocketMine-ChunkUtils] Downloading $EXT_POCKETMINE_CHUNKUTILS_VERSION..."
+	download_file "https://github.com/dktapps/PocketMine-C-ChunkUtils/archive/$EXT_POCKETMINE_CHUNKUTILS_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv PocketMine-C-ChunkUtils-$EXT_POCKETMINE_CHUNKUTILS_VERSION "$DIR/install_data/php/ext/pocketmine_chunkutils"
 	echo " done!"
 	HAS_POCKETMINE_CHUNKUTILS=--enable-pocketmine-chunkutils
 else
