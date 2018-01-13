@@ -701,7 +701,7 @@ fi
 
 #get_pecl_extension "ncurses" "$EXT_NCURSES_VERSION"
 
-get_github_extension "pthreads" "$EXT_PTHREADS_VERSION" "krakjoe" "pthreads" "v"
+get_github_extension "pthreads" "$EXT_PTHREADS_VERSION" "krakjoe" "pthreads" #"v" needed for release tags because github removes the "v"
 #get_pecl_extension "pthreads" "$EXT_PTHREADS_VERSION"
 
 get_github_extension "yaml" "$EXT_YAML_VERSION" "php" "pecl-file_formats-yaml"
