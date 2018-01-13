@@ -21,6 +21,7 @@ EXT_YAML_VERSION="2.0.2"
 EXT_LEVELDB_VERSION="0a1669ce8cfb7db845c05d327ca50db57cd0787b"
 EXT_POCKETMINE_CHUNKUTILS_VERSION="master"
 EXT_XDEBUG_VERSION="283a62be7a73746719162d3724dced18b6226a08"
+EXT_IGBINARY_VERSION="4b61818d361cf2c51472956b4a6e23be363d681a"
 
 
 function write_out {
@@ -707,6 +708,8 @@ get_github_extension "pthreads" "$EXT_PTHREADS_VERSION" "krakjoe" "pthreads" #"v
 get_github_extension "yaml" "$EXT_YAML_VERSION" "php" "pecl-file_formats-yaml"
 #get_pecl_extension "yaml" "$EXT_YAML_VERSION"
 
+get_github_extension "igbinary" "$EXT_IGBINARY_VERSION" "igbinary" "igbinary"
+
 if [ "$COMPILE_LEVELDB" == "yes" ]; then
 	#PHP LevelDB
 	get_github_extension "leveldb" "$EXT_LEVELDB_VERSION" "reeze" "php-leveldb"
@@ -824,6 +827,7 @@ $HAVE_MYSQLI \
 --enable-zip \
 --enable-ftp \
 --enable-opcache=no \
+--enable-igbinary \
 $CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
 echo -n " compiling..."
 if [ "$COMPILE_FOR_ANDROID" == "yes" ]; then
