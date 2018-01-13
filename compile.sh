@@ -3,8 +3,6 @@
 
 PHP_IS_BETA="no"
 
-ZEND_VM="GOTO"
-
 ZLIB_VERSION="1.2.11"
 MBEDTLS_VERSION="2.6.0"
 GMP_VERSION="6.1.2"
@@ -831,7 +829,6 @@ $HAVE_MYSQLI \
 --enable-cli \
 --enable-zip \
 --enable-ftp \
---with-zend-vm=$ZEND_VM \
 --enable-opcache=no \
 --enable-weakref \
 $CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
