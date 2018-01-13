@@ -18,6 +18,7 @@ set PTHREAD_W32_VER=2-9-1
 set PHP_PTHREADS_VER=1c9787e5d918a3602661290ff5efe32ba3df74c8
 set PHP_YAML_VER=2.0.2
 set PHP_POCKETMINE_CHUNKUTILS_VER=master
+set PHP_IGBINARY_VER=4b61818d361cf2c51472956b4a6e23be363d681a
 
 set script_path=%~dp0
 set log_file=%script_path%compile.log
@@ -134,6 +135,10 @@ call :pm-echo "Downloading PocketMine-ChunkUtils version %PHP_POCKETMINE_CHUNKUT
 call :get-zip https://github.com/dktapps/PocketMine-C-ChunkUtils/archive/%PHP_POCKETMINE_CHUNKUTILS_VER%.zip || exit 1
 move PocketMine-C-ChunkUtils-%PHP_POCKETMINE_CHUNKUTILS_VER% pocketmine_chunkutils >>"%log_file%" 2>&1 || exit 1
 
+call :pm-echo "Downloading PHP igbinary version %PHP_IGBINARY_VER%..."
+call :get-zip https://github.com/igbinary/igbinary/archive/%PHP_IGBINARY_VER%.zip || exit 1
+move igbinary-%PHP_IGBINARY_VER% igbinary >>"%log_file%" 2>&1 || exit 1
+
 cd ..\..
 
 :skip
@@ -154,6 +159,7 @@ call configure^
  --enable-ctype^
  --enable-filter^
  --enable-hash^
+ --enable-igbinary=shared^
  --enable-json^
  --enable-mbstring^
  --disable-opcache^
@@ -206,6 +212,7 @@ call :pm-echo "Generating php.ini..."
 (echo extension=php_pthreads.dll)>>"%php_ini%"
 (echo extension=php_openssl.dll)>>"%php_ini%"
 (echo extension=php_pocketmine_chunkutils.dll)>>"%php_ini%"
+(echo extension=php_igbinary.dll)>>"%php_ini%"
 (echo ;zend_extension=php_opcache.dll)>>"%php_ini%"
 echo ;The following extensions are included as shared extensions (DLLs) but disabled by default as they are optional. Uncomment the ones you want to enable.>>"%php_ini%"
 (echo ;extension=php_gd2.dll)>>"%php_ini%"
