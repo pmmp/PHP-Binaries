@@ -659,65 +659,64 @@ fi
 
 # PECL libraries
 
-if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
-	#xdebug
-	echo -n "[PHP xdebug] downloading $EXT_XDEBUG_VERSION..."
-	#TODO Uncomment when a release is available for PHP 7.2.0
-	#download_file "http://pecl.php.net/get/xdebug-$EXT_XDEBUG_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-	download_file "https://github.com/xdebug/xdebug/archive/$EXT_XDEBUG_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv xdebug-$EXT_XDEBUG_VERSION "$DIR/install_data/php/ext/xdebug"
+# 1: extension name
+# 2: extension version
+# 3: URL to get .tar.gz from
+# 4: Name of extracted directory to move
+function get_extension_tar_gz {
+	echo -n "  $1: downloading $2..."
+	download_file "$3" | tar -zx >> "$DIR/install.log" 2>&1
+	mv "$4" "$DIR/install_data/php/ext/$1"
 	echo " done!"
+}
+
+# 1: extension name
+# 2: extension version
+# 3: github user name
+# 4: github repo name
+# 5: version prefix (optional)
+function get_github_extension {
+	get_extension_tar_gz "$1" "$2" "https://github.com/$3/$4/archive/$5$2.tar.gz" "$4-$2"
+}
+
+# 1: extension name
+# 2: extension version
+function get_pecl_extension {
+	get_extension_tar_gz "$1" "$2" "http://pecl.php.net/get/$1-$2.tgz" "$1-$2"
+}
+
+echo "[PHP] Downloading additional extensions..."
+
+if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
+	get_github_extension "xdebug" "$EXT_XDEBUG_VERSION" "xdebug" "xdebug"
 fi
 
 #TODO Uncomment this when it's ready for PHP7
 #if [ "$COMPILE_DEBUG" == "yes" ]; then
-#	#profiler
-#	echo -n "[PHP profiler] downloading latest..."
-#	download_file "https://github.com/krakjoe/profiler/archive/master.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-#	mv profiler-master "$DIR/install_data/php/ext/profiler"
-#	echo " done!"
+#   get_github_extension "profiler" "master" "krakjoe" "profiler"
 #	HAS_PROFILER="--enable-profiler --with-profiler-max-frames=1000"
 #else
 #	HAS_PROFILER=""
 #fi
 
-#PHP ncurses
-#echo -n "[PHP ncurses] downloading $EXT_NCURSES_VERSION..."
-#download_file "http://pecl.php.net/get/ncurses-$EXT_NCURSES_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-#mv ncurses-$EXT_NCURSES_VERSION "$DIR/install_data/php/ext/ncurses"
-#echo " done!"
+#get_pecl_extension "ncurses" "$EXT_NCURSES_VERSION"
 
-#pthreads
-echo -n "[PHP pthreads] downloading $EXT_PTHREADS_VERSION..."
-#download_file "http://pecl.php.net/get/pthreads-$EXT_PTHREADS_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-download_file "https://github.com/krakjoe/pthreads/archive/$EXT_PTHREADS_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-mv pthreads-$EXT_PTHREADS_VERSION "$DIR/install_data/php/ext/pthreads"
-echo " done!"
+get_github_extension "pthreads" "$EXT_PTHREADS_VERSION" "krakjoe" "pthreads" "v"
+#get_pecl_extension "pthreads" "$EXT_PTHREADS_VERSION"
 
-#PHP YAML
-echo -n "[PHP YAML] downloading $EXT_YAML_VERSION..."
-#download_file "http://pecl.php.net/get/yaml-$EXT_YAML_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-#mv yaml-$EXT_YAML_VERSION "$DIR/install_data/php/ext/yaml"
-download_file "https://github.com/php/pecl-file_formats-yaml/archive/$EXT_YAML_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-mv pecl-file_formats-yaml-$EXT_YAML_VERSION "$DIR/install_data/php/ext/yaml"
-echo " done!"
+get_github_extension "yaml" "$EXT_YAML_VERSION" "php" "pecl-file_formats-yaml"
+#get_pecl_extension "yaml" "$EXT_YAML_VERSION"
 
 if [ "$COMPILE_LEVELDB" == "yes" ]; then
 	#PHP LevelDB
-	echo -n "[PHP LevelDB] downloading $EXT_LEVELDB_VERSION..."
-	download_file "https://github.com/reeze/php-leveldb/archive/$EXT_LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv php-leveldb-$EXT_LEVELDB_VERSION "$DIR/install_data/php/ext/leveldb"
-	echo " done!"
+	get_github_extension "leveldb" "$EXT_LEVELDB_VERSION" "reeze" "php-leveldb"
 	HAS_LEVELDB=--with-leveldb="$DIR/bin/php7"
 else
 	HAS_LEVELDB=""
 fi
 
 if [ "$COMPILE_POCKETMINE_CHUNKUTILS" == "yes" ]; then
-	echo -n "[PocketMine-ChunkUtils] Downloading $EXT_POCKETMINE_CHUNKUTILS_VERSION..."
-	download_file "https://github.com/dktapps/PocketMine-C-ChunkUtils/archive/$EXT_POCKETMINE_CHUNKUTILS_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv PocketMine-C-ChunkUtils-$EXT_POCKETMINE_CHUNKUTILS_VERSION "$DIR/install_data/php/ext/pocketmine_chunkutils"
-	echo " done!"
+	get_github_extension "pocketmine-chunkutils" "$EXT_POCKETMINE_CHUNKUTILS_VERSION" "dktapps" "PocketMine-C-ChunkUtils"
 	HAS_POCKETMINE_CHUNKUTILS=--enable-pocketmine-chunkutils
 else
 	HAS_POCKETMINE_CHUNKUTILS=""
