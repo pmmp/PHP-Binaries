@@ -558,12 +558,6 @@ else
 	HAVE_CURL="$DIR/bin/php7"
 fi
 
-#PHP ncurses
-#echo -n "[PHP ncurses] downloading $EXT_NCURSES_VERSION..."
-#download_file "http://pecl.php.net/get/ncurses-$EXT_NCURSES_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-#mv ncurses-$EXT_NCURSES_VERSION "$DIR/install_data/php/ext/ncurses"
-#echo " done!"
-
 
 if [ "$DO_STATIC" == "yes" ]; then
 	EXTRA_FLAGS="--disable-shared --enable-static"
@@ -686,6 +680,12 @@ fi
 #else
 #	HAS_PROFILER=""
 #fi
+
+#PHP ncurses
+#echo -n "[PHP ncurses] downloading $EXT_NCURSES_VERSION..."
+#download_file "http://pecl.php.net/get/ncurses-$EXT_NCURSES_VERSION.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+#mv ncurses-$EXT_NCURSES_VERSION "$DIR/install_data/php/ext/ncurses"
+#echo " done!"
 
 #pthreads
 echo -n "[PHP pthreads] downloading $EXT_PTHREADS_VERSION..."
