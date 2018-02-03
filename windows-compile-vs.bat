@@ -32,20 +32,20 @@ where 7z >nul 2>nul || (call :pm-echo-error "7z is required" & exit 1)
 
 call :pm-echo "PHP Windows compiler"
 call :pm-echo "Setting up environment..."
-call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" %ARCH% >>"%log_file%" 2>&1 || exit 1
+call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" %ARCH% >>"%log_file%" 2>&1 || call :pm-fatal-error "Error initializing Visual Studio environment"
 
 cd "%outpath%"
 
 if exist bin (
 	call :pm-echo "Deleting old binary folder..."
-	rmdir /s /q bin >>"%log_file%" 2>&1 || exit 1
+	rmdir /s /q bin >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to delete old binary folder"
 )
 
 cd C:\
 
 if exist pocketmine-php-sdk (
 	call :pm-echo "Deleting old workspace..."
-	rmdir /s /q pocketmine-php-sdk >>"%log_file%" 2>&1 || exit 1
+	rmdir /s /q pocketmine-php-sdk >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to delete old workspace"
 )
 
 call :pm-echo "Getting SDK..."
@@ -59,8 +59,8 @@ call :pm-echo "Downloading PHP source version %PHP_VER%..."
 if "%PHP_IS_BETA%" == "yes" (
 	git clone https://github.com/php/php-src -b php-%PHP_VER% --depth=1 -q php-src >>"%log_file%" 2>&1 || exit 1
 ) else (
-	call :get-zip http://windows.php.net/downloads/releases/php-%PHP_VER%-src.zip >>"%log_file%" 2>&1 || exit 1
-	move php-%PHP_VER%-src php-src >>"%log_file%" 2>&1 || exit 1
+	call :get-zip http://windows.php.net/downloads/releases/php-%PHP_VER%-src.zip >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to download PHP source"
+	move php-%PHP_VER%-src php-src >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to move PHP source to target directory"
 )
 
 set DEPS_DIR_NAME="deps"
@@ -185,13 +185,13 @@ call configure^
  --with-sqlite3=shared^
  --with-xml^
  --with-yaml^
- --without-readline >>"%log_file%" 2>&1 || (call :pm-echo-error "Error configuring PHP" & exit 1)
+ --without-readline >>"%log_file%" 2>&1 || call :pm-fatal-error "Error configuring PHP"
 
 call :pm-echo "Compiling PHP..."
-nmake >>"%log_file%" 2>&1 || (call :pm-echo-error "Error compiling PHP" & exit 1)
+nmake >>"%log_file%" 2>&1 || call :pm-fatal-error "Error compiling PHP"
 
 call :pm-echo "Assembling artifacts..."
-nmake snap >>"%log_file%" 2>&1 || (call :pm-echo-error "Error assembling artifacts" & exit 1)
+nmake snap >>"%log_file%" 2>&1 || call :pm-fatal-error "Error assembling artifacts"
 
 cd "%outpath%"
 
@@ -224,7 +224,7 @@ REM TODO: more entries
 cd ..\..
 
 call :pm-echo "Checking PHP build works..."
-bin\php\php.exe --version >>"%log_file%" 2>&1 || (call :pm-echo-error "PHP build isn't working" & exit 1)
+bin\php\php.exe --version >>"%log_file%" 2>&1 || call :pm-fatal-error "PHP build isn't working"
 
 
 
@@ -240,7 +240,7 @@ for /f %%i in ('bin\php\php.exe -r "echo hash_file(\"SHA384\", \"composer-setup.
 call :pm-echo "Checking Composer installer signature..."
 if "%expect_signature%" == "%actual_signature%" (
 	call :pm-echo "Installing composer to 'bin'..."
-	call bin\php\php.exe composer-setup.php --install-dir=bin >>"%log_file%" 2>&1 || exit 1
+	call bin\php\php.exe composer-setup.php --install-dir=bin >>"%log_file%" 2>&1 || call :pm-fatal-error "Composer installer failed"
 	rm composer-setup.php
 
 	call :pm-echo "Creating bin\composer.bat..."
@@ -255,7 +255,7 @@ if "%expect_signature%" == "%actual_signature%" (
 call :pm-echo "Packaging build..."
 set package_filename=php-%PHP_VER%-%VC_VER%-%ARCH%.zip
 if exist %package_filename% rm %package_filename%
-7z a -bd %package_filename% bin >nul || (call :pm-echo-error "Failed to package the build!" & exit 1)
+7z a -bd %package_filename% bin >nul || call :pm-fatal-error "Failed to package the build"
 
 call :pm-echo "Created build package %package_filename%"
 call :pm-echo "Moving debugging symbols to output directory..."
@@ -269,6 +269,10 @@ wget %~1 --no-check-certificate -q -O temp.zip || exit /B 1
 7z x -y temp.zip >nul || exit /B 1
 rm temp.zip
 exit /B 0
+
+:pm-fatal-error
+call :pm-echo-error "%~1 - check compile.log for details"
+exit 1
 
 :pm-echo-error
 call :pm-echo "[ERROR] %~1"
