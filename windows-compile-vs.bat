@@ -57,10 +57,10 @@ call bin\phpsdk_setvars.bat >>"%log_file%" 2>&1
 
 call :pm-echo "Downloading PHP source version %PHP_VER%..."
 if "%PHP_IS_BETA%" == "yes" (
-	git clone https://github.com/php/php-src -b php-%PHP_VER% --depth=1 -q php-src >>"%log_file%" 2>&1
+	git clone https://github.com/php/php-src -b php-%PHP_VER% --depth=1 -q php-src >>"%log_file%" 2>&1 || exit 1
 ) else (
-	call :get-zip http://windows.php.net/downloads/releases/php-%PHP_VER%-src.zip >>"%log_file%" 2>&1
-	move php-%PHP_VER%-src php-src >>"%log_file%" 2>&1
+	call :get-zip http://windows.php.net/downloads/releases/php-%PHP_VER%-src.zip >>"%log_file%" 2>&1 || exit 1
+	move php-%PHP_VER%-src php-src >>"%log_file%" 2>&1 || exit 1
 )
 
 set DEPS_DIR_NAME="deps"
