@@ -20,7 +20,7 @@ EXT_PTHREADS_VERSION="d32079fb4a88e6e008104d36dbbf0c2dd7deb403"
 EXT_YAML_VERSION="2.0.2"
 EXT_LEVELDB_VERSION="0a1669ce8cfb7db845c05d327ca50db57cd0787b"
 EXT_POCKETMINE_CHUNKUTILS_VERSION="master"
-EXT_XDEBUG_VERSION="283a62be7a73746719162d3724dced18b6226a08"
+EXT_XDEBUG_VERSION="2.6.0"
 EXT_IGBINARY_VERSION="4b61818d361cf2c51472956b4a6e23be363d681a"
 
 
@@ -689,7 +689,7 @@ function get_pecl_extension {
 echo "[PHP] Downloading additional extensions..."
 
 if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
-	get_github_extension "xdebug" "$EXT_XDEBUG_VERSION" "xdebug" "xdebug"
+	get_pecl_extension "xdebug" "$EXT_XDEBUG_VERSION"
 fi
 
 #TODO Uncomment this when it's ready for PHP7
