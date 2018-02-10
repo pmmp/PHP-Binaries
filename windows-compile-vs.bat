@@ -19,6 +19,7 @@ set PHP_PTHREADS_VER=d32079fb4a88e6e008104d36dbbf0c2dd7deb403
 set PHP_YAML_VER=2.0.2
 set PHP_POCKETMINE_CHUNKUTILS_VER=master
 set PHP_IGBINARY_VER=4b61818d361cf2c51472956b4a6e23be363d681a
+set PHP_DS_VER=f3989cbfca634256e29f155d6fff77e0e50f5ab8
 
 set script_path=%~dp0
 set log_file=%script_path%compile.log
@@ -127,6 +128,7 @@ call :get-extension-zip-from-github "pthreads"              "%PHP_PTHREADS_VER%"
 call :get-extension-zip-from-github "yaml"                  "%PHP_YAML_VER%"                  "php"      "pecl-file_formats-yaml"  || exit 1
 call :get-extension-zip-from-github "pocketmine_chunkutils" "%PHP_POCKETMINE_CHUNKUTILS_VER%" "dktapps"  "PocketMine-C-ChunkUtils" || exit 1
 call :get-extension-zip-from-github "igbinary"              "%PHP_IGBINARY_VER%"              "igbinary" "igbinary"                || exit 1
+call :get-extension-zip-from-github "ds"                    "%PHP_DS_VER%"                    "php-ds"   "extension"               || exit 1
 
 cd ..\..
 
@@ -146,6 +148,7 @@ call configure^
  --enable-bcmath^
  --enable-calendar^
  --enable-ctype^
+ --enable-ds=shared^
  --enable-filter^
  --enable-hash^
  --enable-igbinary=shared^
@@ -202,6 +205,7 @@ call :pm-echo "Generating php.ini..."
 (echo extension=php_openssl.dll)>>"%php_ini%"
 (echo extension=php_pocketmine_chunkutils.dll)>>"%php_ini%"
 (echo extension=php_igbinary.dll)>>"%php_ini%"
+(echo extension=php_ds.dll)>>"%php_ini%"
 (echo igbinary.compact_strings=0)>>"%php_ini%"
 (echo ;zend_extension=php_opcache.dll)>>"%php_ini%"
 echo ;The following extensions are included as shared extensions (DLLs) but disabled by default as they are optional. Uncomment the ones you want to enable.>>"%php_ini%"
