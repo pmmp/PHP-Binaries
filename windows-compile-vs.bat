@@ -123,21 +123,10 @@ cd ..
 call :pm-echo "Getting additional PHP extensions..."
 cd php-src\ext
 
-call :pm-echo "Downloading PHP pthreads version %PHP_PTHREADS_VER%..."
-call :get-zip https://github.com/krakjoe/pthreads/archive/%PHP_PTHREADS_VER%.zip || exit 1
-move pthreads-%PHP_PTHREADS_VER% pthreads >>"%log_file%" 2>&1 || exit 1
-
-call :pm-echo "Downloading PHP YAML version %PHP_YAML_VER%..."
-call :get-zip https://github.com/php/pecl-file_formats-yaml/archive/%PHP_YAML_VER%.zip || exit 1
-move pecl-file_formats-yaml-%PHP_YAML_VER% yaml >>"%log_file%" 2>&1 || exit 1
-
-call :pm-echo "Downloading PocketMine-ChunkUtils version %PHP_POCKETMINE_CHUNKUTILS_VER%..."
-call :get-zip https://github.com/dktapps/PocketMine-C-ChunkUtils/archive/%PHP_POCKETMINE_CHUNKUTILS_VER%.zip || exit 1
-move PocketMine-C-ChunkUtils-%PHP_POCKETMINE_CHUNKUTILS_VER% pocketmine_chunkutils >>"%log_file%" 2>&1 || exit 1
-
-call :pm-echo "Downloading PHP igbinary version %PHP_IGBINARY_VER%..."
-call :get-zip https://github.com/igbinary/igbinary/archive/%PHP_IGBINARY_VER%.zip || exit 1
-move igbinary-%PHP_IGBINARY_VER% igbinary >>"%log_file%" 2>&1 || exit 1
+call :get-extension-zip-from-github "pthreads"              "%PHP_PTHREADS_VER%"              "krakjoe"  "pthreads"                || exit 1
+call :get-extension-zip-from-github "yaml"                  "%PHP_YAML_VER%"                  "php"      "pecl-file_formats-yaml"  || exit 1
+call :get-extension-zip-from-github "pocketmine_chunkutils" "%PHP_POCKETMINE_CHUNKUTILS_VER%" "dktapps"  "PocketMine-C-ChunkUtils" || exit 1
+call :get-extension-zip-from-github "igbinary"              "%PHP_IGBINARY_VER%"              "igbinary" "igbinary"                || exit 1
 
 cd ..\..
 
@@ -263,6 +252,13 @@ move C:\pocketmine-php-sdk\php-src\%ARCH%\Release_TS\php-debug-pack*.zip .
 call :pm-echo "Done?"
 
 exit 0
+
+:get-extension-zip-from-github:
+call :pm-echo " - %~1: downloading %~2..."
+call :get-zip https://github.com/%~3/%~4/archive/%~2.zip || exit /B 1
+move %~4-%~2 %~1 >>"%log_file%" 2>&1 || exit /B 1
+exit /B 0
+
 
 :get-zip
 wget %~1 --no-check-certificate -q -O temp.zip || exit /B 1
