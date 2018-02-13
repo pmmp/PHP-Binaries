@@ -218,7 +218,7 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		[ -z "$march" ] && march="armv8-a";
 		[ -z "$mtune" ] && mtune=generic;
 		TOOLCHAIN_PREFIX="aarch64-linux-musl"
-		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --disable-ipv6"
+		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX"
 		CFLAGS="-static $CFLAGS"
 		CXXFLAGS="-static $CXXFLAGS"
 		LDFLAGS="-static"
