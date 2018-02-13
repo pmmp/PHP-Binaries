@@ -224,9 +224,9 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		LDFLAGS="-static"
 		OPENSSL_TARGET="linux-aarch64"
 		echo "[INFO] Cross-compiling for Android ARMv8 (aarch64)"
-	#TODO: add cross-compile for aarch64 platforms (ios, android, rpi)
+	#TODO: add cross-compile for aarch64 platforms (ios, rpi)
 	else
-		echo "Please supply a proper platform [mac win win64] to cross-compile"
+		echo "Please supply a proper platform [mac win win64 android-aarch64] to cross-compile"
 		exit 1
 	fi
 elif [[ "$COMPILE_TARGET" == "linux" ]] || [[ "$COMPILE_TARGET" == "linux64" ]]; then
