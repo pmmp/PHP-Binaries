@@ -110,9 +110,8 @@ LD_PRELOAD=""
 
 COMPILE_POCKETMINE_CHUNKUTILS="no"
 COMPILE_GD="no"
-COMPILE_JPEG="no"
 
-while getopts "::t:oj:srcdlxzff:ugpn" OPTION; do
+while getopts "::t:oj:srcdlxzff:ugn" OPTION; do
 
 	case $OPTION in
 		t)
@@ -176,13 +175,6 @@ while getopts "::t:oj:srcdlxzff:ugpn" OPTION; do
 		g)
 			echo "[opt] Will enable GD2"
 			COMPILE_GD="yes"
-			;;
-		p)
-				echo "[opt] Will compile with jpeg support"
-			else
-				echo "[opt] error, GD2 must be enabled in order to compile with jpeg support"
-				exit 1
-			fi
 			;;
 		n)
 			echo "[opt] Will not remove sources after completing compilation"
@@ -641,29 +633,25 @@ if [ "$COMPILE_GD" == "yes" ]; then
 	make install >> "$DIR/install.log" 2>&1
 	cd ..
 	echo " done!"
-	if [ "$COMPILE_JPEG" == "yes" ]; then
-		#libjpeg
-		echo -n "[libjpeg] downloading $LIBJPEG_VERSION..."
-		download_file "http://ijg.org/files/jpegsrc.v$LIBJPEG_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-		mv jpeg-$LIBJPEG_VERSION libjpeg
-		echo -n " checking..."
-		cd libjpeg
-		LDFLAGS="$LDFLAGS -L${DIR}/bin/php7/lib" CPPFLAGS="$CPPFLAGS -I${DIR}/bin/php7/include" RANLIB=$RANLIB ./configure \
-		--prefix="$DIR/bin/php7" \
-		$EXTRA_FLAGS \
-		$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
-		echo -n " compiling..."
-		make -j $THREADS >> "$DIR/install.log" 2>&1
-		echo -n " installing..."
-		make install >> "$DIR/install.log" 2>&1
-		cd ..
-		echo " done!"
-		HAS_LIBJPEG="--with-jpeg-dir=${DIR}/bin/php7"
-	else
-		HAS_LIBPNG=""
-	fi
+	#libjpeg
+	echo -n "[libjpeg] downloading $LIBJPEG_VERSION..."
+	download_file "http://ijg.org/files/jpegsrc.v$LIBJPEG_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv jpeg-$LIBJPEG_VERSION libjpeg
+	echo -n " checking..."
+	cd libjpeg
+	LDFLAGS="$LDFLAGS -L${DIR}/bin/php7/lib" CPPFLAGS="$CPPFLAGS -I${DIR}/bin/php7/include" RANLIB=$RANLIB ./configure \
+	--prefix="$DIR/bin/php7" \
+	$EXTRA_FLAGS \
+	$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
+	echo -n " compiling..."
+	make -j $THREADS >> "$DIR/install.log" 2>&1
+	echo -n " installing..."
+	make install >> "$DIR/install.log" 2>&1
+	cd ..
+	echo " done!"
 	HAS_GD="--with-gd"
 	HAS_LIBPNG="--with-png-dir=${DIR}/bin/php7"
+	HAS_LIBJPEG="--with-jpeg-dir=${DIR}/bin/php7"
 else
 	HAS_GD=""
 	HAS_LIBPNG=""

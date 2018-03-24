@@ -24,7 +24,6 @@ Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have
 | -g           | Will compile GD2                                                                      |
 | -j           | Set make threads to #                                                                 |
 | -l           | Will compile with LevelDB support (experimental with PHP7)                            |
-| -p           | With -g only: Additionally adds JPEG support                                          |
 | -s           | Will compile everything statically                                                    |
 | -t           | Set target                                                                            |
 | -u           | Will compile PocketMine-ChunkUtils C extension (recommended if using PC Anvil worlds) |
@@ -40,7 +39,6 @@ Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have
 
 ### Common pitfalls
 - If used, the `-t` option (target) MUST be specified BEFORE the `-f` option (optimizations)
-- If jpeg support is desired the `-p` (jpeg) option MUST be specified AFTER the `-g` option (GD2)
 - Avoid using the script in directory trees containing spaces. Some libraries don't like trying to be built in directory trees containing spaces, e.g. `/home/user/my folder/pocketmine-mp/` might experience problems.
 
 ## installer.sh
