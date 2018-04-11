@@ -743,6 +743,22 @@ rm -rf ./autom4te.cache/ >> "$DIR/install.log" 2>&1
 rm -f ./configure >> "$DIR/install.log" 2>&1
 
 ./buildconf --force >> "$DIR/install.log" 2>&1
+
+#hack for curl with pkg-config (ext/curl doesn't give --static to pkg-config on static builds)
+if [ "$DO_STATIC" == "yes" ]; then
+	if [ -z "$PKG_CONFIG" ]; then
+		PKG_CONFIG="$(which pkg-config)" || true
+	fi
+	if [ ! -z "$PKG_CONFIG" ]; then
+		#only export this if pkg-config exists, otherwise leave it (it'll fall back to curl-config)
+
+		echo '#!/bin/sh' > "$DIR/install_data/pkg-config-wrapper"
+		echo 'exec '$PKG_CONFIG' "$@" --static' >> "$DIR/install_data/pkg-config-wrapper"
+		chmod +x "$DIR/install_data/pkg-config-wrapper"
+		export PKG_CONFIG="$DIR/install_data/pkg-config-wrapper"
+	fi
+fi
+
 if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 	sed -i=".backup" 's/pthreads_working=no/pthreads_working=yes/' ./configure
 	if [ "$IS_WINDOWS" != "yes" ]; then
