@@ -129,6 +129,8 @@ while getopts "::t:oj:srcdlxzff:ugn" OPTION; do
 			echo "[opt] Will compile profiler and xdebug, will not remove sources"
 			COMPILE_DEBUG="yes"
 			DO_CLEANUP="no"
+			CFLAGS="$CFLAGS -g"
+			CXXFLAGS="$CXXFLAGS -g"
 			;;
 		c)
 			echo "[opt] Will force compile cURL"
