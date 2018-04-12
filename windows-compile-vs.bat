@@ -14,12 +14,14 @@ set CMAKE_TARGET=Visual Studio 15 2017 Win64
 REM need this version to be able to compile as a shared library
 set LIBYAML_VER=660242d6a418f0348c61057ed3052450527b3abf
 set PTHREAD_W32_VER=2-9-1
+set LEVELDB_MCPE_VER=622ddc25af877320439975cc2a822ae9713e77d8
 
 set PHP_PTHREADS_VER=71472f1bfa48a4a6fc0fee6847e198691b1ab869
 set PHP_YAML_VER=2.0.2
 set PHP_POCKETMINE_CHUNKUTILS_VER=master
 set PHP_IGBINARY_VER=4b61818d361cf2c51472956b4a6e23be363d681a
 set PHP_DS_VER=f3989cbfca634256e29f155d6fff77e0e50f5ab8
+set PHP_LEVELDB_VER=5bdffaa15962d1107cd1fb7cee5d6b425a714ce0
 
 set script_path=%~dp0
 set log_file=%script_path%compile.log
@@ -64,8 +66,8 @@ if "%PHP_IS_BETA%" == "yes" (
 	move php-%PHP_VER%-src php-src >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to move PHP source to target directory"
 )
 
-set DEPS_DIR_NAME="deps"
-set DEPS_DIR="%cd%\%DEPS_DIR_NAME%"
+set DEPS_DIR_NAME=deps
+set DEPS_DIR=%cd%\%DEPS_DIR_NAME%
 
 call :pm-echo "Getting PHP dependencies..."
 call bin\phpsdk_deps.bat -u -t %VC_VER% -b %PHP_MAJOR_VER% -a %ARCH% -f -d %DEPS_DIR_NAME% >>"%log_file%" 2>&1 || exit 1
@@ -119,6 +121,31 @@ copy pthreadVC2.pdb "%DEPS_DIR%\bin\pthreadVC2.pdb" >>"%log_file%" 2>&1
 
 cd "%DEPS_DIR%"
 
+call :pm-echo "Downloading leveldb-mcpe version %LEVELDB_MCPE_VER%..."
+call :get-zip https://github.com/pmmp/leveldb-mcpe/archive/%LEVELDB_MCPE_VER%.zip || exit 1
+move leveldb-mcpe-%LEVELDB_MCPE_VER% leveldb >>"%log_file%" 2>&1
+cd leveldb
+
+set LEVELDB_ZLIB_LIB_DIR=%DEPS_DIR%\lib
+set LEVELDB_ZLIB_LIB_NAME=zlib_a.lib
+set LEVELDB_ZLIB_INCLUDE_DIR=%DEPS_DIR%\include
+echo %LEVELDB_ZLIB_INCLUDE_DIR%
+echo %LEVELDB_ZLIB_LIB_DIR%
+echo %LEVELDB_ZLIB_LIB_NAME%
+
+call :pm-echo "Compiling..."
+msbuild leveldb-mcpe.sln /p:Configuration=Release /m >>"%log_file%" 2>&1 || exit 1
+call :pm-echo "Copying files..."
+mkdir "%DEPS_DIR%\include\leveldb" >>"%log_file%" 2>&1 || exit 1
+xcopy include\leveldb %DEPS_DIR%\include\leveldb >>"%log_file%" 2>&1 || exit 1
+
+REM ext/leveldb wants leveldb.lib, not leveldb-mcpe.lib
+copy x64\Release\leveldb-mcpe.lib "%DEPS_DIR%\lib\leveldb.lib" >>"%log_file%" 2>&1
+copy x64\Release\leveldb-mcpe.dll "%DEPS_DIR%\bin\leveldb-mcpe.dll" >>"%log_file%" 2>&1
+copy x64\Release\leveldb-mcpe.pdb "%DEPS_DIR%\bin\leveldb-mcpe.pdb" >>"%log_file%" 2>&1
+
+cd "%DEPS_DIR%"
+
 cd ..
 
 call :pm-echo "Getting additional PHP extensions..."
@@ -129,6 +156,7 @@ call :get-extension-zip-from-github "yaml"                  "%PHP_YAML_VER%"    
 call :get-extension-zip-from-github "pocketmine_chunkutils" "%PHP_POCKETMINE_CHUNKUTILS_VER%" "dktapps"  "PocketMine-C-ChunkUtils" || exit 1
 call :get-extension-zip-from-github "igbinary"              "%PHP_IGBINARY_VER%"              "igbinary" "igbinary"                || exit 1
 call :get-extension-zip-from-github "ds"                    "%PHP_DS_VER%"                    "php-ds"   "extension"               || exit 1
+call :get-extension-zip-from-github "leveldb"               "%PHP_LEVELDB_VER%"               "reeze"    "php-leveldb"             || exit 1
 
 cd ..\..
 
@@ -167,6 +195,7 @@ call configure^
  --with-gd=shared^
  --with-gmp^
  --with-iconv^
+ --with-leveldb=shared^
  --with-libxml^
  --with-mysqli=shared^
  --with-mysqlnd^
@@ -206,6 +235,7 @@ call :pm-echo "Generating php.ini..."
 (echo extension=php_pocketmine_chunkutils.dll)>>"%php_ini%"
 (echo extension=php_igbinary.dll)>>"%php_ini%"
 (echo extension=php_ds.dll)>>"%php_ini%"
+(echo extension=php_leveldb.dll)>>"%php_ini%"
 (echo igbinary.compact_strings=0)>>"%php_ini%"
 (echo ;zend_extension=php_opcache.dll)>>"%php_ini%"
 echo ;The following extensions are included as shared extensions (DLLs) but disabled by default as they are optional. Uncomment the ones you want to enable.>>"%php_ini%"
