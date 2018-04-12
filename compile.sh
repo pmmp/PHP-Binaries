@@ -221,7 +221,7 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX"
 		CFLAGS="-static $CFLAGS"
 		CXXFLAGS="-static $CXXFLAGS"
-		LDFLAGS="-static"
+		LDFLAGS="-static -static-libgcc -Wl,-static"
 		OPENSSL_TARGET="linux-aarch64"
 		echo "[INFO] Cross-compiling for Android ARMv8 (aarch64)"
 	#TODO: add cross-compile for aarch64 platforms (ios, rpi)
@@ -598,9 +598,9 @@ if [ "$COMPILE_LEVELDB" == "yes" ]; then
 	INSTALL_PATH="$DIR/bin/php7/lib" CFLAGS="$CFLAGS -I$DIR/bin/php7/include" CXXFLAGS="$CXXFLAGS -I$DIR/bin/php7/include" LDFLAGS="$LDFLAGS -L$DIR/bin/php7/lib" make -j $THREADS >> "$DIR/install.log" 2>&1
 	echo -n " installing..."
 	if [ "$DO_STATIC" == "yes" ]; then
-		cp out-static/libleveldb* "$DIR/bin/php7/lib/"
+		cp out-static/lib*.a "$DIR/bin/php7/lib/"
 	else
-		cp out-shared/libleveldb* "$DIR/bin/php7/lib/"
+		cp out-shared/libleveldb.so* "$DIR/bin/php7/lib/"
 	fi
 	cp -r include/leveldb "$DIR/bin/php7/include/leveldb"
 	cd ..
@@ -800,7 +800,7 @@ else
 	HAS_DEBUG="--disable-debug"
 fi
 
-RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" LDFLAGS="$LDFLAGS $FLAGS_LTO" ./configure $PHP_OPTIMIZATION --prefix="$DIR/bin/php7" \
+RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS_LTO" LDFLAGS="$LDFLAGS $FLAGS_LTO" ./configure $PHP_OPTIMIZATION --prefix="$DIR/bin/php7" \
 --exec-prefix="$DIR/bin/php7" \
 --with-curl="$HAVE_CURL" \
 --with-zlib="$DIR/bin/php7" \
