@@ -1,5 +1,5 @@
 #!/bin/bash
-[ -z "$PHP_VERSION" ] && PHP_VERSION="7.2.3"
+[ -z "$PHP_VERSION" ] && PHP_VERSION="7.2.4"
 
 PHP_IS_BETA="no"
 
