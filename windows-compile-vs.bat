@@ -129,9 +129,6 @@ cd leveldb
 set LEVELDB_ZLIB_LIB_DIR=%DEPS_DIR%\lib
 set LEVELDB_ZLIB_LIB_NAME=zlib_a.lib
 set LEVELDB_ZLIB_INCLUDE_DIR=%DEPS_DIR%\include
-echo %LEVELDB_ZLIB_INCLUDE_DIR%
-echo %LEVELDB_ZLIB_LIB_DIR%
-echo %LEVELDB_ZLIB_LIB_NAME%
 
 call :pm-echo "Compiling..."
 msbuild leveldb-mcpe.sln /p:Configuration=Release /m >>"%log_file%" 2>&1 || exit 1
