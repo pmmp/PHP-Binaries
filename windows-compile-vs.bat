@@ -14,7 +14,7 @@ set CMAKE_TARGET=Visual Studio 15 2017 Win64
 REM need this version to be able to compile as a shared library
 set LIBYAML_VER=660242d6a418f0348c61057ed3052450527b3abf
 set PTHREAD_W32_VER=2-9-1
-set LEVELDB_MCPE_VER=622ddc25af877320439975cc2a822ae9713e77d8
+set LEVELDB_MCPE_VER=e593bfda9347a6118b8f58bb50db29c2a88bc50b
 
 set PHP_PTHREADS_VER=71472f1bfa48a4a6fc0fee6847e198691b1ab869
 set PHP_YAML_VER=2.0.2
@@ -131,15 +131,14 @@ set LEVELDB_ZLIB_LIB_NAME=zlib_a.lib
 set LEVELDB_ZLIB_INCLUDE_DIR=%DEPS_DIR%\include
 
 call :pm-echo "Compiling..."
-msbuild leveldb-mcpe.sln /p:Configuration=Release /m >>"%log_file%" 2>&1 || exit 1
+msbuild leveldb.sln /p:Configuration=Release /m >>"%log_file%" 2>&1 || exit 1
 call :pm-echo "Copying files..."
 mkdir "%DEPS_DIR%\include\leveldb" >>"%log_file%" 2>&1 || exit 1
 xcopy include\leveldb %DEPS_DIR%\include\leveldb >>"%log_file%" 2>&1 || exit 1
 
-REM ext/leveldb wants leveldb.lib, not leveldb-mcpe.lib
-copy x64\Release\leveldb-mcpe.lib "%DEPS_DIR%\lib\leveldb.lib" >>"%log_file%" 2>&1
-copy x64\Release\leveldb-mcpe.dll "%DEPS_DIR%\bin\leveldb-mcpe.dll" >>"%log_file%" 2>&1
-copy x64\Release\leveldb-mcpe.pdb "%DEPS_DIR%\bin\leveldb-mcpe.pdb" >>"%log_file%" 2>&1
+copy x64\Release\leveldb.lib "%DEPS_DIR%\lib\leveldb.lib" >>"%log_file%" 2>&1
+copy x64\Release\leveldb.dll "%DEPS_DIR%\bin\leveldb.dll" >>"%log_file%" 2>&1
+copy x64\Release\leveldb.pdb "%DEPS_DIR%\bin\leveldb.pdb" >>"%log_file%" 2>&1
 
 cd "%DEPS_DIR%"
 
