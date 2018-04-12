@@ -13,7 +13,7 @@ Use this script to build the custom PHP binary. Make sure you have ``make autoco
 
 #### Android 64-bit (cross-compile)
 - Only aarch64 targets are supported for Android cross-compile.
-- The `aarch64-linux-musl` toolchain is required. You can compile and install it using https://github.com/richfelker/musl-cross-make
+- The `aarch64-linux-musl` toolchain is required. You can compile and install it using https://github.com/pmmp/musl-cross-make (PMMP fork includes musl-libc patches for DNS resolver config path and increasing stack size limit for LevelDB)
 - Android cross-compile binaries MUST be compiled statically (using `-s`) or the binary will not work correctly.
 - It is strongly recommended that you enable abusive optimizations for Android targets (`-f` flag) for best performance.
 
