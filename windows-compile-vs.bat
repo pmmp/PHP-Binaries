@@ -21,7 +21,7 @@ set PHP_YAML_VER=2.0.2
 set PHP_POCKETMINE_CHUNKUTILS_VER=master
 set PHP_IGBINARY_VER=4b61818d361cf2c51472956b4a6e23be363d681a
 set PHP_DS_VER=f3989cbfca634256e29f155d6fff77e0e50f5ab8
-set PHP_LEVELDB_VER=5bdffaa15962d1107cd1fb7cee5d6b425a714ce0
+set PHP_LEVELDB_VER=8a51bec95c6bdcbfba61424a96c77fec8f265b6f
 
 set script_path=%~dp0
 set log_file=%script_path%compile.log
