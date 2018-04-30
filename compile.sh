@@ -602,7 +602,7 @@ if [ "$COMPILE_LEVELDB" == "yes" ]; then
 	if [ "$DO_STATIC" == "yes" ]; then
 		cp out-static/lib*.a "$DIR/bin/php7/lib/"
 	else
-		cp out-shared/libleveldb.so* "$DIR/bin/php7/lib/"
+		cp out-shared/libleveldb.* "$DIR/bin/php7/lib/"
 	fi
 	cp -r include/leveldb "$DIR/bin/php7/include/leveldb"
 	cd ..
