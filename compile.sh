@@ -16,7 +16,7 @@ LIBPNG_VERSION="1.6.34"
 OPENSSL_VERSION="1.1.0h"
 
 EXT_NCURSES_VERSION="1.0.2"
-EXT_PTHREADS_VERSION="d32079fb4a88e6e008104d36dbbf0c2dd7deb403"
+EXT_PTHREADS_VERSION="a949a0447a187781d64faafc7422ab5f8874bb2a"
 EXT_YAML_VERSION="2.0.2"
 EXT_LEVELDB_VERSION="8a51bec95c6bdcbfba61424a96c77fec8f265b6f"
 EXT_POCKETMINE_CHUNKUTILS_VERSION="master"
@@ -707,7 +707,7 @@ fi
 
 #get_pecl_extension "ncurses" "$EXT_NCURSES_VERSION"
 
-get_github_extension "pthreads" "$EXT_PTHREADS_VERSION" "krakjoe" "pthreads" #"v" needed for release tags because github removes the "v"
+get_github_extension "pthreads" "$EXT_PTHREADS_VERSION" "pmmp" "pthreads" #"v" needed for release tags because github removes the "v"
 #get_pecl_extension "pthreads" "$EXT_PTHREADS_VERSION"
 
 get_github_extension "yaml" "$EXT_YAML_VERSION" "php" "pecl-file_formats-yaml"

@@ -16,7 +16,7 @@ set LIBYAML_VER=660242d6a418f0348c61057ed3052450527b3abf
 set PTHREAD_W32_VER=2-9-1
 set LEVELDB_MCPE_VER=e593bfda9347a6118b8f58bb50db29c2a88bc50b
 
-set PHP_PTHREADS_VER=71472f1bfa48a4a6fc0fee6847e198691b1ab869
+set PHP_PTHREADS_VER=a949a0447a187781d64faafc7422ab5f8874bb2a
 set PHP_YAML_VER=2.0.2
 set PHP_POCKETMINE_CHUNKUTILS_VER=master
 set PHP_IGBINARY_VER=4b61818d361cf2c51472956b4a6e23be363d681a
@@ -147,7 +147,7 @@ cd ..
 call :pm-echo "Getting additional PHP extensions..."
 cd php-src\ext
 
-call :get-extension-zip-from-github "pthreads"              "%PHP_PTHREADS_VER%"              "dktapps"  "pthreads"                || exit /b 1
+call :get-extension-zip-from-github "pthreads"              "%PHP_PTHREADS_VER%"              "pmmp"     "pthreads"                || exit /b 1
 call :get-extension-zip-from-github "yaml"                  "%PHP_YAML_VER%"                  "php"      "pecl-file_formats-yaml"  || exit /b 1
 call :get-extension-zip-from-github "pocketmine_chunkutils" "%PHP_POCKETMINE_CHUNKUTILS_VER%" "dktapps"  "PocketMine-C-ChunkUtils" || exit /b 1
 call :get-extension-zip-from-github "igbinary"              "%PHP_IGBINARY_VER%"              "igbinary" "igbinary"                || exit /b 1
