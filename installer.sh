@@ -114,9 +114,7 @@ function parse_json {
 
 if [[ "$BUILD_URL" != "" && "$CHANNEL" == "custom" ]]; then
 	BASE_VERSION="custom"
-	VERSION="custom"
 	BUILD="unknown"
-	API_VERSION="unknown"
 	VERSION_DATE_STRING="unknown"
 	ENABLE_GPG="no"
 	VERSION_DOWNLOAD="$BUILD_URL"
@@ -145,9 +143,8 @@ else
 
 		BUILD_INFO_JSON=$(download_file "https://jenkins.pmmp.io/job/PocketMine-MP/$(tr '[:lower:]' '[:upper:]' <<< ${CHANNEL:0:1})${CHANNEL:1}/artifact/build_info.json")
 
-		VERSION=$(parse_json "$BUILD_INFO_JSON" pm_version)
+		BASE_VERSION=$(parse_json "$BUILD_INFO_JSON" base_version)
 		BUILD=$(parse_json "$BUILD_INFO_JSON" build_number)
-		API_VERSION=$(parse_json "$BUILD_INFO_JSON" api_version)
 		MCPE_VERSION=$(parse_json "$BUILD_INFO_JSON" mcpe_version)
 		PHP_VERSION=$(parse_json "$BUILD_INFO_JSON" php_version)
 
@@ -160,10 +157,8 @@ else
 		fi
 
 		if [ "$(uname -s)" == "Darwin" ]; then
-			BASE_VERSION=$(echo "$VERSION" | sed -E 's/([A-Za-z0-9_\.]*).*/\1/')
 			VERSION_DATE_STRING=$(date -r $VERSION_DATE)
 		else
-			BASE_VERSION=$(echo "$VERSION" | sed -r 's/([A-Za-z0-9_\.]*).*/\1/')
 			VERSION_DATE_STRING=$(date --date="@$VERSION_DATE")
 		fi
 
@@ -173,7 +168,7 @@ else
 			ENABLE_GPG="yes"
 		fi
 
-		if [ "$VERSION" == "" ]; then
+		if [ "$BASE_VERSION" == "" ]; then
 			echo "[!] Couldn't get the latest $NAME version"
 			exit 1
 		fi
@@ -209,7 +204,7 @@ else
 	fi
 fi
 
-echo "[*] Found $NAME $BASE_VERSION (build $BUILD) for Minecraft: PE v$MCPE_VERSION (PHP $PHP_VERSION, API $API_VERSION)"
+echo "[*] Found $NAME $BASE_VERSION (build $BUILD) for Minecraft: PE v$MCPE_VERSION (PHP $PHP_VERSION)"
 echo "[*] This $CHANNEL build was released on $VERSION_DATE_STRING"
 
 if [ "$ENABLE_GPG" == "yes" ]; then
@@ -235,7 +230,7 @@ rm -f start.bat
 rm -f PocketMine-MP.php
 rm -r -f src/
 
-echo -n "[2/3] Downloading $NAME $VERSION phar..."
+echo -n "[2/3] Downloading $NAME phar..."
 set +e
 download_file "$VERSION_DOWNLOAD" > "$NAME.phar"
 if ! [ -s "$NAME.phar" ] || [ "$(head -n 1 $NAME.phar)" == '<!DOCTYPE html>' ]; then
