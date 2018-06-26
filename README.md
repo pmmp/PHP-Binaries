@@ -1,4 +1,5 @@
 # Custom PHP build scripts for PocketMine-MP
+## Looking for prebuilt binaries? Head over to our [Jenkins build server](https://jenkins.pmmp.io/job/PHP-7.2-Aggregate)
 
 ## compile.sh
 
