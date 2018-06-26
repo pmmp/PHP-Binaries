@@ -13,6 +13,7 @@ YAML_VERSION="0.1.7"
 LEVELDB_VERSION="8758c296910988f13d737a44696c01b5000f227c"
 LIBXML_VERSION="2.9.1"
 LIBPNG_VERSION="1.6.34"
+LIBJPEG_VERSION="8"
 OPENSSL_VERSION="1.1.0h"
 
 EXT_NCURSES_VERSION="1.0.2"
@@ -632,11 +633,29 @@ if [ "$COMPILE_GD" == "yes" ]; then
 	make install >> "$DIR/install.log" 2>&1
 	cd ..
 	echo " done!"
+	#libjpeg
+	echo -n "[libjpeg] downloading $LIBJPEG_VERSION..."
+	download_file "http://ijg.org/files/jpegsrc.v$LIBJPEG_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv jpeg-$LIBJPEG_VERSION libjpeg
+	echo -n " checking..."
+	cd libjpeg
+	LDFLAGS="$LDFLAGS -L${DIR}/bin/php7/lib" CPPFLAGS="$CPPFLAGS -I${DIR}/bin/php7/include" RANLIB=$RANLIB ./configure \
+	--prefix="$DIR/bin/php7" \
+	$EXTRA_FLAGS \
+	$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
+	echo -n " compiling..."
+	make -j $THREADS >> "$DIR/install.log" 2>&1
+	echo -n " installing..."
+	make install >> "$DIR/install.log" 2>&1
+	cd ..
+	echo " done!"
 	HAS_GD="--with-gd"
 	HAS_LIBPNG="--with-png-dir=${DIR}/bin/php7"
+	HAS_LIBJPEG="--with-jpeg-dir=${DIR}/bin/php7"
 else
 	HAS_GD=""
 	HAS_LIBPNG=""
+	HAS_LIBJPEG=""
 fi
 
 #libxml2
@@ -811,6 +830,7 @@ RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS_LTO" LDFLA
 --with-yaml="$DIR/bin/php7" \
 --with-openssl="$DIR/bin/php7" \
 $HAS_LIBPNG \
+$HAS_LIBJPEG \
 $HAS_GD \
 $HAVE_NCURSES \
 $HAVE_READLINE \
