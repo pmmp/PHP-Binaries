@@ -29,9 +29,9 @@ echo.>"%log_file%"
 
 set outpath="%cd%"
 
-where git >nul 2>nul || (call :pm-echo-error "git is required" & exit /b 1)
-where cmake >nul 2>nul || (call :pm-echo-error "cmake is required" & exit /b 1)
-where 7z >nul 2>nul || (call :pm-echo-error "7z is required" & exit /b 1)
+where git >nul 2>nul || (call :pm-echo-error "git is required" & exit 1)
+where cmake >nul 2>nul || (call :pm-echo-error "cmake is required" & exit 1)
+where 7z >nul 2>nul || (call :pm-echo-error "7z is required" & exit 1)
 
 call :pm-echo "PHP Windows compiler"
 call :pm-echo "Setting up environment..."
@@ -60,7 +60,7 @@ call bin\phpsdk_setvars.bat >>"%log_file%" 2>&1
 
 call :pm-echo "Downloading PHP source version %PHP_VER%..."
 if "%PHP_IS_BETA%" == "yes" (
-	git clone https://github.com/php/php-src -b php-%PHP_VER% --depth=1 -q php-src >>"%log_file%" 2>&1 || exit /b 1
+	git clone https://github.com/php/php-src -b php-%PHP_VER% --depth=1 -q php-src >>"%log_file%" 2>&1 || exit 1
 ) else (
 	call :get-zip http://windows.php.net/downloads/releases/php-%PHP_VER%-src.zip >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to download PHP source"
 	move php-%PHP_VER%-src php-src >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to move PHP source to target directory"
@@ -70,19 +70,19 @@ set DEPS_DIR_NAME=deps
 set DEPS_DIR=%cd%\%DEPS_DIR_NAME%
 
 call :pm-echo "Getting PHP dependencies..."
-call bin\phpsdk_deps.bat -u -t %VC_VER% -b %PHP_MAJOR_VER% -a %ARCH% -f -d %DEPS_DIR_NAME% >>"%log_file%" 2>&1 || exit /b 1
+call bin\phpsdk_deps.bat -u -t %VC_VER% -b %PHP_MAJOR_VER% -a %ARCH% -f -d %DEPS_DIR_NAME% >>"%log_file%" 2>&1 || exit 1
 
 
 call :pm-echo "Getting additional dependencies..."
 cd "%DEPS_DIR%"
 
 call :pm-echo "Downloading LibYAML version %LIBYAML_VER%..."
-call :get-zip https://github.com/yaml/libyaml/archive/%LIBYAML_VER%.zip || exit /b 1
+call :get-zip https://github.com/yaml/libyaml/archive/%LIBYAML_VER%.zip || exit 1
 move libyaml-%LIBYAML_VER% libyaml >>"%log_file%" 2>&1
 cd libyaml
 cmake -G "%CMAKE_TARGET%" >>"%log_file%" 2>&1
 call :pm-echo "Compiling..."
-msbuild yaml.sln /p:Configuration=RelWithDebInfo /m >>"%log_file%" 2>&1 || exit /b 1
+msbuild yaml.sln /p:Configuration=RelWithDebInfo /m >>"%log_file%" 2>&1 || exit 1
 call :pm-echo "Copying files..."
 copy RelWithDebInfo\yaml.lib "%DEPS_DIR%\lib\yaml.lib" >>"%log_file%" 2>&1
 copy RelWithDebInfo\yaml.dll "%DEPS_DIR%\bin\yaml.dll" >>"%log_file%" 2>&1
@@ -94,7 +94,7 @@ cd "%DEPS_DIR%"
 call :pm-echo "Downloading pthread-w32 version %PTHREAD_W32_VER%..."
 mkdir pthread-w32
 cd pthread-w32
-call :get-zip http://www.mirrorservice.org/sites/sources.redhat.com/pub/pthreads-win32/pthreads-w32-%PTHREAD_W32_VER%-release.zip || exit /b 1
+call :get-zip http://www.mirrorservice.org/sites/sources.redhat.com/pub/pthreads-win32/pthreads-w32-%PTHREAD_W32_VER%-release.zip || exit 1
 cd pthreads.2
 
 REM Hack for HAVE_STRUCT_TIMESPEC for newer VS versions - it doesn't compile in VS2017 without it
@@ -109,7 +109,7 @@ chcp 65001 & echo #ifndef HAVE_STRUCT_TIMESPEC^
 REM hack end
 
 call :pm-echo "Compiling..."
-nmake VC-inlined >>"%log_file%" 2>&1 || exit /b 1
+nmake VC-inlined >>"%log_file%" 2>&1 || exit 1
 
 call :pm-echo "Copying files..."
 copy pthread.h "%DEPS_DIR%\include\pthread.h" >>"%log_file%" 2>&1
@@ -122,7 +122,7 @@ copy pthreadVC2.pdb "%DEPS_DIR%\bin\pthreadVC2.pdb" >>"%log_file%" 2>&1
 cd "%DEPS_DIR%"
 
 call :pm-echo "Downloading leveldb-mcpe version %LEVELDB_MCPE_VER%..."
-call :get-zip https://github.com/pmmp/leveldb-mcpe/archive/%LEVELDB_MCPE_VER%.zip || exit /b 1
+call :get-zip https://github.com/pmmp/leveldb-mcpe/archive/%LEVELDB_MCPE_VER%.zip || exit 1
 move leveldb-mcpe-%LEVELDB_MCPE_VER% leveldb >>"%log_file%" 2>&1
 cd leveldb
 
@@ -131,10 +131,10 @@ set LEVELDB_ZLIB_LIB_NAME=zlib_a.lib
 set LEVELDB_ZLIB_INCLUDE_DIR=%DEPS_DIR%\include
 
 call :pm-echo "Compiling..."
-msbuild leveldb.sln /p:Configuration=Release /m >>"%log_file%" 2>&1 || exit /b 1
+msbuild leveldb.sln /p:Configuration=Release /m >>"%log_file%" 2>&1 || exit 1
 call :pm-echo "Copying files..."
-mkdir "%DEPS_DIR%\include\leveldb" >>"%log_file%" 2>&1 || exit /b 1
-xcopy include\leveldb %DEPS_DIR%\include\leveldb >>"%log_file%" 2>&1 || exit /b 1
+mkdir "%DEPS_DIR%\include\leveldb" >>"%log_file%" 2>&1 || exit 1
+xcopy include\leveldb %DEPS_DIR%\include\leveldb >>"%log_file%" 2>&1 || exit 1
 
 copy x64\Release\leveldb.lib "%DEPS_DIR%\lib\leveldb.lib" >>"%log_file%" 2>&1
 copy x64\Release\leveldb.dll "%DEPS_DIR%\bin\leveldb.dll" >>"%log_file%" 2>&1
@@ -147,12 +147,12 @@ cd ..
 call :pm-echo "Getting additional PHP extensions..."
 cd php-src\ext
 
-call :get-extension-zip-from-github "pthreads"              "%PHP_PTHREADS_VER%"              "pmmp"     "pthreads"                || exit /b 1
-call :get-extension-zip-from-github "yaml"                  "%PHP_YAML_VER%"                  "php"      "pecl-file_formats-yaml"  || exit /b 1
-call :get-extension-zip-from-github "pocketmine_chunkutils" "%PHP_POCKETMINE_CHUNKUTILS_VER%" "dktapps"  "PocketMine-C-ChunkUtils" || exit /b 1
-call :get-extension-zip-from-github "igbinary"              "%PHP_IGBINARY_VER%"              "igbinary" "igbinary"                || exit /b 1
-call :get-extension-zip-from-github "ds"                    "%PHP_DS_VER%"                    "php-ds"   "extension"               || exit /b 1
-call :get-extension-zip-from-github "leveldb"               "%PHP_LEVELDB_VER%"               "reeze"    "php-leveldb"             || exit /b 1
+call :get-extension-zip-from-github "pthreads"              "%PHP_PTHREADS_VER%"              "pmmp"     "pthreads"                || exit 1
+call :get-extension-zip-from-github "yaml"                  "%PHP_YAML_VER%"                  "php"      "pecl-file_formats-yaml"  || exit 1
+call :get-extension-zip-from-github "pocketmine_chunkutils" "%PHP_POCKETMINE_CHUNKUTILS_VER%" "dktapps"  "PocketMine-C-ChunkUtils" || exit 1
+call :get-extension-zip-from-github "igbinary"              "%PHP_IGBINARY_VER%"              "igbinary" "igbinary"                || exit 1
+call :get-extension-zip-from-github "ds"                    "%PHP_DS_VER%"                    "php-ds"   "extension"               || exit 1
+call :get-extension-zip-from-github "leveldb"               "%PHP_LEVELDB_VER%"               "reeze"    "php-leveldb"             || exit 1
 
 cd ..\..
 
@@ -281,7 +281,7 @@ call :pm-echo "Moving debugging symbols to output directory..."
 move C:\pocketmine-php-sdk\php-src\%ARCH%\Release_TS\php-debug-pack*.zip .
 call :pm-echo "Done?"
 
-exit /b 0
+exit 0
 
 :get-extension-zip-from-github:
 call :pm-echo " - %~1: downloading %~2..."
@@ -298,7 +298,7 @@ exit /B 0
 
 :pm-fatal-error
 call :pm-echo-error "%~1 - check compile.log for details"
-exit /b 1
+exit 1
 
 :pm-echo-error
 call :pm-echo "[ERROR] %~1"
