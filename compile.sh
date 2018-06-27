@@ -7,8 +7,8 @@ ZLIB_VERSION="1.2.11"
 MBEDTLS_VERSION="2.8.0"
 GMP_VERSION="6.1.2"
 CURL_VERSION="curl-7_59_0"
-READLINE_VERSION="6.3"
-NCURSES_VERSION="6.0"
+READLINE_VERSION="7.0"
+NCURSES_VERSION="6.1"
 YAML_VERSION="0.1.7"
 LEVELDB_VERSION="8758c296910988f13d737a44696c01b5000f227c"
 LIBXML_VERSION="2.9.1"
@@ -23,7 +23,7 @@ EXT_LEVELDB_VERSION="8a51bec95c6bdcbfba61424a96c77fec8f265b6f"
 EXT_POCKETMINE_CHUNKUTILS_VERSION="master"
 EXT_XDEBUG_VERSION="2.6.0"
 EXT_IGBINARY_VERSION="4b61818d361cf2c51472956b4a6e23be363d681a"
-EXT_DS_VERSION="f3989cbfca634256e29f155d6fff77e0e50f5ab8"
+EXT_DS_VERSION="1.2.5"
 
 function write_out {
 	echo "[$1] $2"
@@ -734,7 +734,7 @@ get_github_extension "yaml" "$EXT_YAML_VERSION" "php" "pecl-file_formats-yaml"
 
 get_github_extension "igbinary" "$EXT_IGBINARY_VERSION" "igbinary" "igbinary"
 
-get_github_extension "ds" "$EXT_DS_VERSION" "php-ds" "extension"
+get_github_extension "ds" "$EXT_DS_VERSION" "php-ds" "extension" "v"
 
 if [ "$COMPILE_LEVELDB" == "yes" ]; then
 	#PHP LevelDB
