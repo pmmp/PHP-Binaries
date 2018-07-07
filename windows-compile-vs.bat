@@ -10,6 +10,9 @@ set PATH=C:\Program Files\7-Zip;C:\Program Files (x86)\GnuWin32\bin;%PATH%
 set VC_VER=vc15
 set ARCH=x64
 set CMAKE_TARGET=Visual Studio 15 2017 Win64
+if "%DEBUG%"=="" (
+	set DEBUG=0
+)
 
 set LIBYAML_VER=0.2.2
 set PTHREAD_W32_VER=3.0.0
@@ -37,6 +40,16 @@ where 7z >nul 2>nul || (call :pm-echo-error "7z is required" & exit 1)
 
 call :pm-echo "PHP Windows compiler"
 call :pm-echo "Setting up environment..."
+
+if "%DEBUG%"=="0" (
+	set OUT_PATH_REL=Release
+	set HAVE_DEBUG=enable-debug-pack
+	call :pm-echo "Building release binaries with debug symbols"
+) else (
+	set OUT_PATH_REL=Debug
+	set HAVE_DEBUG=enable-debug
+	call :pm-echo "Building debug binaries"
+)
 
 if "%SOURCES_PATH%"=="" (
 	set SOURCES_PATH=C:\pocketmine-php-sdk
@@ -169,7 +182,7 @@ call buildconf.bat >>"%log_file%" 2>&1
 call configure^
  --with-mp=auto^
  --with-prefix=pocketmine-php-bin^
- --enable-debug-pack^
+ --%HAVE_DEBUG%^
  --disable-all^
  --disable-cgi^
  --enable-cli^
@@ -229,7 +242,7 @@ rmdir /s /q "%SOURCES_PATH%\php-src\%ARCH%\Release_TS\php-%PHP_VER%\lib\enchant\
 call :pm-echo "Copying artifacts..."
 cd "%outpath%"
 mkdir bin
-move "%SOURCES_PATH%\php-src\%ARCH%\Release_TS\php-%PHP_VER%" bin\php
+move "%SOURCES_PATH%\php-src\%ARCH%\%OUT_PATH_REL%_TS\php-%PHP_VER%" bin\php
 cd bin\php
 
 set php_ini=php.ini
@@ -274,7 +287,7 @@ if exist %package_filename% rm %package_filename%
 
 call :pm-echo "Created build package %package_filename%"
 call :pm-echo "Moving debugging symbols to output directory..."
-move "%SOURCES_PATH%\php-src\%ARCH%\Release_TS\php-debug-pack*.zip" .
+move "%SOURCES_PATH%\php-src\%ARCH%\%OUT_PATH_REL%_TS\php-debug-pack*.zip" .
 call :pm-echo "Done?"
 
 exit 0
