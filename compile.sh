@@ -24,6 +24,7 @@ EXT_POCKETMINE_CHUNKUTILS_VERSION="master"
 EXT_XDEBUG_VERSION="2.6.0"
 EXT_IGBINARY_VERSION="2.0.7"
 EXT_DS_VERSION="35a46a0fba1a0fe2bd4c61f6ea9891d8c4b5e94a"
+EXT_CRYPTO_VERSION="42b50c105cc24dbe3db7638ab8c2d9508f50ebb6"
 
 function write_out {
 	echo "[$1] $2"
@@ -736,6 +737,14 @@ get_github_extension "igbinary" "$EXT_IGBINARY_VERSION" "igbinary" "igbinary"
 
 get_github_extension "ds" "$EXT_DS_VERSION" "php-ds" "extension"
 
+echo -n "  crypto: downloading $EXT_CRYPTO_VERSION..."
+git clone https://github.com/bukka/php-crypto.git "$DIR/install_data/php/ext/crypto" >> "$DIR/install.log" 2>&1
+cd "$DIR/install_data/php/ext/crypto"
+git checkout "$EXT_CRYPTO_VERSION" >> "$DIR/install.log" 2>&1
+git submodule update --init --recursive >> "$DIR/install.log" 2>&1
+cd "$DIR/install_data"
+echo " done!"
+
 if [ "$COMPILE_LEVELDB" == "yes" ]; then
 	#PHP LevelDB
 	get_github_extension "leveldb" "$EXT_LEVELDB_VERSION" "reeze" "php-leveldb"
@@ -872,6 +881,7 @@ $HAVE_MYSQLI \
 --enable-opcache=no \
 --enable-igbinary \
 --enable-ds \
+--with-crypto \
 $CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
 echo -n " compiling..."
 if [ "$COMPILE_FOR_ANDROID" == "yes" ]; then

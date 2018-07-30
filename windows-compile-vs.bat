@@ -23,6 +23,7 @@ set PHP_IGBINARY_VER=2.0.6
 REM this is 1.2.6 but tags with a "v" prefix are a pain in the ass
 set PHP_DS_VER=35a46a0fba1a0fe2bd4c61f6ea9891d8c4b5e94a
 set PHP_LEVELDB_VER=65971421d31b3d01dfa4205b4698c11b9736fdef
+set PHP_CRYPTO_VER=9f463da61c7a18759b2febb8cf6352bb59bb6a07
 
 set script_path=%~dp0
 set log_file=%script_path%compile.log
@@ -155,6 +156,13 @@ call :get-extension-zip-from-github "igbinary"              "%PHP_IGBINARY_VER%"
 call :get-extension-zip-from-github "ds"                    "%PHP_DS_VER%"                    "php-ds"   "extension"               || exit 1
 call :get-extension-zip-from-github "leveldb"               "%PHP_LEVELDB_VER%"               "reeze"    "php-leveldb"             || exit 1
 
+call :pm-echo " - crypto: downloading %PHP_CRYPTO_VER%..."
+git clone https://github.com/pmmp/php-crypto.git crypto
+cd crypto
+git checkout %PHP_CRYPTO_VER%
+git submodule update --init --recursive
+cd ..
+
 cd ..\..
 
 :skip
@@ -187,6 +195,7 @@ call configure^
  --enable-zip^
  --enable-zlib^
  --with-bz2=shared^
+ --with-crypto=shared^
  --with-curl^
  --with-dom^
  --with-gd=shared^
@@ -233,6 +242,7 @@ call :pm-echo "Generating php.ini..."
 (echo extension=php_igbinary.dll)>>"%php_ini%"
 (echo extension=php_ds.dll)>>"%php_ini%"
 (echo extension=php_leveldb.dll)>>"%php_ini%"
+(echo extension=php_crypto.dll)>>"%php_ini%"
 (echo igbinary.compact_strings=0)>>"%php_ini%"
 (echo ;zend_extension=php_opcache.dll)>>"%php_ini%"
 echo ;The following extensions are included as shared extensions (DLLs) but disabled by default as they are optional. Uncomment the ones you want to enable.>>"%php_ini%"
