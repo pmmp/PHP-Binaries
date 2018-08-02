@@ -180,6 +180,7 @@ call configure^
  --enable-zts^
  --enable-bcmath^
  --enable-calendar^
+ --enable-com-dotnet^
  --enable-ctype^
  --enable-ds=shared^
  --enable-filter^
