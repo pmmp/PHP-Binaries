@@ -3,7 +3,7 @@
 
 ## compile.sh
 
-Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have ``make autoconf automake libtool m4 wget getconf gzip bzip2 bison g++``.
+Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have ``make autoconf automake libtool m4 wget getconf gzip bzip2 bison g++ git``.
 
 ### Additional notes
 #### Mac OSX (native compile)
@@ -19,7 +19,6 @@ Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have
 
 | Script flags | Description                                                                           |
 | ------------ | ------------------------------------------------------------------------------------- |
-| -c           | Will force compile cURL                                                               |
 | -d           | Will compile with debug and the xdebug PHP extension                                  |
 | -f           | Enabling abusive optimizations...                                                     |
 | -g           | Will compile GD2                                                                      |
@@ -34,8 +33,8 @@ Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have
 
 | Target          | Arguments                           |
 | --------------- | ----------------------------------- |
-| linux64         | ``-t linux64 -l -j4 -c -f x86_64``  |
-| mac64           | ``-t mac64 -l -j4 -c -f``           |
+| linux64         | ``-t linux64 -l -j4 -f x86_64``     |
+| mac64           | ``-t mac64 -l -j4 -f``              |
 | android-aarch64 | ``-t android-aarch64 -x -s -j4 -f`` |
 
 ### Common pitfalls
