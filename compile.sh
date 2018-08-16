@@ -96,7 +96,6 @@ fi
 COMPILE_FOR_ANDROID=no
 HAVE_MYSQLI="--enable-embedded-mysqli --enable-mysqlnd --with-mysqli=mysqlnd"
 COMPILE_TARGET=""
-COMPILE_CURL="default"
 COMPILE_FANCY="no"
 IS_CROSSCOMPILE="no"
 IS_WINDOWS="no"
@@ -112,7 +111,7 @@ LD_PRELOAD=""
 COMPILE_POCKETMINE_CHUNKUTILS="no"
 COMPILE_GD="no"
 
-while getopts "::t:oj:srcdlxzff:ugn" OPTION; do
+while getopts "::t:oj:srdlxzff:ugn" OPTION; do
 
 	case $OPTION in
 		t)
@@ -133,10 +132,6 @@ while getopts "::t:oj:srcdlxzff:ugn" OPTION; do
 			DO_CLEANUP="no"
 			CFLAGS="$CFLAGS -g"
 			CXXFLAGS="$CXXFLAGS -g"
-			;;
-		c)
-			echo "[opt] Will force compile cURL"
-			COMPILE_CURL="yes"
 			;;
 		x)
 			echo "[opt] Doing cross-compile"
@@ -457,27 +452,28 @@ make install >> "$DIR/install.log" 2>&1
 cd ..
 echo " done!"
 
-if [ "$(uname -s)" != "Darwin" ] || [ "$IS_CROSSCOMPILE" == "yes" ] || [ "$COMPILE_CURL" == "yes" ]; then
-	#if [ "$DO_STATIC" == "yes" ]; then
-	#	EXTRA_FLAGS=""
-	#else
-	#	EXTRA_FLAGS="shared no-static"
-	#fi
 
-	#mbed TLS
-	echo -n "[mbed TLS] downloading $MBEDTLS_VERSION..."
-	download_file "https://tls.mbed.org/download/mbedtls-${MBEDTLS_VERSION}-gpl.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv mbedtls-${MBEDTLS_VERSION} mbedtls
-	echo -n " checking..."
-	cd mbedtls
-	sed -i=".backup" 's,DESTDIR=/usr/local,,g' Makefile
-	echo -n " compiling..."
-	DESTDIR="$DIR/bin/php7" RANLIB=$RANLIB make -j $THREADS lib >> "$DIR/install.log" 2>&1
-	echo -n " installing..."
-	DESTDIR="$DIR/bin/php7" make install >> "$DIR/install.log" 2>&1
-	cd ..
-	echo " done!"
-fi
+#if [ "$DO_STATIC" == "yes" ]; then
+#	EXTRA_FLAGS=""
+#else
+#	EXTRA_FLAGS="shared no-static"
+#fi
+
+#mbed TLS
+#TODO: remove and use openssl instead?
+
+echo -n "[mbed TLS] downloading $MBEDTLS_VERSION..."
+download_file "https://tls.mbed.org/download/mbedtls-${MBEDTLS_VERSION}-gpl.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+mv mbedtls-${MBEDTLS_VERSION} mbedtls
+echo -n " checking..."
+cd mbedtls
+sed -i=".backup" 's,DESTDIR=/usr/local,,g' Makefile
+echo -n " compiling..."
+DESTDIR="$DIR/bin/php7" RANLIB=$RANLIB make -j $THREADS lib >> "$DIR/install.log" 2>&1
+echo -n " installing..."
+DESTDIR="$DIR/bin/php7" make install >> "$DIR/install.log" 2>&1
+cd ..
+echo " done!"
 
 
 
@@ -513,55 +509,50 @@ echo " done!"
 
 
 
-if [ "$(uname -s)" == "Darwin" ] && [ "$IS_CROSSCOMPILE" != "yes" ] && [ "$COMPILE_CURL" != "yes" ]; then
-   HAVE_CURL="shared,/usr"
+if [ "$DO_STATIC" == "yes" ]; then
+	EXTRA_FLAGS="--enable-static --disable-shared"
 else
-	if [ "$DO_STATIC" == "yes" ]; then
-		EXTRA_FLAGS="--enable-static --disable-shared"
-	else
-		EXTRA_FLAGS="--disable-static --enable-shared"
-	fi
-
-	#curl
-	echo -n "[cURL] downloading $CURL_VERSION..."
-	download_file "https://github.com/curl/curl/archive/$CURL_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv curl-$CURL_VERSION curl
-	echo -n " checking..."
-	cd curl
-	./buildconf --force >> "$DIR/install.log" 2>&1
-	RANLIB=$RANLIB ./configure --disable-dependency-tracking \
-	--enable-ipv6 \
-	--enable-optimize \
-	--enable-http \
-	--enable-ftp \
-	--disable-dict \
-	--enable-file \
-	--without-librtmp \
-	--disable-gopher \
-	--disable-imap \
-	--disable-pop3 \
-	--disable-rtsp \
-	--disable-smtp \
-	--disable-telnet \
-	--disable-tftp \
-	--disable-ldap \
-	--disable-ldaps \
-	--without-libidn \
-	--with-zlib="$DIR/bin/php7" \
-	--without-ssl \
-	--with-mbedtls="$DIR/bin/php7" \
-	--enable-threaded-resolver \
-	--prefix="$DIR/bin/php7" \
-	$EXTRA_FLAGS \
-	$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
-	echo -n " compiling..."
-	make -j $THREADS >> "$DIR/install.log" 2>&1
-	echo -n " installing..."
-	make install >> "$DIR/install.log" 2>&1
-	cd ..
-	echo " done!"
-	HAVE_CURL="$DIR/bin/php7"
+	EXTRA_FLAGS="--disable-static --enable-shared"
 fi
+
+#curl
+echo -n "[cURL] downloading $CURL_VERSION..."
+download_file "https://github.com/curl/curl/archive/$CURL_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+mv curl-$CURL_VERSION curl
+echo -n " checking..."
+cd curl
+./buildconf --force >> "$DIR/install.log" 2>&1
+RANLIB=$RANLIB ./configure --disable-dependency-tracking \
+--enable-ipv6 \
+--enable-optimize \
+--enable-http \
+--enable-ftp \
+--disable-dict \
+--enable-file \
+--without-librtmp \
+--disable-gopher \
+--disable-imap \
+--disable-pop3 \
+--disable-rtsp \
+--disable-smtp \
+--disable-telnet \
+--disable-tftp \
+--disable-ldap \
+--disable-ldaps \
+--without-libidn \
+--with-zlib="$DIR/bin/php7" \
+--without-ssl \
+--with-mbedtls="$DIR/bin/php7" \
+--enable-threaded-resolver \
+--prefix="$DIR/bin/php7" \
+$EXTRA_FLAGS \
+$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
+echo -n " compiling..."
+make -j $THREADS >> "$DIR/install.log" 2>&1
+echo -n " installing..."
+make install >> "$DIR/install.log" 2>&1
+cd ..
+echo " done!"
 
 
 if [ "$DO_STATIC" == "yes" ]; then
@@ -832,7 +823,7 @@ fi
 
 RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS_LTO" LDFLAGS="$LDFLAGS $FLAGS_LTO" ./configure $PHP_OPTIMIZATION --prefix="$DIR/bin/php7" \
 --exec-prefix="$DIR/bin/php7" \
---with-curl="$HAVE_CURL" \
+--with-curl="$DIR/bin/php7" \
 --with-zlib="$DIR/bin/php7" \
 --with-zlib-dir="$DIR/bin/php7" \
 --with-gmp="$DIR/bin/php7" \
@@ -949,10 +940,6 @@ if [ "$IS_CROSSCOMPILE" != "yes" ] && [ "$DO_STATIC" == "no" ]; then
 	echo "opcache.interned_strings_buffer=8" >> "$DIR/bin/php7/bin/php.ini"
 	echo "opcache.memory_consumption=128" >> "$DIR/bin/php7/bin/php.ini"
 	echo "opcache.optimization_level=0xffffffff" >> "$DIR/bin/php7/bin/php.ini"
-fi
-
-if [ "$HAVE_CURL" == "shared,/usr" ]; then
-	echo "extension=curl.so" >> "$DIR/bin/php7/bin/php.ini"
 fi
 
 echo " done!"
