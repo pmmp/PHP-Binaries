@@ -225,6 +225,8 @@ cd "%outpath%"
 
 call :pm-echo "Copying artifacts..."
 mkdir bin
+REM remove ICU DLLs copied unnecessarily by nmake snap - this needs to be removed if we ever have ext/intl as a dependency
+del /q C:\pocketmine-php-sdk\php-src\%ARCH%\Release_TS\php-%PHP_VER%\icu*.dll
 move C:\pocketmine-php-sdk\php-src\%ARCH%\Release_TS\php-%PHP_VER% bin\php
 cd bin\php
 
