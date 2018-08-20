@@ -488,7 +488,7 @@ no-engine >> "$DIR/install.log" 2>&1
 echo -n " compiling..."
 make -j $THREADS >> "$DIR/install.log" 2>&1
 echo -n " installing..."
-make install >> "$DIR/install.log" 2>&1
+make install_sw >> "$DIR/install.log" 2>&1
 cd ..
 echo " done!"
 
@@ -609,6 +609,7 @@ if [ "$COMPILE_GD" == "yes" ]; then
 	make install >> "$DIR/install.log" 2>&1
 	cd ..
 	echo " done!"
+
 	#libjpeg
 	echo -n "[libjpeg] downloading $LIBJPEG_VERSION..."
 	download_file "http://ijg.org/files/jpegsrc.v$LIBJPEG_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
@@ -951,8 +952,12 @@ if [ "$DO_CLEANUP" == "yes" ]; then
 	rm -f bin/php7/bin/c_rehash* >> "$DIR/install.log" 2>&1
 	rm -f bin/php7/bin/openssl* >> "$DIR/install.log" 2>&1
 	rm -r -f bin/php7/man >> "$DIR/install.log" 2>&1
+	rm -r -f bin/php7/share/man >> "$DIR/install.log" 2>&1
 	rm -r -f bin/php7/php >> "$DIR/install.log" 2>&1
 	rm -r -f bin/php7/misc >> "$DIR/install.log" 2>&1
+	rm -r -f bin/php7/lib/*.a >> "$DIR/install.log" 2>&1
+	rm -r -f bin/php7/lib/*.la >> "$DIR/install.log" 2>&1
+	rm -r -f bin/php7/include >> "$DIR/install.log" 2>&1
 	echo " done!"
 fi
 
