@@ -4,7 +4,6 @@
 PHP_IS_BETA="no"
 
 ZLIB_VERSION="1.2.11"
-MBEDTLS_VERSION="2.12.0"
 GMP_VERSION="6.1.2"
 CURL_VERSION="curl-7_61_0"
 READLINE_VERSION="6.3"
@@ -463,30 +462,6 @@ cd ..
 echo " done!"
 
 
-#if [ "$DO_STATIC" == "yes" ]; then
-#	EXTRA_FLAGS=""
-#else
-#	EXTRA_FLAGS="shared no-static"
-#fi
-
-#mbed TLS
-#TODO: remove and use openssl instead?
-
-echo -n "[mbed TLS] downloading $MBEDTLS_VERSION..."
-download_file "https://tls.mbed.org/download/mbedtls-${MBEDTLS_VERSION}-gpl.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-mv mbedtls-${MBEDTLS_VERSION} mbedtls
-echo -n " checking..."
-cd mbedtls
-sed -i=".backup" 's,DESTDIR=/usr/local,,g' Makefile
-echo -n " compiling..."
-DESTDIR="$DIR/bin/php7" RANLIB=$RANLIB make -j $THREADS lib >> "$DIR/install.log" 2>&1
-echo -n " installing..."
-DESTDIR="$DIR/bin/php7" make install >> "$DIR/install.log" 2>&1
-cd ..
-echo " done!"
-
-
-
 #OpenSSL
 OPENSSL_CMD="./config"
 if [ "$OPENSSL_TARGET" != "" ]; then
@@ -551,8 +526,7 @@ RANLIB=$RANLIB ./configure --disable-dependency-tracking \
 --disable-ldaps \
 --without-libidn \
 --with-zlib="$DIR/bin/php7" \
---without-ssl \
---with-mbedtls="$DIR/bin/php7" \
+--with-ssl="$DIR/bin/php7" \
 --enable-threaded-resolver \
 --prefix="$DIR/bin/php7" \
 $EXTRA_FLAGS \
