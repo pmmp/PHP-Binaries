@@ -859,6 +859,7 @@ $HAS_POCKETMINE_CHUNKUTILS \
 --disable-xmlreader \
 --disable-xmlwriter \
 --disable-cgi \
+--disable-phpdbg \
 --disable-session \
 --disable-pdo \
 --without-pear \
