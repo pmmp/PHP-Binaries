@@ -13,10 +13,10 @@ set CMAKE_TARGET=Visual Studio 15 2017 Win64
 
 REM need this version to be able to compile as a shared library
 set LIBYAML_VER=660242d6a418f0348c61057ed3052450527b3abf
-set PTHREAD_W32_VER=2-9-1
+set PTHREAD_W32_VER=3.0.0
 set LEVELDB_MCPE_VER=e593bfda9347a6118b8f58bb50db29c2a88bc50b
 
-set PHP_PTHREADS_VER=a3057347da7fde81c9ae82ac3669b9c08828c482
+set PHP_PTHREADS_VER=5eb80c0c691aa81e0d235bdd37f6f30b633c433e
 set PHP_YAML_VER=2.0.2
 set PHP_POCKETMINE_CHUNKUTILS_VER=master
 set PHP_IGBINARY_VER=2.0.6
@@ -96,30 +96,21 @@ cd "%DEPS_DIR%"
 call :pm-echo "Downloading pthread-w32 version %PTHREAD_W32_VER%..."
 mkdir pthread-w32
 cd pthread-w32
-call :get-zip http://www.mirrorservice.org/sites/sources.redhat.com/pub/pthreads-win32/pthreads-w32-%PTHREAD_W32_VER%-release.zip || exit 1
-cd pthreads.2
-
-REM Hack for HAVE_STRUCT_TIMESPEC for newer VS versions - it doesn't compile in VS2017 without it
-REM really this should do some nice replacement, but text replace in batchfile is a pain
-REM hack start
-chcp 65001 & echo #ifndef HAVE_STRUCT_TIMESPEC^
-
-#define HAVE_STRUCT_TIMESPEC 1^
-
-#endif^
- >>config.h
-REM hack end
+call :get-zip https://sourceforge.net/projects/pthreads4w/files/pthreads4w-code-v%PTHREAD_W32_VER%.zip/download || exit 1
+move pthreads4w-code-* pthreads4w-code
+cd pthreads4w-code
 
 call :pm-echo "Compiling..."
-nmake VC-inlined >>"%log_file%" 2>&1 || exit 1
+nmake VC >>"%log_file%" 2>&1 || exit 1
 
 call :pm-echo "Copying files..."
 copy pthread.h "%DEPS_DIR%\include\pthread.h" >>"%log_file%" 2>&1
 copy sched.h "%DEPS_DIR%\include\sched.h" >>"%log_file%" 2>&1
 copy semaphore.h "%DEPS_DIR%\include\semaphore.h" >>"%log_file%" 2>&1
-copy pthreadVC2.lib "%DEPS_DIR%\lib\pthreadVC2.lib" >>"%log_file%" 2>&1
-copy pthreadVC2.dll "%DEPS_DIR%\bin\pthreadVC2.dll" >>"%log_file%" 2>&1
-copy pthreadVC2.pdb "%DEPS_DIR%\bin\pthreadVC2.pdb" >>"%log_file%" 2>&1
+copy _ptw32.h "%DEPS_DIR%\include\_ptw32.h" >>"%log_file%" 2>&1
+copy pthreadVC3.lib "%DEPS_DIR%\lib\pthreadVC3.lib" >>"%log_file%" 2>&1
+copy pthreadVC3.dll "%DEPS_DIR%\bin\pthreadVC3.dll" >>"%log_file%" 2>&1
+copy pthreadVC3.pdb "%DEPS_DIR%\bin\pthreadVC3.pdb" >>"%log_file%" 2>&1
 
 cd "%DEPS_DIR%"
 
