@@ -97,7 +97,7 @@ call :pm-echo "Downloading pthread-w32 version %PTHREAD_W32_VER%..."
 mkdir pthread-w32
 cd pthread-w32
 call :get-zip https://sourceforge.net/projects/pthreads4w/files/pthreads4w-code-v%PTHREAD_W32_VER%.zip/download || exit 1
-move pthreads4w-code-* pthreads4w-code
+move pthreads4w-code-* pthreads4w-code >>"%log_file%" 2>&1
 cd pthreads4w-code
 
 call :pm-echo "Compiling..."
@@ -148,10 +148,10 @@ call :get-extension-zip-from-github "ds"                    "%PHP_DS_VER%"      
 call :get-extension-zip-from-github "leveldb"               "%PHP_LEVELDB_VER%"               "reeze"    "php-leveldb"             || exit 1
 
 call :pm-echo " - crypto: downloading %PHP_CRYPTO_VER%..."
-git clone https://github.com/pmmp/php-crypto.git crypto
+git clone https://github.com/pmmp/php-crypto.git crypto >>"%log_file%" 2>&1 || exit 1
 cd crypto
-git checkout %PHP_CRYPTO_VER%
-git submodule update --init --recursive
+git checkout %PHP_CRYPTO_VER% >>"%log_file%" 2>&1 || exit 1
+git submodule update --init --recursive >>"%log_file%" 2>&1 || exit 1
 cd ..
 
 cd ..\..
