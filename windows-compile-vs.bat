@@ -212,10 +212,7 @@ nmake >>"%log_file%" 2>&1 || call :pm-fatal-error "Error compiling PHP"
 call :pm-echo "Assembling artifacts..."
 nmake snap >>"%log_file%" 2>&1 || call :pm-fatal-error "Error assembling artifacts"
 
-cd "%outpath%"
-
-call :pm-echo "Copying artifacts..."
-mkdir bin
+call :pm-echo "Removing unneeded dependency DLLs..."
 REM remove ICU DLLs copied unnecessarily by nmake snap - this needs to be removed if we ever have ext/intl as a dependency
 del /q C:\pocketmine-php-sdk\php-src\%ARCH%\Release_TS\php-%PHP_VER%\icu*.dll
 REM remove enchant dependencies which are unnecessarily copied - this needs to be removed if we ever have ext/enchant as a dependency
@@ -223,6 +220,9 @@ del /q C:\pocketmine-php-sdk\php-src\%ARCH%\Release_TS\php-%PHP_VER%\glib-*.dll
 del /q C:\pocketmine-php-sdk\php-src\%ARCH%\Release_TS\php-%PHP_VER%\gmodule-*.dll
 rmdir /s /q C:\pocketmine-php-sdk\php-src\%ARCH%\Release_TS\php-%PHP_VER%\lib\enchant\
 
+call :pm-echo "Copying artifacts..."
+cd "%outpath%"
+mkdir bin
 move C:\pocketmine-php-sdk\php-src\%ARCH%\Release_TS\php-%PHP_VER% bin\php
 cd bin\php
 
