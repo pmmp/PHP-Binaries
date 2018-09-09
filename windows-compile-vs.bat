@@ -14,7 +14,7 @@ set CMAKE_TARGET=Visual Studio 15 2017 Win64
 REM need this version to be able to compile as a shared library
 set LIBYAML_VER=660242d6a418f0348c61057ed3052450527b3abf
 set PTHREAD_W32_VER=3.0.0
-set LEVELDB_MCPE_VER=e593bfda9347a6118b8f58bb50db29c2a88bc50b
+set LEVELDB_MCPE_VER=f1ff6a673f5b0b3703e4fca56cd866a2fb31d6c7
 
 set PHP_PTHREADS_VER=5eb80c0c691aa81e0d235bdd37f6f30b633c433e
 set PHP_YAML_VER=2.0.2
@@ -119,12 +119,8 @@ call :get-zip https://github.com/pmmp/leveldb-mcpe/archive/%LEVELDB_MCPE_VER%.zi
 move leveldb-mcpe-%LEVELDB_MCPE_VER% leveldb >>"%log_file%" 2>&1
 cd leveldb
 
-set LEVELDB_ZLIB_LIB_DIR=%DEPS_DIR%\lib
-set LEVELDB_ZLIB_LIB_NAME=zlib_a.lib
-set LEVELDB_ZLIB_INCLUDE_DIR=%DEPS_DIR%\include
-
 call :pm-echo "Compiling..."
-msbuild leveldb.sln /p:Configuration=Release /m >>"%log_file%" 2>&1 || exit 1
+msbuild leveldb.sln /p:Configuration=Release /p:ZlibIncludePath="%DEPS_DIR%\include" /p:ZlibLibPath="%DEPS_DIR%\lib\zlib_a.lib" /m >>"%log_file%" 2>&1 || exit 1
 call :pm-echo "Copying files..."
 mkdir "%DEPS_DIR%\include\leveldb" >>"%log_file%" 2>&1 || exit 1
 xcopy include\leveldb %DEPS_DIR%\include\leveldb >>"%log_file%" 2>&1 || exit 1
