@@ -123,38 +123,22 @@ if [[ "$BUILD_URL" != "" && "$CHANNEL" == "custom" ]]; then
 else
 	echo "[*] Retrieving latest build data for channel \"$CHANNEL\""
 
-	VERSION_DATA=$(download_file "https://jenkins.pmmp.io/job/PocketMine-MP/$(tr '[:lower:]' '[:upper:]' <<< ${CHANNEL:0:1})${CHANNEL:1}/api/json?pretty=true&tree=url,artifacts[fileName],number,timestamp")
+	VERSION_DATA=$(download_file "https://update.pmmp.io/api?channel=$(tr '[:lower:]' '[:upper:]' <<< ${CHANNEL:0:1})${CHANNEL:1}")
 
 	if [ "$VERSION_DATA" != "" ]; then
-		FILENAME="unknown"
-
-		IFS=$'\n' FILENAMES=($(parse_json "$VERSION_DATA" fileName))
-		for (( i=0; i<${#FILENAMES[@]}; i++ ))
-		do
-			if [[ ${FILENAMES[$i]} == PocketMine*.phar ]]; then
-				FILENAME=${FILENAMES[$i]}
-				break
-			fi
-		done
-		if [ "$FILENAME" == "unknown" ]; then
-			echo "[!] Couldn't determine filename of artifact to download"
+		error=$(parse_json "$VERSION_DATA" error)
+		if [ "$error" != "" ]; then
+			echo "[!] Failed to get download information: $error"
 			exit 1
 		fi
-
-		BUILD_INFO_JSON=$(download_file "https://jenkins.pmmp.io/job/PocketMine-MP/$(tr '[:lower:]' '[:upper:]' <<< ${CHANNEL:0:1})${CHANNEL:1}/artifact/build_info.json")
-
-		BASE_VERSION=$(parse_json "$BUILD_INFO_JSON" base_version)
-		BUILD=$(parse_json "$BUILD_INFO_JSON" build_number)
-		MCPE_VERSION=$(parse_json "$BUILD_INFO_JSON" mcpe_version)
-		PHP_VERSION=$(parse_json "$BUILD_INFO_JSON" php_version)
-
-		VERSION_DATE=$(($(echo "$VERSION_DATA" | grep -m 1 '"timestamp"' | cut -d ':' -f2- | tr -d ' ",') / 1000))
+		FILENAME=$(parse_json "$VERSION_DATA" phar_name)
+		BASE_VERSION=$(parse_json "$VERSION_DATA" base_version)
+		BUILD=$(parse_json "$VERSION_DATA" build_number)
+		MCPE_VERSION=$(parse_json "$VERSION_DATA" mcpe_version)
+		PHP_VERSION=$(parse_json "$VERSION_DATA" php_version)
+		VERSION_DATE=$(parse_json "$VERSION_DATA" date)
 		BASE_URL=$(parse_json "$VERSION_DATA" url)
-		VERSION_DOWNLOAD="${BASE_URL}artifact/${FILENAME}"
-
-		if [ "$alternateurl" == "on" ]; then
-			VERSION_DOWNLOAD=$(parse_json "$VERSION_DATA" alternate_download_url)
-		fi
+		VERSION_DOWNLOAD=$(parse_json "$VERSION_DATA" download_url)
 
 		if [ "$(uname -s)" == "Darwin" ]; then
 			VERSION_DATE_STRING=$(date -r $VERSION_DATE)
@@ -199,7 +183,7 @@ else
 			fi
 		fi
 	else
-		echo "[!] Couldn't download version information automatically from Jenkins server."
+		echo "[!] Failed to download version information: Empty response from API"
 		exit 1
 	fi
 fi
