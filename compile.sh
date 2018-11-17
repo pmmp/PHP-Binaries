@@ -961,38 +961,6 @@ if [ "$DO_CLEANUP" == "yes" ]; then
 	echo " done!"
 fi
 
-
-#Composer
-if [ "$IS_CROSSCOMPILE" != "yes" ]; then
-	echo -n "[Composer] downloading..."
-	EXPECTED_SIGNATURE=$(download_file https://composer.github.io/installer.sig)
-	download_file https://getcomposer.org/installer > composer-setup.php
-	ACTUAL_SIGNATURE=$($DIR/bin/php7/bin/php -r "echo hash_file('SHA384', 'composer-setup.php');")
-
-	if [ "$EXPECTED_SIGNATURE" != "$ACTUAL_SIGNATURE" ]
-	then
-		>&2 echo ' ERROR: Invalid Composer installer signature'
-		echo 'ERROR: Invalid Composer installer signature' >> "$DIR/install.log" 2>&1
-		rm composer-setup.php
-		exit 1
-	fi
-
-	echo -n " installing..."
-	$DIR/bin/php7/bin/php composer-setup.php --install-dir=bin >> "$DIR/install.log" 2>&1
-	rm composer-setup.php
-
-	echo -n " generating bin/composer script..."
-	echo '#!/bin/bash' > $DIR/bin/composer
-	echo 'DIR="$(cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd)"' >> $DIR/bin/composer
-	echo '$DIR/php7/bin/php $DIR/composer.phar $@' >> $DIR/bin/composer
-	chmod +x $DIR/bin/composer
-
-	echo " done!"
-else
-	echo "WARNING: Can't get Composer for cross-compile builds, you will need to install Composer manually on the target machine."
-fi
-
-
 date >> "$DIR/install.log" 2>&1
 echo "[PocketMine] You should start the server now using \"./start.sh\"."
 echo "[PocketMine] If it doesn't work, please send the \"install.log\" file to the Bug Tracker."
