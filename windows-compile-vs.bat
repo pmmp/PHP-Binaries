@@ -3,27 +3,26 @@
 REM For future users: This file MUST have CRLF line endings. If it doesn't, lots of inexplicable undesirable strange behaviour will result.
 REM Also: Don't modify this version with sed, or it will screw up your line endings.
 set PHP_MAJOR_VER=7.2
-set PHP_VER=%PHP_MAJOR_VER%.12
+set PHP_VER=%PHP_MAJOR_VER%.13
 set PHP_IS_BETA="no"
-set PHP_SDK_VER=2.1.1
+set PHP_SDK_VER=2.1.9
 set PATH=C:\Program Files\7-Zip;C:\Program Files (x86)\GnuWin32\bin;%PATH%
 set VC_VER=vc15
 set ARCH=x64
 set CMAKE_TARGET=Visual Studio 15 2017 Win64
 
-REM need this version to be able to compile as a shared library
-set LIBYAML_VER=660242d6a418f0348c61057ed3052450527b3abf
+set LIBYAML_VER=0.2.1
 set PTHREAD_W32_VER=3.0.0
-set LEVELDB_MCPE_VER=f1ff6a673f5b0b3703e4fca56cd866a2fb31d6c7
+set LEVELDB_MCPE_VER=6cca62044fcad4667df74f470111d07f5f122841
 
 set PHP_PTHREADS_VER=5eb80c0c691aa81e0d235bdd37f6f30b633c433e
-set PHP_YAML_VER=2.0.2
+set PHP_YAML_VER=2.0.4
 set PHP_POCKETMINE_CHUNKUTILS_VER=master
-set PHP_IGBINARY_VER=2.0.6
-REM this is 1.2.6 but tags with a "v" prefix are a pain in the ass
-set PHP_DS_VER=35a46a0fba1a0fe2bd4c61f6ea9891d8c4b5e94a
-set PHP_LEVELDB_VER=65971421d31b3d01dfa4205b4698c11b9736fdef
-set PHP_CRYPTO_VER=9f463da61c7a18759b2febb8cf6352bb59bb6a07
+set PHP_IGBINARY_VER=2.0.8
+REM this is 1.2.7 but tags with a "v" prefix are a pain in the ass
+set PHP_DS_VER=4257ed3f75d85a729cf711c94ff06f67fc4e3af2
+set PHP_LEVELDB_VER=9bcae79f71b81a5c3ea6f67e45ae9ae9fb2775a5
+set PHP_CRYPTO_VER=5f26ac91b0ba96742cc6284cd00f8db69c3788b2
 
 set script_path=%~dp0
 set log_file=%script_path%compile.log
@@ -82,14 +81,14 @@ call :pm-echo "Downloading LibYAML version %LIBYAML_VER%..."
 call :get-zip https://github.com/yaml/libyaml/archive/%LIBYAML_VER%.zip || exit 1
 move libyaml-%LIBYAML_VER% libyaml >>"%log_file%" 2>&1
 cd libyaml
-cmake -G "%CMAKE_TARGET%" >>"%log_file%" 2>&1
+cmake -G "%CMAKE_TARGET%" -DBUILD_SHARED_LIBS=ON >>"%log_file%" 2>&1
 call :pm-echo "Compiling..."
 msbuild yaml.sln /p:Configuration=RelWithDebInfo /m >>"%log_file%" 2>&1 || exit 1
 call :pm-echo "Copying files..."
-copy RelWithDebInfo\yaml.lib "%DEPS_DIR%\lib\yaml.lib" >>"%log_file%" 2>&1
-copy RelWithDebInfo\yaml.dll "%DEPS_DIR%\bin\yaml.dll" >>"%log_file%" 2>&1
-copy RelWithDebInfo\yaml.pdb "%DEPS_DIR%\bin\yaml.pdb" >>"%log_file%" 2>&1
-copy include\yaml.h "%DEPS_DIR%\include\yaml.h" >>"%log_file%" 2>&1
+copy RelWithDebInfo\yaml.lib "%DEPS_DIR%\lib\yaml.lib" >>"%log_file%" 2>&1 || exit 1
+copy RelWithDebInfo\yaml.dll "%DEPS_DIR%\bin\yaml.dll" >>"%log_file%" 2>&1 || exit 1
+copy RelWithDebInfo\yaml.pdb "%DEPS_DIR%\bin\yaml.pdb" >>"%log_file%" 2>&1 || exit 1
+copy include\yaml.h "%DEPS_DIR%\include\yaml.h" >>"%log_file%" 2>&1 || exit 1
 
 cd "%DEPS_DIR%"
 
@@ -104,13 +103,13 @@ call :pm-echo "Compiling..."
 nmake VC >>"%log_file%" 2>&1 || exit 1
 
 call :pm-echo "Copying files..."
-copy pthread.h "%DEPS_DIR%\include\pthread.h" >>"%log_file%" 2>&1
-copy sched.h "%DEPS_DIR%\include\sched.h" >>"%log_file%" 2>&1
-copy semaphore.h "%DEPS_DIR%\include\semaphore.h" >>"%log_file%" 2>&1
-copy _ptw32.h "%DEPS_DIR%\include\_ptw32.h" >>"%log_file%" 2>&1
-copy pthreadVC3.lib "%DEPS_DIR%\lib\pthreadVC3.lib" >>"%log_file%" 2>&1
-copy pthreadVC3.dll "%DEPS_DIR%\bin\pthreadVC3.dll" >>"%log_file%" 2>&1
-copy pthreadVC3.pdb "%DEPS_DIR%\bin\pthreadVC3.pdb" >>"%log_file%" 2>&1
+copy pthread.h "%DEPS_DIR%\include\pthread.h" >>"%log_file%" 2>&1 || exit 1
+copy sched.h "%DEPS_DIR%\include\sched.h" >>"%log_file%" 2>&1 || exit 1
+copy semaphore.h "%DEPS_DIR%\include\semaphore.h" >>"%log_file%" 2>&1 || exit 1
+copy _ptw32.h "%DEPS_DIR%\include\_ptw32.h" >>"%log_file%" 2>&1 || exit 1
+copy pthreadVC3.lib "%DEPS_DIR%\lib\pthreadVC3.lib" >>"%log_file%" 2>&1 || exit 1
+copy pthreadVC3.dll "%DEPS_DIR%\bin\pthreadVC3.dll" >>"%log_file%" 2>&1 || exit 1
+copy pthreadVC3.pdb "%DEPS_DIR%\bin\pthreadVC3.pdb" >>"%log_file%" 2>&1 || exit 1
 
 cd "%DEPS_DIR%"
 
@@ -144,7 +143,7 @@ call :get-extension-zip-from-github "ds"                    "%PHP_DS_VER%"      
 call :get-extension-zip-from-github "leveldb"               "%PHP_LEVELDB_VER%"               "reeze"    "php-leveldb"             || exit 1
 
 call :pm-echo " - crypto: downloading %PHP_CRYPTO_VER%..."
-git clone https://github.com/pmmp/php-crypto.git crypto >>"%log_file%" 2>&1 || exit 1
+git clone https://github.com/bukka/php-crypto.git crypto >>"%log_file%" 2>&1 || exit 1
 cd crypto
 git checkout %PHP_CRYPTO_VER% >>"%log_file%" 2>&1 || exit 1
 git submodule update --init --recursive >>"%log_file%" 2>&1 || exit 1
