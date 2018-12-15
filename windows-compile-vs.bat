@@ -247,13 +247,16 @@ REM TODO: more entries
 
 cd ..\..
 
+call :pm-echo "Downloading Microsoft Visual C++ Redistributable 2017"
+wget https://aka.ms/vs/15/release/vc_redist.x64.exe --no-check-certificate -q -O vc_redist.x64.exe || exit 1
+
 call :pm-echo "Checking PHP build works..."
 bin\php\php.exe --version >>"%log_file%" 2>&1 || call :pm-fatal-error "PHP build isn't working"
 
 call :pm-echo "Packaging build..."
 set package_filename=php-%PHP_VER%-%VC_VER%-%ARCH%.zip
 if exist %package_filename% rm %package_filename%
-7z a -bd %package_filename% bin >nul || call :pm-fatal-error "Failed to package the build"
+7z a -bd %package_filename% bin vc_redist.x64.exe >nul || call :pm-fatal-error "Failed to package the build"
 
 call :pm-echo "Created build package %package_filename%"
 call :pm-echo "Moving debugging symbols to output directory..."
