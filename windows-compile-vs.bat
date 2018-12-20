@@ -239,10 +239,10 @@ call :pm-echo "Generating php.ini..."
 (echo extension=php_crypto.dll)>>"%php_ini%"
 (echo igbinary.compact_strings=0)>>"%php_ini%"
 (echo ;zend_extension=php_opcache.dll)>>"%php_ini%"
-echo ;The following extensions are included as shared extensions (DLLs) but disabled by default as they are optional. Uncomment the ones you want to enable.>>"%php_ini%"
-(echo ;extension=php_gd2.dll)>>"%php_ini%"
-(echo ;extension=php_mysqli.dll)>>"%php_ini%"
-(echo ;extension=php_sqlite3.dll)>>"%php_ini%"
+(echo ;Optional extensions, supplied for plugin use)>>"%php_ini%"
+(echo extension=php_gd2.dll)>>"%php_ini%"
+(echo extension=php_mysqli.dll)>>"%php_ini%"
+(echo extension=php_sqlite3.dll)>>"%php_ini%"
 REM TODO: more entries
 
 cd ..\..
