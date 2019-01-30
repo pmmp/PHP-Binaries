@@ -23,6 +23,7 @@ REM this is 1.2.7 but tags with a "v" prefix are a pain in the ass
 set PHP_DS_VER=4bb4be24ce9835ca81be2e48f0104683e41bce12
 set PHP_LEVELDB_VER=9bcae79f71b81a5c3ea6f67e45ae9ae9fb2775a5
 set PHP_CRYPTO_VER=5f26ac91b0ba96742cc6284cd00f8db69c3788b2
+set PHP_RECURSIONGUARD_VER=39514c540d1b2ff3121e50ae5c630e91f36a3950
 
 set script_path=%~dp0
 set log_file=%script_path%compile.log
@@ -141,6 +142,7 @@ call :get-extension-zip-from-github "pocketmine_chunkutils" "%PHP_POCKETMINE_CHU
 call :get-extension-zip-from-github "igbinary"              "%PHP_IGBINARY_VER%"              "igbinary" "igbinary"                || exit 1
 call :get-extension-zip-from-github "ds"                    "%PHP_DS_VER%"                    "php-ds"   "ext-ds"                  || exit 1
 call :get-extension-zip-from-github "leveldb"               "%PHP_LEVELDB_VER%"               "reeze"    "php-leveldb"             || exit 1
+call :get-extension-zip-from-github "recursionguard"        "%PHP_RECURSIONGUARD_VER%"        "pmmp"     "ext-recursionguard"      || exit 1
 
 call :pm-echo " - crypto: downloading %PHP_CRYPTO_VER%..."
 git clone https://github.com/bukka/php-crypto.git crypto >>"%log_file%" 2>&1 || exit 1
@@ -177,6 +179,7 @@ call configure^
  --disable-opcache^
  --enable-phar^
  --enable-pocketmine-chunkutils=shared^
+ --enable-recursionguard=shared^
  --enable-sockets^
  --enable-tokenizer^
  --enable-zip^
@@ -243,6 +246,8 @@ call :pm-echo "Generating php.ini..."
 (echo extension=php_gd2.dll)>>"%php_ini%"
 (echo extension=php_mysqli.dll)>>"%php_ini%"
 (echo extension=php_sqlite3.dll)>>"%php_ini%"
+(echo ;Optional extensions, supplied for debugging)>>"%php_ini%"
+(echo ;extension=php_recursionguard.dll)>>"%php_ini%"
 REM TODO: more entries
 
 cd ..\..

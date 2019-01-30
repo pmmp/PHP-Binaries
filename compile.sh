@@ -24,6 +24,7 @@ EXT_XDEBUG_VERSION="2.6.1"
 EXT_IGBINARY_VERSION="2.0.8"
 EXT_DS_VERSION="4bb4be24ce9835ca81be2e48f0104683e41bce12"
 EXT_CRYPTO_VERSION="5f26ac91b0ba96742cc6284cd00f8db69c3788b2"
+EXT_RECURSIONGUARD_VERSION="39514c540d1b2ff3121e50ae5c630e91f36a3950"
 
 function write_out {
 	echo "[$1] $2"
@@ -713,6 +714,8 @@ get_github_extension "igbinary" "$EXT_IGBINARY_VERSION" "igbinary" "igbinary"
 
 get_github_extension "ds" "$EXT_DS_VERSION" "php-ds" "ext-ds"
 
+get_github_extension "recursionguard" "$EXT_RECURSIONGUARD_VERSION" "pmmp" "ext-recursionguard"
+
 echo -n "  crypto: downloading $EXT_CRYPTO_VERSION..."
 git clone https://github.com/bukka/php-crypto.git "$DIR/install_data/php/ext/crypto" >> "$DIR/install.log" 2>&1
 cd "$DIR/install_data/php/ext/crypto"
@@ -859,6 +862,7 @@ $HAVE_MYSQLI \
 --enable-igbinary \
 --enable-ds \
 --with-crypto \
+--enable-recursionguard=shared \
 $CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
 echo -n " compiling..."
 if [ "$COMPILE_FOR_ANDROID" == "yes" ]; then
@@ -915,6 +919,7 @@ fi
 echo "error_reporting=-1" >> "$DIR/bin/php7/bin/php.ini"
 echo "display_errors=1" >> "$DIR/bin/php7/bin/php.ini"
 echo "display_startup_errors=1" >> "$DIR/bin/php7/bin/php.ini"
+echo ";extension=recursionguard.so" >> "$DIR/bin/php7/bin/php.ini"
 
 if [ "$IS_CROSSCOMPILE" != "yes" ] && [ "$DO_STATIC" == "no" ]; then
 	echo ";zend_extension=opcache.so" >> "$DIR/bin/php7/bin/php.ini"
