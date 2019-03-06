@@ -82,7 +82,7 @@ call :pm-echo "Downloading LibYAML version %LIBYAML_VER%..."
 call :get-zip https://github.com/yaml/libyaml/archive/%LIBYAML_VER%.zip || exit 1
 move libyaml-%LIBYAML_VER% libyaml >>"%log_file%" 2>&1
 cd libyaml
-cmake -G "%CMAKE_TARGET%" -DBUILD_SHARED_LIBS=ON >>"%log_file%" 2>&1
+cmake -G "%CMAKE_TARGET%" -DBUILD_SHARED_LIBS=ON >>"%log_file%" 2>&1 || exit 1
 call :pm-echo "Compiling..."
 msbuild yaml.sln /p:Configuration=RelWithDebInfo /m >>"%log_file%" 2>&1 || exit 1
 call :pm-echo "Copying files..."
