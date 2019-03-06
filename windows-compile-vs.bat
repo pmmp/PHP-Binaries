@@ -82,7 +82,7 @@ call :pm-echo "Downloading LibYAML version %LIBYAML_VER%..."
 call :get-zip https://github.com/yaml/libyaml/archive/%LIBYAML_VER%.zip || exit 1
 move libyaml-%LIBYAML_VER% libyaml >>"%log_file%" 2>&1
 cd libyaml
-cmake -G "%CMAKE_TARGET%" -DBUILD_SHARED_LIBS=ON >>"%log_file%" 2>&1 || exit 1
+cmake -G "%CMAKE_TARGET%" -DBUILD_SHARED_LIBS=ON . >>"%log_file%" 2>&1 || exit 1
 call :pm-echo "Compiling..."
 msbuild yaml.sln /p:Configuration=RelWithDebInfo /m >>"%log_file%" 2>&1 || exit 1
 call :pm-echo "Copying files..."
@@ -96,7 +96,7 @@ cd "%DEPS_DIR%"
 call :pm-echo "Downloading pthread-w32 version %PTHREAD_W32_VER%..."
 mkdir pthread-w32
 cd pthread-w32
-call :get-zip https://sourceforge.net/projects/pthreads4w/files/pthreads4w-code-v%PTHREAD_W32_VER%.zip/download || exit 1
+call :get-zip https://netcologne.dl.sourceforge.net/project/pthreads4w/pthreads4w-code-v%PTHREAD_W32_VER%.zip || exit 1
 move pthreads4w-code-* pthreads4w-code >>"%log_file%" 2>&1
 cd pthreads4w-code
 
