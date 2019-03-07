@@ -17,7 +17,7 @@ set LEVELDB_MCPE_VER=ea7ef8899de400fab555de8fe5cca15da3ff4489
 
 set PHP_PTHREADS_VER=17c9966bac59211da0705166fc0ecb5ecbc96a0d
 set PHP_YAML_VER=2.0.4
-set PHP_POCKETMINE_CHUNKUTILS_VER=master
+set PHP_CHUNKUTILS2_VER=510379d41cdd9335e3a827c3679c23333e1f30ec
 set PHP_IGBINARY_VER=2.0.8
 REM this is 1.2.8 but tags with a "v" prefix are a pain in the ass
 set PHP_DS_VER=4bb4be24ce9835ca81be2e48f0104683e41bce12
@@ -138,7 +138,7 @@ cd php-src\ext
 
 call :get-extension-zip-from-github "pthreads"              "%PHP_PTHREADS_VER%"              "pmmp"     "pthreads"                || exit 1
 call :get-extension-zip-from-github "yaml"                  "%PHP_YAML_VER%"                  "php"      "pecl-file_formats-yaml"  || exit 1
-call :get-extension-zip-from-github "pocketmine_chunkutils" "%PHP_POCKETMINE_CHUNKUTILS_VER%" "dktapps"  "PocketMine-C-ChunkUtils" || exit 1
+call :get-extension-zip-from-github "chunkutils2"           "%PHP_CHUNKUTILS2_VER%"           "pmmp"     "ext-chunkutils2"         || exit 1
 call :get-extension-zip-from-github "igbinary"              "%PHP_IGBINARY_VER%"              "igbinary" "igbinary"                || exit 1
 call :get-extension-zip-from-github "ds"                    "%PHP_DS_VER%"                    "php-ds"   "ext-ds"                  || exit 1
 call :get-extension-zip-from-github "leveldb"               "%PHP_LEVELDB_VER%"               "reeze"    "php-leveldb"             || exit 1
@@ -168,6 +168,7 @@ call configure^
  --enable-zts^
  --enable-bcmath^
  --enable-calendar^
+ --enable-chunkutils2=shared^
  --enable-com-dotnet^
  --enable-ctype^
  --enable-ds=shared^
@@ -178,7 +179,6 @@ call configure^
  --enable-mbstring^
  --disable-opcache^
  --enable-phar^
- --enable-pocketmine-chunkutils=shared^
  --enable-recursionguard=shared^
  --enable-sockets^
  --enable-tokenizer^
@@ -235,7 +235,7 @@ call :pm-echo "Generating php.ini..."
 (echo extension_dir=ext)>>"%php_ini%"
 (echo extension=php_pthreads.dll)>>"%php_ini%"
 (echo extension=php_openssl.dll)>>"%php_ini%"
-(echo extension=php_pocketmine_chunkutils.dll)>>"%php_ini%"
+(echo extension=php_chunkutils2.dll)>>"%php_ini%"
 (echo extension=php_igbinary.dll)>>"%php_ini%"
 (echo extension=php_ds.dll)>>"%php_ini%"
 (echo extension=php_leveldb.dll)>>"%php_ini%"

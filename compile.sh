@@ -19,7 +19,7 @@ EXT_NCURSES_VERSION="1.0.2"
 EXT_PTHREADS_VERSION="17c9966bac59211da0705166fc0ecb5ecbc96a0d"
 EXT_YAML_VERSION="2.0.4"
 EXT_LEVELDB_VERSION="9bcae79f71b81a5c3ea6f67e45ae9ae9fb2775a5"
-EXT_POCKETMINE_CHUNKUTILS_VERSION="master"
+EXT_CHUNKUTILS2_VERSION="510379d41cdd9335e3a827c3679c23333e1f30ec"
 EXT_XDEBUG_VERSION="2.7.0"
 EXT_IGBINARY_VERSION="2.0.8"
 EXT_DS_VERSION="4bb4be24ce9835ca81be2e48f0104683e41bce12"
@@ -104,15 +104,13 @@ OPTIMIZE_TARGET=""
 DO_STATIC="no"
 DO_CLEANUP="yes"
 COMPILE_DEBUG="no"
-COMPILE_LEVELDB="no"
 FLAGS_LTO=""
 
 LD_PRELOAD=""
 
-COMPILE_POCKETMINE_CHUNKUTILS="no"
 COMPILE_GD="no"
 
-while getopts "::t:oj:srdlxzff:ugn" OPTION; do
+while getopts "::t:oj:srdxzff:gn" OPTION; do
 
 	case $OPTION in
 		t)
@@ -138,10 +136,6 @@ while getopts "::t:oj:srdlxzff:ugn" OPTION; do
 			echo "[opt] Doing cross-compile"
 			IS_CROSSCOMPILE="yes"
 			;;
-		l)
-			echo "[opt] Will compile with LevelDB support"
-			COMPILE_LEVELDB="yes"
-			;;
 		s)
 			echo "[opt] Will compile everything statically"
 			DO_STATIC="yes"
@@ -151,10 +145,6 @@ while getopts "::t:oj:srdlxzff:ugn" OPTION; do
 			echo "[opt] Enabling abusive optimizations..."
 			DO_OPTIMIZE="yes"
 			OPTIMIZE_TARGET="$OPTARG"
-			;;
-		u)
-			echo "[opt] Will compile with PocketMine-ChunkUtils C extension for Anvil"
-			COMPILE_POCKETMINE_CHUNKUTILS="yes"
 			;;
 		g)
 			echo "[opt] Will enable GD2"
@@ -566,26 +556,24 @@ make install >> "$DIR/install.log" 2>&1
 cd ..
 echo " done!"
 
-if [ "$COMPILE_LEVELDB" == "yes" ]; then
-	#LevelDB
-	echo -n "[LevelDB] downloading $LEVELDB_VERSION..."
-	download_file "https://github.com/pmmp/leveldb-mcpe/archive/$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	#download_file "https://github.com/Mojang/leveldb-mcpe/archive/$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv leveldb-mcpe-$LEVELDB_VERSION leveldb
-	echo -n " checking..."
-	cd leveldb
-	echo -n " compiling..."
-	INSTALL_PATH="$DIR/bin/php7/lib" CFLAGS="$CFLAGS -I$DIR/bin/php7/include" CXXFLAGS="$CXXFLAGS -I$DIR/bin/php7/include" LDFLAGS="$LDFLAGS -L$DIR/bin/php7/lib" make -j $THREADS >> "$DIR/install.log" 2>&1
-	echo -n " installing..."
-	if [ "$DO_STATIC" == "yes" ]; then
-		cp out-static/lib*.a "$DIR/bin/php7/lib/"
-	else
-		cp out-shared/libleveldb.* "$DIR/bin/php7/lib/"
-	fi
-	cp -r include/leveldb "$DIR/bin/php7/include/leveldb"
-	cd ..
-	echo " done!"
+#LevelDB
+echo -n "[LevelDB] downloading $LEVELDB_VERSION..."
+download_file "https://github.com/pmmp/leveldb-mcpe/archive/$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+#download_file "https://github.com/Mojang/leveldb-mcpe/archive/$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+mv leveldb-mcpe-$LEVELDB_VERSION leveldb
+echo -n " checking..."
+cd leveldb
+echo -n " compiling..."
+INSTALL_PATH="$DIR/bin/php7/lib" CFLAGS="$CFLAGS -I$DIR/bin/php7/include" CXXFLAGS="$CXXFLAGS -I$DIR/bin/php7/include" LDFLAGS="$LDFLAGS -L$DIR/bin/php7/lib" make -j $THREADS >> "$DIR/install.log" 2>&1
+echo -n " installing..."
+if [ "$DO_STATIC" == "yes" ]; then
+	cp out-static/lib*.a "$DIR/bin/php7/lib/"
+else
+	cp out-shared/libleveldb.* "$DIR/bin/php7/lib/"
 fi
+cp -r include/leveldb "$DIR/bin/php7/include/leveldb"
+cd ..
+echo " done!"
 
 if [ "$DO_STATIC" == "yes" ]; then
 	EXTRA_FLAGS="--enable-shared=no --enable-static=yes"
@@ -724,20 +712,9 @@ git submodule update --init --recursive >> "$DIR/install.log" 2>&1
 cd "$DIR/install_data"
 echo " done!"
 
-if [ "$COMPILE_LEVELDB" == "yes" ]; then
-	#PHP LevelDB
-	get_github_extension "leveldb" "$EXT_LEVELDB_VERSION" "reeze" "php-leveldb"
-	HAS_LEVELDB=--with-leveldb="$DIR/bin/php7"
-else
-	HAS_LEVELDB=""
-fi
+get_github_extension "leveldb" "$EXT_LEVELDB_VERSION" "reeze" "php-leveldb"
 
-if [ "$COMPILE_POCKETMINE_CHUNKUTILS" == "yes" ]; then
-	get_github_extension "pocketmine-chunkutils" "$EXT_POCKETMINE_CHUNKUTILS_VERSION" "dktapps" "PocketMine-C-ChunkUtils"
-	HAS_POCKETMINE_CHUNKUTILS=--enable-pocketmine-chunkutils
-else
-	HAS_POCKETMINE_CHUNKUTILS=""
-fi
+get_github_extension "chunkutils2" "$EXT_CHUNKUTILS2_VERSION" "pmmp" "ext-chunkutils2"
 
 
 echo -n "[PHP]"
@@ -822,10 +799,10 @@ $HAS_LIBJPEG \
 $HAS_GD \
 $HAVE_NCURSES \
 $HAVE_READLINE \
-$HAS_LEVELDB \
+--with-leveldb="$DIR/bin/php7" \
 $HAS_PROFILER \
 $HAS_DEBUG \
-$HAS_POCKETMINE_CHUNKUTILS \
+--enable-chunkutils2 \
 --enable-mbstring \
 --enable-calendar \
 --enable-pthreads \
@@ -871,7 +848,7 @@ fi
 sed -i=".backup" 's/PHP_BINARIES. pharcmd$/PHP_BINARIES)/g' Makefile
 sed -i=".backup" 's/install-programs install-pharcmd$/install-programs/g' Makefile
 
-if [[ "$COMPILE_LEVELDB" == "yes" ]] && [[ "$DO_STATIC" == "yes" ]]; then
+if [[ "$DO_STATIC" == "yes" ]]; then
 	sed -i=".backup" 's/--mode=link $(CC)/--mode=link $(CXX)/g' Makefile
 fi
 
