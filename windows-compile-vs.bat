@@ -23,7 +23,7 @@ REM this is 1.2.8 but tags with a "v" prefix are a pain in the ass
 set PHP_DS_VER=4bb4be24ce9835ca81be2e48f0104683e41bce12
 set PHP_LEVELDB_VER=9bcae79f71b81a5c3ea6f67e45ae9ae9fb2775a5
 set PHP_CRYPTO_VER=5f26ac91b0ba96742cc6284cd00f8db69c3788b2
-set PHP_RECURSIONGUARD_VER=9a92f7d26830635bfff9f7402bb66e3d9081ee75
+set PHP_RECURSIONGUARD_VER=d6ed5da49178762ed81dc0184cd34ff4d3254720
 
 set script_path=%~dp0
 set log_file=%script_path%compile.log
