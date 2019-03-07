@@ -23,7 +23,7 @@ REM this is 1.2.7 but tags with a "v" prefix are a pain in the ass
 set PHP_DS_VER=4bb4be24ce9835ca81be2e48f0104683e41bce12
 set PHP_LEVELDB_VER=9bcae79f71b81a5c3ea6f67e45ae9ae9fb2775a5
 set PHP_CRYPTO_VER=5f26ac91b0ba96742cc6284cd00f8db69c3788b2
-set PHP_RECURSIONGUARD_VER=39514c540d1b2ff3121e50ae5c630e91f36a3950
+set PHP_RECURSIONGUARD_VER=9a92f7d26830635bfff9f7402bb66e3d9081ee75
 
 set script_path=%~dp0
 set log_file=%script_path%compile.log
@@ -247,7 +247,8 @@ call :pm-echo "Generating php.ini..."
 (echo extension=php_mysqli.dll)>>"%php_ini%"
 (echo extension=php_sqlite3.dll)>>"%php_ini%"
 (echo ;Optional extensions, supplied for debugging)>>"%php_ini%"
-(echo ;extension=php_recursionguard.dll)>>"%php_ini%"
+(echo extension=php_recursionguard.dll)>>"%php_ini%"
+(echo recursionguard.enabled=0 ;disabled due to minor performance impact, only enable this if you need it for debugging)>>"%php_ini%"
 REM TODO: more entries
 
 cd ..\..
