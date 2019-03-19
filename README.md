@@ -1,4 +1,5 @@
 # Custom PHP build scripts for PocketMine-MP
+[![Build status](https://dev.azure.com/pocketmine/PHP-Builds/_apis/build/status/PM%20Compile%20Test-CI)](https://dev.azure.com/pocketmine/PHP-Builds/_build/latest?definitionId=2)
 ## Looking for prebuilt binaries? Head over to our [Jenkins build server](https://jenkins.pmmp.io/job/PHP-7.2-Aggregate)
 
 ## compile.sh
