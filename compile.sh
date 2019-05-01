@@ -1,5 +1,5 @@
 #!/bin/bash
-[ -z "$PHP_VERSION" ] && PHP_VERSION="7.2.16"
+[ -z "$PHP_VERSION" ] && PHP_VERSION="7.2.17"
 
 PHP_IS_BETA="no"
 
@@ -235,7 +235,9 @@ else
 	elif [ -z "$CFLAGS" ]; then
 		if [ `getconf LONG_BIT` == "64" ]; then
 			echo "[INFO] Compiling for current machine using 64-bit"
-			CFLAGS="-m64 $CFLAGS"
+			if [ "$(uname -m)" != "aarch64" ]; then
+				CFLAGS="-m64 $CFLAGS"
+			fi
 			GMP_ABI="64"
 		else
 			echo "[ERROR] PocketMine-MP is no longer supported on 32-bit systems"

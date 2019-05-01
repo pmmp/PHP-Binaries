@@ -3,7 +3,7 @@
 REM For future users: This file MUST have CRLF line endings. If it doesn't, lots of inexplicable undesirable strange behaviour will result.
 REM Also: Don't modify this version with sed, or it will screw up your line endings.
 set PHP_MAJOR_VER=7.2
-set PHP_VER=%PHP_MAJOR_VER%.16
+set PHP_VER=%PHP_MAJOR_VER%.17
 set PHP_IS_BETA="no"
 set PHP_SDK_VER=2.1.9
 set PATH=C:\Program Files\7-Zip;C:\Program Files (x86)\GnuWin32\bin;%PATH%
@@ -37,7 +37,17 @@ where 7z >nul 2>nul || (call :pm-echo-error "7z is required" & exit 1)
 
 call :pm-echo "PHP Windows compiler"
 call :pm-echo "Setting up environment..."
-call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" %ARCH% >>"%log_file%" 2>&1 || call :pm-fatal-error "Error initializing Visual Studio environment"
+
+if "%SOURCES_PATH%"=="" (
+	set SOURCES_PATH=C:\pocketmine-php-sdk
+)
+call :pm-echo "Using path %SOURCES_PATH% for build sources"
+
+REM export an env var to override this if you're using something other than the community edition
+if "%VS_EDITION%"=="" (
+	set VS_EDITION=Community
+)
+call "C:\Program Files (x86)\Microsoft Visual Studio\2017\%VS_EDITION%\VC\Auxiliary\Build\vcvarsall.bat" %ARCH% >>"%log_file%" 2>&1 || call :pm-fatal-error "Error initializing Visual Studio environment"
 
 cd "%outpath%"
 
@@ -46,17 +56,15 @@ if exist bin (
 	rmdir /s /q bin >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to delete old binary folder"
 )
 
-cd C:\
-
-if exist pocketmine-php-sdk (
+if exist "%SOURCES_PATH%" (
 	call :pm-echo "Deleting old workspace..."
-	rmdir /s /q pocketmine-php-sdk >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to delete old workspace"
+	rmdir /s /q "%SOURCES_PATH%" >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to delete old workspace"
 )
 
 call :pm-echo "Getting SDK..."
-git clone https://github.com/OSTC/php-sdk-binary-tools.git -b php-sdk-%PHP_SDK_VER% --depth=1 -q pocketmine-php-sdk >>"%log_file%" 2>&1
+git clone https://github.com/OSTC/php-sdk-binary-tools.git -b php-sdk-%PHP_SDK_VER% --depth=1 -q "%SOURCES_PATH%" >>"%log_file%" 2>&1
 
-cd pocketmine-php-sdk
+cd "%SOURCES_PATH%"
 
 call bin\phpsdk_setvars.bat >>"%log_file%" 2>&1
 
@@ -69,9 +77,9 @@ if "%PHP_IS_BETA%" == "yes" (
 )
 
 set DEPS_DIR_NAME=deps
-set DEPS_DIR=%cd%\%DEPS_DIR_NAME%
+set DEPS_DIR="%SOURCES_PATH%\%DEPS_DIR_NAME%"
 
-call :pm-echo "Getting PHP dependencies..."
+call :pm-echo "Downloading PHP dependencies into %DEPS_DIR%..."
 call bin\phpsdk_deps.bat -u -t %VC_VER% -b %PHP_MAJOR_VER% -a %ARCH% -f -d %DEPS_DIR_NAME% >>"%log_file%" 2>&1 || exit 1
 
 
@@ -212,16 +220,16 @@ nmake snap >>"%log_file%" 2>&1 || call :pm-fatal-error "Error assembling artifac
 
 call :pm-echo "Removing unneeded dependency DLLs..."
 REM remove ICU DLLs copied unnecessarily by nmake snap - this needs to be removed if we ever have ext/intl as a dependency
-del /q C:\pocketmine-php-sdk\php-src\%ARCH%\Release_TS\php-%PHP_VER%\icu*.dll 2>&1
+del /q "%SOURCES_PATH%\php-src\%ARCH%\Release_TS\php-%PHP_VER%\icu*.dll" 2>&1
 REM remove enchant dependencies which are unnecessarily copied - this needs to be removed if we ever have ext/enchant as a dependency
-del /q C:\pocketmine-php-sdk\php-src\%ARCH%\Release_TS\php-%PHP_VER%\glib-*.dll 2>&1
-del /q C:\pocketmine-php-sdk\php-src\%ARCH%\Release_TS\php-%PHP_VER%\gmodule-*.dll 2>&1
-rmdir /s /q C:\pocketmine-php-sdk\php-src\%ARCH%\Release_TS\php-%PHP_VER%\lib\enchant\ 2>&1
+del /q "%SOURCES_PATH%\php-src\%ARCH%\Release_TS\php-%PHP_VER%\glib-*.dll" 2>&1
+del /q "%SOURCES_PATH%\php-src\%ARCH%\Release_TS\php-%PHP_VER%\gmodule-*.dll" 2>&1
+rmdir /s /q "%SOURCES_PATH%\php-src\%ARCH%\Release_TS\php-%PHP_VER%\lib\enchant\" 2>&1
 
 call :pm-echo "Copying artifacts..."
 cd "%outpath%"
 mkdir bin
-move C:\pocketmine-php-sdk\php-src\%ARCH%\Release_TS\php-%PHP_VER% bin\php
+move "%SOURCES_PATH%\php-src\%ARCH%\Release_TS\php-%PHP_VER%" bin\php
 cd bin\php
 
 set php_ini=php.ini
@@ -266,7 +274,7 @@ if exist %package_filename% rm %package_filename%
 
 call :pm-echo "Created build package %package_filename%"
 call :pm-echo "Moving debugging symbols to output directory..."
-move C:\pocketmine-php-sdk\php-src\%ARCH%\Release_TS\php-debug-pack*.zip .
+move "%SOURCES_PATH%\php-src\%ARCH%\Release_TS\php-debug-pack*.zip" .
 call :pm-echo "Done?"
 
 exit 0
