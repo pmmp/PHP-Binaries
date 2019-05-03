@@ -667,6 +667,7 @@ cd libzip
 CFLAGS="$CFLAGS -I$DIR/bin/php7/include" LDFLAGS="$LDFLAGS -L$DIR/bin/php7/lib" cmake . -DCMAKE_INSTALL_PREFIX="$DIR/bin/php7" >> "$DIR/install.log" 2>&1
 echo " compiling..."
 make -j4 >> "$DIR/install.log" 2>&1
+echo " installing..."
 make install >> "$DIR/install.log" 2>&1
 cd ..
 echo " done!"
