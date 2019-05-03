@@ -668,6 +668,7 @@ CFLAGS="$CFLAGS -I$DIR/bin/php7/include" LDFLAGS="$LDFLAGS -L$DIR/bin/php7/lib" 
 echo " compiling..."
 make -j4 >> "$DIR/install.log" 2>&1
 make install >> "$DIR/install.log" 2>&1
+cd ..
 echo " done!"
 
 
