@@ -14,6 +14,7 @@ LIBXML_VERSION="2.9.1"
 LIBPNG_VERSION="1.6.37"
 LIBJPEG_VERSION="9c"
 OPENSSL_VERSION="1.1.0j" #1.1.1a has some segfault issues
+LIBZIP_VERSION="1.5.2"
 
 EXT_NCURSES_VERSION="1.0.2"
 EXT_PTHREADS_VERSION="17c9966bac59211da0705166fc0ecb5ecbc96a0d"
@@ -657,8 +658,17 @@ fi
 #cd ..
 #echo " done!"
 
-
-
+#libzip
+echo -n "[libzip] downloading $LIBZIP_VERSION..."
+download_file "https://libzip.org/download/libzip-$LIBZIP_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+mv libzip-$LIBZIP_VERSION libzip >> "$DIR/install.log" 2>&1
+echo -n " checking..."
+cd libzip
+CFLAGS="$CFLAGS -I$DIR/bin/php7/include" LDFLAGS="$LDFLAGS -L$DIR/bin/php7/lib" cmake . -DCMAKE_INSTALL_PREFIX="$DIR/bin/php7" >> "$DIR/install.log" 2>&1
+echo " compiling..."
+make -j4 >> "$DIR/install.log" 2>&1
+make install >> "$DIR/install.log" 2>&1
+echo " done!"
 
 
 
@@ -819,6 +829,7 @@ RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS_LTO" LDFLA
 --with-gmp="$DIR/bin/php7" \
 --with-yaml="$DIR/bin/php7" \
 --with-openssl="$DIR/bin/php7" \
+--with-libzip="$DIR/bin/php7" \
 $HAS_LIBPNG \
 $HAS_LIBJPEG \
 $HAS_GD \
