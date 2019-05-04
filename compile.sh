@@ -870,7 +870,7 @@ $HAVE_MYSQLI \
 --enable-ds \
 --with-crypto \
 --enable-recursionguard \
-$HAVE_VALGRIND
+$HAVE_VALGRIND \
 $CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
 echo -n " compiling..."
 if [ "$COMPILE_FOR_ANDROID" == "yes" ]; then
