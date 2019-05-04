@@ -106,6 +106,7 @@ DO_STATIC="no"
 DO_CLEANUP="yes"
 COMPILE_DEBUG="no"
 COMPILE_LEVELDB="no"
+HAVE_VALGRIND="--without-valgrind"
 FLAGS_LTO=""
 
 LD_PRELOAD=""
@@ -113,7 +114,7 @@ LD_PRELOAD=""
 COMPILE_POCKETMINE_CHUNKUTILS="no"
 COMPILE_GD="no"
 
-while getopts "::t:oj:srdlxzff:ugn" OPTION; do
+while getopts "::t:oj:srdlxzff:ugnv" OPTION; do
 
 	case $OPTION in
 		t)
@@ -164,6 +165,10 @@ while getopts "::t:oj:srdlxzff:ugn" OPTION; do
 		n)
 			echo "[opt] Will not remove sources after completing compilation"
 			DO_CLEANUP="no"
+			;;
+		v)
+			echo "[opt] Will enable valgrind support in PHP"
+			HAVE_VALGRIND="--with-valgrind"
 			;;
 		\?)
 			echo "Invalid option: -$OPTION$OPTARG" >&2
@@ -881,6 +886,7 @@ $HAVE_MYSQLI \
 --enable-ds \
 --with-crypto \
 --enable-recursionguard \
+$HAVE_VALGRIND \
 $CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
 echo -n " compiling..."
 if [ "$COMPILE_FOR_ANDROID" == "yes" ]; then
