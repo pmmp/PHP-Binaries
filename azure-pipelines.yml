@@ -15,7 +15,7 @@ jobs:
       echo $PWD
       ls
       chmod +x compile.sh
-      echo | ./compile.sh -t linux64 -j 4 -f -u -g -l
+      echo | ./compile.sh -t linux64 -j 4 -f -g
       tar -czf ./PHP_Linux-x86_64.tar.gz bin
     displayName: Bash Script
   - bash: |
@@ -68,7 +68,7 @@ jobs:
 
       brew install libtool autoconf automake
 
-      ./compile.sh -t mac64 -j4 -f -u -g -l
+      ./compile.sh -t mac64 -j4 -f -g
       tar -czf ./PHP_MacOS-x86_64.tar.gz bin
     displayName: Bash Script
   - bash: |
