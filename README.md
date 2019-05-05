@@ -4,7 +4,7 @@
 
 ## compile.sh
 
-Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have ``make autoconf automake libtool m4 wget getconf gzip bzip2 bison g++ git``.
+Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have ``make autoconf automake libtool m4 wget getconf gzip bzip2 bison g++ git cmake``.
 
 ### Additional notes
 #### Mac OSX (native compile)

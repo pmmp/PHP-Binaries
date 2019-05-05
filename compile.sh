@@ -1,27 +1,28 @@
 #!/bin/bash
-[ -z "$PHP_VERSION" ] && PHP_VERSION="7.2.18"
+[ -z "$PHP_VERSION" ] && PHP_VERSION="7.3.5"
 
 PHP_IS_BETA="no"
 
 ZLIB_VERSION="1.2.11"
 GMP_VERSION="6.1.2"
-CURL_VERSION="curl-7_64_0"
+CURL_VERSION="curl-7_64_1"
 READLINE_VERSION="6.3"
 NCURSES_VERSION="6.0"
-YAML_VERSION="0.2.1"
+YAML_VERSION="0.2.2"
 LEVELDB_VERSION="ea7ef8899de400fab555de8fe5cca15da3ff4489"
 LIBXML_VERSION="2.9.1"
-LIBPNG_VERSION="1.6.36"
+LIBPNG_VERSION="1.6.37"
 LIBJPEG_VERSION="9c"
 OPENSSL_VERSION="1.1.0j" #1.1.1a has some segfault issues
+LIBZIP_VERSION="1.5.2"
 
 EXT_NCURSES_VERSION="1.0.2"
 EXT_PTHREADS_VERSION="17c9966bac59211da0705166fc0ecb5ecbc96a0d"
 EXT_YAML_VERSION="2.0.4"
 EXT_LEVELDB_VERSION="9bcae79f71b81a5c3ea6f67e45ae9ae9fb2775a5"
 EXT_CHUNKUTILS2_VERSION="c94e9c7e1f059b3f89bd50aaa72a7675ca6d38e3"
-EXT_XDEBUG_VERSION="2.7.0"
-EXT_IGBINARY_VERSION="2.0.8"
+EXT_XDEBUG_VERSION="2.7.1"
+EXT_IGBINARY_VERSION="3.0.1"
 EXT_DS_VERSION="4bb4be24ce9835ca81be2e48f0104683e41bce12"
 EXT_CRYPTO_VERSION="5f26ac91b0ba96742cc6284cd00f8db69c3788b2"
 EXT_RECURSIONGUARD_VERSION="d6ed5da49178762ed81dc0184cd34ff4d3254720"
@@ -41,7 +42,7 @@ date > "$DIR/install.log" 2>&1
 uname -a >> "$DIR/install.log" 2>&1
 echo "[INFO] Checking dependencies"
 
-COMPILE_SH_DEPENDENCIES=( make autoconf automake m4 getconf gzip bzip2 bison g++ git )
+COMPILE_SH_DEPENDENCIES=( make autoconf automake m4 getconf gzip bzip2 bison g++ git cmake )
 ERRORS=0
 for(( i=0; i<${#COMPILE_SH_DEPENDENCIES[@]}; i++ ))
 do
@@ -104,13 +105,14 @@ OPTIMIZE_TARGET=""
 DO_STATIC="no"
 DO_CLEANUP="yes"
 COMPILE_DEBUG="no"
+HAVE_VALGRIND="--without-valgrind"
 FLAGS_LTO=""
 
 LD_PRELOAD=""
 
 COMPILE_GD="no"
 
-while getopts "::t:oj:srdxzff:gn" OPTION; do
+while getopts "::t:oj:srdxzff:gnv" OPTION; do
 
 	case $OPTION in
 		t)
@@ -153,6 +155,10 @@ while getopts "::t:oj:srdxzff:gn" OPTION; do
 		n)
 			echo "[opt] Will not remove sources after completing compilation"
 			DO_CLEANUP="no"
+			;;
+		v)
+			echo "[opt] Will enable valgrind support in PHP"
+			HAVE_VALGRIND="--with-valgrind"
 			;;
 		\?)
 			echo "Invalid option: -$OPTION$OPTARG" >&2
@@ -645,8 +651,22 @@ fi
 #cd ..
 #echo " done!"
 
-
-
+#libzip
+if [ "$DO_STATIC" == "yes" ]; then
+	CMAKE_LIBZIP_EXTRA_FLAGS="-DBUILD_SHARED_LIBS=OFF"
+fi
+echo -n "[libzip] downloading $LIBZIP_VERSION..."
+download_file "https://libzip.org/download/libzip-$LIBZIP_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+mv libzip-$LIBZIP_VERSION libzip >> "$DIR/install.log" 2>&1
+echo -n " checking..."
+cd libzip
+cmake . -DCMAKE_PREFIX_PATH="$DIR/bin/php7" -DCMAKE_INSTALL_PREFIX="$DIR/bin/php7" $CMAKE_LIBZIP_EXTRA_FLAGS -DBUILD_TOOLS=OFF -DBUILD_REGRESS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_DOC=OFF >> "$DIR/install.log" 2>&1
+echo -n " compiling..."
+make -j $THREADS >> "$DIR/install.log" 2>&1
+echo -n " installing..."
+make install >> "$DIR/install.log" 2>&1
+cd ..
+echo " done!"
 
 
 
@@ -796,6 +816,7 @@ RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS_LTO" LDFLA
 --with-gmp="$DIR/bin/php7" \
 --with-yaml="$DIR/bin/php7" \
 --with-openssl="$DIR/bin/php7" \
+--with-libzip="$DIR/bin/php7" \
 $HAS_LIBPNG \
 $HAS_LIBJPEG \
 $HAS_GD \
@@ -842,6 +863,7 @@ $HAVE_MYSQLI \
 --enable-ds \
 --with-crypto \
 --enable-recursionguard \
+$HAVE_VALGRIND \
 $CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
 echo -n " compiling..."
 if [ "$COMPILE_FOR_ANDROID" == "yes" ]; then
