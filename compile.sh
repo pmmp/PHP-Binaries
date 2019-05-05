@@ -226,7 +226,7 @@ else
 	elif [[ "$COMPILE_TARGET" == "mac" ]] || [[ "$COMPILE_TARGET" == "mac64" ]]; then
 		[ -z "$march" ] && march=core2;
 		[ -z "$mtune" ] && mtune=generic;
-		CFLAGS="$CFLAGS -m64 -arch x86_64 -fomit-frame-pointer -mmacosx-version-min=10.7";
+		CFLAGS="$CFLAGS -m64 -arch x86_64 -fomit-frame-pointer -mmacosx-version-min=10.9";
 		if [ "$DO_STATIC" == "no" ]; then
 			LDFLAGS="$LDFLAGS -Wl,-rpath,@loader_path/../lib";
 			export DYLD_LIBRARY_PATH="@loader_path/../lib"
