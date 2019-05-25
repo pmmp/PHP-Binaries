@@ -953,8 +953,7 @@ if [ "$HAVE_OPCACHE" == "yes" ]; then
 	echo "opcache.enable_cli=1" >> "$DIR/bin/php7/bin/php.ini"
 	echo "opcache.save_comments=1" >> "$DIR/bin/php7/bin/php.ini"
 	echo "opcache.validate_timestamps=0" >> "$DIR/bin/php7/bin/php.ini"
-	#echo ";opcache.file_cache=\"\"" >> "$DIR/bin/php7/bin/php.ini" #TODO: determine a unique tmp path
-	echo "opcache.file_cache_consistency_checks=1" >> "$DIR/bin/php7/bin/php.ini"
+	echo "opcache.file_update_protection=0" >> "$DIR/bin/php7/bin/php.ini"
 	echo "opcache.optimization_level=0x7FFEBFFF ;https://github.com/php/php-src/blob/53c1b485741f31a17b24f4db2b39afeb9f4c8aba/ext/opcache/Optimizer/zend_optimizer.h" >> "$DIR/bin/php7/bin/php.ini"
 fi
 
