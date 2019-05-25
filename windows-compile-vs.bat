@@ -184,7 +184,7 @@ call configure^
  --enable-igbinary=shared^
  --enable-json^
  --enable-mbstring^
- --disable-opcache^
+ --enable-opcache^
  --enable-phar^
  --enable-pocketmine-chunkutils=shared^
  --enable-recursionguard=shared^
@@ -249,7 +249,13 @@ call :pm-echo "Generating php.ini..."
 (echo extension=php_leveldb.dll)>>"%php_ini%"
 (echo extension=php_crypto.dll)>>"%php_ini%"
 (echo igbinary.compact_strings=0)>>"%php_ini%"
-(echo ;zend_extension=php_opcache.dll)>>"%php_ini%"
+(echo zend_extension=php_opcache.dll)>>"%php_ini%"
+(echo opcache.enable=1)>>"%php_ini%"
+(echo opcache.enable_cli=1)>>"%php_ini%"
+(echo opcache.save_comments=1)>>"%php_ini%"
+(echo opcache.validate_timestamps=0)>>"%php_ini%"
+(echo opcache.file_cache_consistency_checks=1)>>"%php_ini%"
+(echo opcache.optimization_level=0x7FFEBFFF)>>"%php_ini%"
 (echo ;Optional extensions, supplied for plugin use)>>"%php_ini%"
 (echo extension=php_gd2.dll)>>"%php_ini%"
 (echo extension=php_mysqli.dll)>>"%php_ini%"
