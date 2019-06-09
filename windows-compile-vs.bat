@@ -3,7 +3,7 @@
 REM For future users: This file MUST have CRLF line endings. If it doesn't, lots of inexplicable undesirable strange behaviour will result.
 REM Also: Don't modify this version with sed, or it will screw up your line endings.
 set PHP_MAJOR_VER=7.3
-set PHP_VER=%PHP_MAJOR_VER%.5
+set PHP_VER=%PHP_MAJOR_VER%.6
 set PHP_IS_BETA="no"
 set PHP_SDK_VER=2.1.10
 set PATH=C:\Program Files\7-Zip;C:\Program Files (x86)\GnuWin32\bin;%PATH%
@@ -20,7 +20,7 @@ set PHP_YAML_VER=2.0.4
 set PHP_CHUNKUTILS2_VER=011f4677ad06065a24c62c92c953a1132dfb0a14
 set PHP_IGBINARY_VER=3.0.1
 REM this is 1.2.8 but tags with a "v" prefix are a pain in the ass
-set PHP_DS_VER=4bb4be24ce9835ca81be2e48f0104683e41bce12
+set PHP_DS_VER=2ddef84d3e9391c37599cb716592184315e23921
 set PHP_LEVELDB_VER=9bcae79f71b81a5c3ea6f67e45ae9ae9fb2775a5
 set PHP_CRYPTO_VER=5f26ac91b0ba96742cc6284cd00f8db69c3788b2
 set PHP_RECURSIONGUARD_VER=d6ed5da49178762ed81dc0184cd34ff4d3254720
