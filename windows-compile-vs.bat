@@ -10,8 +10,8 @@ set PATH=C:\Program Files\7-Zip;C:\Program Files (x86)\GnuWin32\bin;%PATH%
 set VC_VER=vc15
 set ARCH=x64
 set CMAKE_TARGET=Visual Studio 15 2017 Win64
-if "%DEBUG%"=="" (
-	set DEBUG=0
+if "%PHP_DEBUG_BUILD%"=="" (
+	set PHP_DEBUG_BUILD=0
 )
 
 set LIBYAML_VER=0.2.2
@@ -41,13 +41,13 @@ where 7z >nul 2>nul || (call :pm-echo-error "7z is required" & exit 1)
 call :pm-echo "PHP Windows compiler"
 call :pm-echo "Setting up environment..."
 
-if "%DEBUG%"=="0" (
+if "%PHP_DEBUG_BUILD%"=="0" (
 	set OUT_PATH_REL=Release
-	set HAVE_DEBUG=enable-debug-pack
+	set PHP_HAVE_DEBUG=enable-debug-pack
 	call :pm-echo "Building release binaries with debug symbols"
 ) else (
 	set OUT_PATH_REL=Debug
-	set HAVE_DEBUG=enable-debug
+	set PHP_HAVE_DEBUG=enable-debug
 	call :pm-echo "Building debug binaries"
 )
 
@@ -182,7 +182,7 @@ call buildconf.bat >>"%log_file%" 2>&1
 call configure^
  --with-mp=auto^
  --with-prefix=pocketmine-php-bin^
- --%HAVE_DEBUG%^
+ --%PHP_HAVE_DEBUG%^
  --disable-all^
  --disable-cgi^
  --enable-cli^
