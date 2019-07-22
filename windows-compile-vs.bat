@@ -248,6 +248,7 @@ cd bin\php
 set php_ini=php.ini
 call :pm-echo "Generating php.ini..."
 (echo ;Custom PocketMine-MP php.ini file)>"%php_ini%"
+(echo memory_limit=1024M)>>"%php_ini%"
 (echo display_errors=1)>>"%php_ini%"
 (echo display_startup_errors=1)>>"%php_ini%"
 (echo error_reporting=-1)>>"%php_ini%"
