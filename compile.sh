@@ -585,6 +585,9 @@ if [ "$COMPILE_LEVELDB" == "yes" ]; then
 	echo -n " checking..."
 	cd leveldb
 	echo -n " compiling..."
+	if [ "$COMPILE_FOR_ANDROID" == "yes" ]; then
+		sed -i 's|$(SHARED_LIBS) $(SHARED_PROGRAMS) ||g' Makefile
+	fi
 	INSTALL_PATH="$DIR/bin/php7/lib" CFLAGS="$CFLAGS -I$DIR/bin/php7/include" CXXFLAGS="$CXXFLAGS -I$DIR/bin/php7/include" LDFLAGS="$LDFLAGS -L$DIR/bin/php7/lib" make -j $THREADS >> "$DIR/install.log" 2>&1
 	echo -n " installing..."
 	if [ "$DO_STATIC" == "yes" ]; then
