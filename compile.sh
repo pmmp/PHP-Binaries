@@ -525,6 +525,7 @@ RANLIB=$RANLIB ./configure --disable-dependency-tracking \
 --disable-ldap \
 --disable-ldaps \
 --without-libidn \
+--without-libidn2 \
 --with-zlib="$DIR/bin/php7" \
 --with-ssl="$DIR/bin/php7" \
 --enable-threaded-resolver \
