@@ -9,7 +9,7 @@ CURL_VERSION="curl-7_65_3"
 READLINE_VERSION="6.3"
 NCURSES_VERSION="6.0"
 YAML_VERSION="0.2.2"
-LEVELDB_VERSION="ea7ef8899de400fab555de8fe5cca15da3ff4489"
+LEVELDB_VERSION="10f59b56bec1db3ffe42ff265afe22182073e0e2"
 LIBXML_VERSION="2.9.1"
 LIBPNG_VERSION="1.6.37"
 LIBJPEG_VERSION="9c"
@@ -584,7 +584,12 @@ if [ "$COMPILE_LEVELDB" == "yes" ]; then
 	echo -n " checking..."
 	cd leveldb
 	echo -n " compiling..."
-	INSTALL_PATH="$DIR/bin/php7/lib" CFLAGS="$CFLAGS -I$DIR/bin/php7/include" CXXFLAGS="$CXXFLAGS -I$DIR/bin/php7/include" LDFLAGS="$LDFLAGS -L$DIR/bin/php7/lib" make -j $THREADS >> "$DIR/install.log" 2>&1
+	if [ "$DO_STATIC" == "yes" ]; then
+		LEVELDB_TARGET="staticlibs"
+	else
+		LEVELDB_TARGET="sharedlibs"
+	fi
+	INSTALL_PATH="$DIR/bin/php7/lib" CFLAGS="$CFLAGS -I$DIR/bin/php7/include" CXXFLAGS="$CXXFLAGS -I$DIR/bin/php7/include" LDFLAGS="$LDFLAGS -L$DIR/bin/php7/lib" make $LEVELDB_TARGET -j $THREADS >> "$DIR/install.log" 2>&1
 	echo -n " installing..."
 	if [ "$DO_STATIC" == "yes" ]; then
 		cp out-static/lib*.a "$DIR/bin/php7/lib/"
