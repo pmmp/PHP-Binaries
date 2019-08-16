@@ -1,6 +1,8 @@
 image: Visual Studio 2017
 version: php-7.2-appveyor{build}
 clone_folder: c:\pmmp\windows-php
+install:
+  - cinst wget
 build_script:
 - ps: >-
     .\windows-compile-vs.bat
