@@ -37,6 +37,7 @@ set outpath="%cd%"
 where git >nul 2>nul || (call :pm-echo-error "git is required" & exit 1)
 where cmake >nul 2>nul || (call :pm-echo-error "cmake is required" & exit 1)
 where 7z >nul 2>nul || (call :pm-echo-error "7z is required" & exit 1)
+where wget >nul 2>nul || (call :pm-echo-error "wget is required" & exit 1)
 
 call :pm-echo "PHP Windows compiler"
 call :pm-echo "Setting up environment..."
