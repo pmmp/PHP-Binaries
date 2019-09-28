@@ -222,6 +222,7 @@ call configure^
  --with-pthreads=shared^
  --with-sodium^
  --with-sqlite3=shared^
+ --with-ftp=shared^
  --with-xml^
  --with-yaml^
  --without-readline >>"%log_file%" 2>&1 || call :pm-fatal-error "Error configuring PHP"
@@ -269,6 +270,7 @@ call :pm-echo "Generating php.ini..."
 (echo extension=php_gd2.dll)>>"%php_ini%"
 (echo extension=php_mysqli.dll)>>"%php_ini%"
 (echo extension=php_sqlite3.dll)>>"%php_ini%"
+(echo extension=php_ftp.dll)>>"%php_ini%"
 (echo ;Optional extensions, supplied for debugging)>>"%php_ini%"
 (echo extension=php_recursionguard.dll)>>"%php_ini%"
 (echo recursionguard.enabled=0 ;disabled due to minor performance impact, only enable this if you need it for debugging)>>"%php_ini%"
