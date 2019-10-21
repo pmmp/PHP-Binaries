@@ -66,7 +66,7 @@ jobs:
       set -ex
       trap "exit 1" ERR
 
-      brew install libtool autoconf automake
+      brew install libtool autoconf automake pkg-config
 
       ./compile.sh -t mac64 -j4 -f -u -g -l
       tar -czf ./PHP_MacOS-x86_64.tar.gz bin
