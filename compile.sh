@@ -662,6 +662,7 @@ if [ "$DO_STATIC" == "yes" ]; then
 else
 	EXTRA_FLAGS="--enable-shared=yes --enable-static=no"
 fi
+sed -i.bak 's{libtoolize --version{"$LIBTOOLIZE" --version{' autogen.sh #needed for glibtool on macos
 ./autogen.sh --prefix="$DIR/bin/php7" \
 	--without-iconv \
 	--without-python \
