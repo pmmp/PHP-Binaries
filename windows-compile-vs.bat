@@ -204,6 +204,8 @@ call configure^
  --enable-recursionguard=shared^
  --enable-sockets^
  --enable-tokenizer^
+ --enable-xmlreader^
+ --enable-xmlwriter^
  --enable-zip^
  --enable-zlib^
  --with-bz2=shared^
@@ -220,6 +222,7 @@ call configure^
  --with-openssl^
  --with-pcre-jit^
  --with-pthreads=shared^
+ --with-simplexml^
  --with-sodium^
  --with-sqlite3=shared^
  --with-xml^
