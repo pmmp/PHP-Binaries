@@ -3,7 +3,7 @@
 REM For future users: This file MUST have CRLF line endings. If it doesn't, lots of inexplicable undesirable strange behaviour will result.
 REM Also: Don't modify this version with sed, or it will screw up your line endings.
 set PHP_MAJOR_VER=7.3
-set PHP_VER=%PHP_MAJOR_VER%.9
+set PHP_VER=%PHP_MAJOR_VER%.10
 set PHP_IS_BETA="no"
 set PHP_SDK_VER=2.1.10
 set PATH=C:\Program Files\7-Zip;C:\Program Files (x86)\GnuWin32\bin;%PATH%
@@ -204,6 +204,8 @@ call configure^
  --enable-recursionguard=shared^
  --enable-sockets^
  --enable-tokenizer^
+ --enable-xmlreader^
+ --enable-xmlwriter^
  --enable-zip^
  --enable-zlib^
  --with-bz2=shared^
@@ -220,6 +222,7 @@ call configure^
  --with-openssl^
  --with-pcre-jit^
  --with-pthreads=shared^
+ --with-simplexml^
  --with-sodium^
  --with-sqlite3=shared^
  --with-xml^

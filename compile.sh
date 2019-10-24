@@ -1,5 +1,5 @@
 #!/bin/bash
-[ -z "$PHP_VERSION" ] && PHP_VERSION="7.3.9"
+[ -z "$PHP_VERSION" ] && PHP_VERSION="7.3.10"
 
 PHP_IS_BETA="no"
 
@@ -10,7 +10,7 @@ READLINE_VERSION="6.3"
 NCURSES_VERSION="6.0"
 YAML_VERSION="0.2.2"
 LEVELDB_VERSION="10f59b56bec1db3ffe42ff265afe22182073e0e2"
-LIBXML_VERSION="2.9.1"
+LIBXML_VERSION="2.9.9"
 LIBPNG_VERSION="1.6.37"
 LIBJPEG_VERSION="9c"
 OPENSSL_VERSION="1.1.0k" #1.1.1a has some segfault issues
@@ -42,7 +42,7 @@ date > "$DIR/install.log" 2>&1
 uname -a >> "$DIR/install.log" 2>&1
 echo "[INFO] Checking dependencies"
 
-COMPILE_SH_DEPENDENCIES=( make autoconf automake m4 getconf gzip bzip2 bison g++ git cmake )
+COMPILE_SH_DEPENDENCIES=( make autoconf automake m4 getconf gzip bzip2 bison g++ git cmake pkg-config)
 ERRORS=0
 for(( i=0; i<${#COMPILE_SH_DEPENDENCIES[@]}; i++ ))
 do
@@ -640,23 +640,32 @@ else
 fi
 
 #libxml2
-#echo -n "[libxml2] downloading $LIBXML_VERSION..."
-#download_file "ftp://xmlsoft.org/libxml2/libxml2-$LIBXML_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-#mv libxml2-$LIBXML_VERSION libxml2
-#echo -n " checking..."
-#cd libxml2
-#RANLIB=$RANLIB ./configure \
-#--disable-ipv6 \
-#--with-libz="$DIR/bin/php7" \
-#--prefix="$DIR/bin/php7" \
-#$EXTRA_FLAGS \
-#$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
-#echo -n " compiling..."
-#make -j $THREADS >> "$DIR/install.log" 2>&1
-#echo -n " installing..."
-#make install >> "$DIR/install.log" 2>&1
-#cd ..
-#echo " done!"
+echo -n "[libxml] downloading $LIBXML_VERSION... "
+download_file "https://gitlab.gnome.org/GNOME/libxml2/-/archive/v$LIBXML_VERSION/libxml2-v$LIBXML_VERSION.tar.gz" | tar -xz >> "$DIR/install.log" 2>&1
+mv libxml2-v$LIBXML_VERSION libxml2
+echo -n "checking... "
+cd libxml2
+if [ "$DO_STATIC" == "yes" ]; then
+	EXTRA_FLAGS="--enable-shared=no --enable-static=yes"
+else
+	EXTRA_FLAGS="--enable-shared=yes --enable-static=no"
+fi
+sed -i.bak 's{libtoolize --version{"$LIBTOOLIZE" --version{' autogen.sh #needed for glibtool on macos
+./autogen.sh --prefix="$DIR/bin/php7" \
+	--without-iconv \
+	--without-python \
+	--with-zlib="$DIR/bin/php7" \
+	--config-cache \
+	$EXTRA_FLAGS \
+	$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
+echo -n "compiling... "
+make -j $THREADS >> "$DIR/install.log" 2>&1
+echo -n "installing... "
+make install >> "$DIR/install.log" 2>&1
+cd ..
+echo "done!"
+
+
 
 #libzip
 if [ "$DO_STATIC" == "yes" ]; then
@@ -837,12 +846,12 @@ $HAS_DEBUG \
 --enable-calendar \
 --enable-pthreads \
 --disable-fileinfo \
---disable-libxml \
---disable-xml \
---disable-dom \
---disable-simplexml \
---disable-xmlreader \
---disable-xmlwriter \
+--with-libxml-dir="$DIR/bin/php7" \
+--enable-xml \
+--enable-dom \
+--enable-simplexml \
+--enable-xmlreader \
+--enable-xmlwriter \
 --disable-cgi \
 --disable-phpdbg \
 --disable-session \
