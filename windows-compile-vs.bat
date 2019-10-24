@@ -5,7 +5,7 @@ REM Also: Don't modify this version with sed, or it will screw up your line endi
 set PHP_MAJOR_VER=7.3
 set PHP_VER=%PHP_MAJOR_VER%.11
 set PHP_IS_BETA="no"
-set PHP_SDK_VER=2.1.10
+set PHP_SDK_VER=2.2.0
 set PATH=C:\Program Files\7-Zip;C:\Program Files (x86)\GnuWin32\bin;%PATH%
 set VC_VER=vc15
 set ARCH=x64
@@ -22,7 +22,7 @@ set PHP_PTHREADS_VER=2e568b2edd0ae9a40df425f7ae77d6608e387706
 set PHP_YAML_VER=2.0.4
 set PHP_POCKETMINE_CHUNKUTILS_VER=master
 set PHP_IGBINARY_VER=3.0.1
-REM this is 1.2.8 but tags with a "v" prefix are a pain in the ass
+REM this is 1.2.9 but tags with a "v" prefix are a pain in the ass
 set PHP_DS_VER=2ddef84d3e9391c37599cb716592184315e23921
 set PHP_LEVELDB_VER=9bcae79f71b81a5c3ea6f67e45ae9ae9fb2775a5
 set PHP_CRYPTO_VER=5f26ac91b0ba96742cc6284cd00f8db69c3788b2
