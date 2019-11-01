@@ -227,6 +227,8 @@ call configure^
  --with-sqlite3=shared^
  --with-xml^
  --with-yaml^
+ --with-pdo-mysql^
+ --with-pdo-sqlite^
  --without-readline >>"%log_file%" 2>&1 || call :pm-fatal-error "Error configuring PHP"
 
 call :pm-echo "Compiling PHP..."
