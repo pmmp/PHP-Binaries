@@ -188,6 +188,7 @@ call configure^
  --disable-cgi^
  --enable-cli^
  --enable-zts^
+ --enable-pdo^
  --enable-bcmath^
  --enable-calendar^
  --enable-com-dotnet^
@@ -227,6 +228,8 @@ call configure^
  --with-sqlite3=shared^
  --with-xml^
  --with-yaml^
+ --with-pdo-mysql^
+ --with-pdo-sqlite^
  --without-readline >>"%log_file%" 2>&1 || call :pm-fatal-error "Error configuring PHP"
 
 call :pm-echo "Compiling PHP..."
@@ -272,6 +275,8 @@ call :pm-echo "Generating php.ini..."
 (echo extension=php_gd2.dll)>>"%php_ini%"
 (echo extension=php_mysqli.dll)>>"%php_ini%"
 (echo extension=php_sqlite3.dll)>>"%php_ini%"
+(echo extension=php_pdo_mysql.dll)>>"%php_ini%"
+(echo extension=php_pdo_sqlite.dll)>>"%php_ini%"
 (echo ;Optional extensions, supplied for debugging)>>"%php_ini%"
 (echo extension=php_recursionguard.dll)>>"%php_ini%"
 (echo recursionguard.enabled=0 ;disabled due to minor performance impact, only enable this if you need it for debugging)>>"%php_ini%"

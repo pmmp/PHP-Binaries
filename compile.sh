@@ -878,10 +878,10 @@ $HAS_POCKETMINE_CHUNKUTILS \
 --disable-cgi \
 --disable-phpdbg \
 --disable-session \
---disable-pdo \
 --without-pear \
 --without-iconv \
---without-pdo-sqlite \
+--with-pdo-sqlite \
+--with-pdo-mysql \
 --with-pic \
 --enable-phar \
 --enable-ctype \
