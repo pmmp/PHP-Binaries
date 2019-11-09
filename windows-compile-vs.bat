@@ -18,7 +18,7 @@ set LIBYAML_VER=0.2.2
 set PTHREAD_W32_VER=3.0.0
 set LEVELDB_MCPE_VER=ea7ef8899de400fab555de8fe5cca15da3ff4489
 
-set PHP_PTHREADS_VER=2e568b2edd0ae9a40df425f7ae77d6608e387706
+set PHP_PTHREADS_VER=4420e1cfcf54cf0b16e87b6f1f354743cff77013
 set PHP_YAML_VER=2.0.4
 set PHP_CHUNKUTILS2_VER=ab4fd12869d18fb14f5d037241fe4b9a5492beb7
 set PHP_IGBINARY_VER=3.0.1
@@ -188,6 +188,7 @@ call configure^
  --disable-cgi^
  --enable-cli^
  --enable-zts^
+ --enable-pdo^
  --enable-bcmath^
  --enable-calendar^
  --enable-chunkutils2=shared^
@@ -227,6 +228,8 @@ call configure^
  --with-sqlite3=shared^
  --with-xml^
  --with-yaml^
+ --with-pdo-mysql^
+ --with-pdo-sqlite^
  --without-readline >>"%log_file%" 2>&1 || call :pm-fatal-error "Error configuring PHP"
 
 call :pm-echo "Compiling PHP..."
@@ -284,6 +287,7 @@ wget https://aka.ms/vs/15/release/vc_redist.x64.exe --no-check-certificate -q -O
 
 call :pm-echo "Checking PHP build works..."
 bin\php\php.exe --version >>"%log_file%" 2>&1 || call :pm-fatal-error "PHP build isn't working"
+bin\php\php.exe -m >>"%log_file%" 2>&1
 
 call :pm-echo "Packaging build..."
 set package_filename=php-%PHP_VER%-%VC_VER%-%ARCH%.zip

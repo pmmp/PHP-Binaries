@@ -17,7 +17,7 @@ OPENSSL_VERSION="1.1.0l" #1.1.1a has some segfault issues
 LIBZIP_VERSION="1.5.2"
 
 EXT_NCURSES_VERSION="1.0.2"
-EXT_PTHREADS_VERSION="2e568b2edd0ae9a40df425f7ae77d6608e387706"
+EXT_PTHREADS_VERSION="4420e1cfcf54cf0b16e87b6f1f354743cff77013"
 EXT_YAML_VERSION="2.0.4"
 EXT_LEVELDB_VERSION="9bcae79f71b81a5c3ea6f67e45ae9ae9fb2775a5"
 EXT_CHUNKUTILS2_VERSION="ab4fd12869d18fb14f5d037241fe4b9a5492beb7"
@@ -855,10 +855,10 @@ $HAS_DEBUG \
 --disable-cgi \
 --disable-phpdbg \
 --disable-session \
---disable-pdo \
 --without-pear \
 --without-iconv \
---without-pdo-sqlite \
+--with-pdo-sqlite \
+--with-pdo-mysql \
 --with-pic \
 --enable-phar \
 --enable-ctype \
