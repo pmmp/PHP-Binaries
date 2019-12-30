@@ -1,5 +1,5 @@
 #!/bin/bash
-[ -z "$PHP_VERSION" ] && PHP_VERSION="7.3.12"
+[ -z "$PHP_VERSION" ] && PHP_VERSION="7.3.13"
 
 PHP_IS_BETA="no"
 
@@ -676,7 +676,7 @@ download_file "https://libzip.org/download/libzip-$LIBZIP_VERSION.tar.gz" | tar 
 mv libzip-$LIBZIP_VERSION libzip >> "$DIR/install.log" 2>&1
 echo -n " checking..."
 cd libzip
-cmake . -DCMAKE_PREFIX_PATH="$DIR/bin/php7" -DCMAKE_INSTALL_PREFIX="$DIR/bin/php7" -DCMAKE_INSTALL_LIBDIR=lib $CMAKE_LIBZIP_EXTRA_FLAGS -DBUILD_TOOLS=OFF -DBUILD_REGRESS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_DOC=OFF >> "$DIR/install.log" 2>&1
+cmake . -DCMAKE_PREFIX_PATH="$DIR/bin/php7" -DCMAKE_INSTALL_PREFIX="$DIR/bin/php7" -DCMAKE_INSTALL_LIBDIR=lib $CMAKE_LIBZIP_EXTRA_FLAGS -DBUILD_TOOLS=OFF -DBUILD_REGRESS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_DOC=OFF -DENABLE_BZIP2=OFF -DENABLE_LZMA=OFF >> "$DIR/install.log" 2>&1
 echo -n " compiling..."
 make -j $THREADS >> "$DIR/install.log" 2>&1
 echo -n " installing..."

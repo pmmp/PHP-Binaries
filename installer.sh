@@ -1,7 +1,7 @@
 #!/bin/bash
 
-CHANNEL="alpha"
-BRANCH="master"
+CHANNEL="stable"
+BRANCH="stable"
 NAME="PocketMine-MP"
 BUILD_URL=""
 
