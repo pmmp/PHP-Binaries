@@ -70,7 +70,7 @@ fi
 shopt -s expand_aliases
 type wget >> "$DIR/install.log" 2>&1
 if [ $? -eq 0 ]; then
-	alias download_file="wget --no-check-certificate -q -O -"
+	alias download_file="wget --no-check-certificate -nv -O -"
 else
 	type curl >> "$DIR/install.log" 2>&1
 	if [ $? -eq 0 ]; then
