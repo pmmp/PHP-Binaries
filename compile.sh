@@ -493,7 +493,6 @@ RANLIB=$RANLIB $OPENSSL_CMD \
 no-asm \
 no-hw \
 no-shared \
-no-threads \
 no-engine >> "$DIR/install.log" 2>&1
 
 echo -n " compiling..."
