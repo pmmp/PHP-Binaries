@@ -1,5 +1,5 @@
 #!/bin/bash
-[ -z "$PHP_VERSION" ] && PHP_VERSION="7.3.14"
+[ -z "$PHP_VERSION" ] && PHP_VERSION="7.3.15"
 
 PHP_IS_BETA="no"
 
@@ -13,7 +13,7 @@ LEVELDB_VERSION="10f59b56bec1db3ffe42ff265afe22182073e0e2"
 LIBXML_VERSION="2.9.10"
 LIBPNG_VERSION="1.6.37"
 LIBJPEG_VERSION="9d"
-OPENSSL_VERSION="1.1.1d"
+OPENSSL_VERSION="1.0.2u" #1.1.1a-d all have thread safety / random fault issues
 LIBZIP_VERSION="1.6.1"
 
 EXT_NCURSES_VERSION="1.0.2"
