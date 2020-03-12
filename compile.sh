@@ -13,7 +13,7 @@ LEVELDB_VERSION="10f59b56bec1db3ffe42ff265afe22182073e0e2"
 LIBXML_VERSION="2.9.10"
 LIBPNG_VERSION="1.6.37"
 LIBJPEG_VERSION="9d"
-OPENSSL_VERSION="1.0.2u" #1.1.1a-d all have thread safety / random fault issues
+OPENSSL_VERSION="1.1.1d"
 LIBZIP_VERSION="1.6.1"
 
 EXT_NCURSES_VERSION="1.0.2"
@@ -70,7 +70,7 @@ fi
 shopt -s expand_aliases
 type wget >> "$DIR/install.log" 2>&1
 if [ $? -eq 0 ]; then
-	alias download_file="wget --no-check-certificate -q -O -"
+	alias download_file="wget --no-check-certificate -nv -O -"
 else
 	type curl >> "$DIR/install.log" 2>&1
 	if [ $? -eq 0 ]; then
@@ -483,7 +483,6 @@ RANLIB=$RANLIB $OPENSSL_CMD \
 no-asm \
 no-hw \
 no-shared \
-no-threads \
 no-engine >> "$DIR/install.log" 2>&1
 
 echo -n " compiling..."
