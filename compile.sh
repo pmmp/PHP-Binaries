@@ -70,16 +70,20 @@ fi
 shopt -s expand_aliases
 type wget >> "$DIR/install.log" 2>&1
 if [ $? -eq 0 ]; then
-	alias download_file="wget --no-check-certificate -nv -O -"
+	alias _download_file="wget --no-check-certificate -nv -O -"
 else
 	type curl >> "$DIR/install.log" 2>&1
 	if [ $? -eq 0 ]; then
-		alias download_file="curl --insecure --silent --show-error --location --globoff"
+		alias _download_file="curl --insecure --silent --show-error --location --globoff"
 	else
 		echo "error, curl or wget not found"
 		exit 1
 	fi
 fi
+
+function download_file {
+	_download_file "$1" 2> "$DIR/install.log"
+}
 
 #if type llvm-gcc >/dev/null 2>&1; then
 #	export CC="llvm-gcc"
