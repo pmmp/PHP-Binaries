@@ -152,6 +152,7 @@ while getopts "::t:oj:srdlxzff:ugnv" OPTION; do
 		s)
 			echo "[opt] Will compile everything statically"
 			DO_STATIC="yes"
+			HAVE_OPCACHE="no" #doesn't work on static builds
 			CFLAGS="$CFLAGS -static"
 			;;
 		f)
@@ -829,7 +830,6 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 
 	mv ext/mysqlnd/config9.m4 ext/mysqlnd/config.m4
 	sed  -i=".backup" "s{ext/mysqlnd/php_mysqlnd_config.h{config.h{" ext/mysqlnd/mysqlnd_portability.h
-	HAVE_OPCACHE="no"
 elif [ "$DO_STATIC" == "yes" ]; then
 	export LIBS="$LIBS -ldl"
 fi
