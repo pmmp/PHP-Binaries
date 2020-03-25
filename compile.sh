@@ -353,7 +353,7 @@ if [[ "$PHP_IS_BETA" == "yes" ]]; then
 	download_file "https://github.com/php/php-src/archive/php-$PHP_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 	mv php-src-php-$PHP_VERSION php
 else
-	download_file "http://php.net/get/php-$PHP_VERSION.tar.gz/from/this/mirror" | tar -zx >> "$DIR/install.log" 2>&1
+	download_file "https://www.php.net/distributions/php-$PHP_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 	mv php-$PHP_VERSION php
 fi
 
