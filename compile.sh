@@ -1,5 +1,5 @@
 #!/bin/bash
-[ -z "$PHP_VERSION" ] && PHP_VERSION="7.3.15"
+[ -z "$PHP_VERSION" ] && PHP_VERSION="7.3.16"
 
 PHP_IS_BETA="no"
 
@@ -82,7 +82,7 @@ else
 fi
 
 function download_file {
-	_download_file "$1" 2> "$DIR/install.log"
+	_download_file "$1" 2>> "$DIR/install.log"
 }
 
 #if type llvm-gcc >/dev/null 2>&1; then
