@@ -220,6 +220,7 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		CFLAGS="-static $CFLAGS"
 		CXXFLAGS="-static $CXXFLAGS"
 		LDFLAGS="-static -static-libgcc -Wl,-static"
+		DO_STATIC="yes"
 		OPENSSL_TARGET="linux-aarch64"
 		export ac_cv_func_fnmatch_works=yes #musl should be OK
 		echo "[INFO] Cross-compiling for Android ARMv8 (aarch64)"
