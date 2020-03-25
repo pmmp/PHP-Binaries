@@ -110,6 +110,7 @@ DO_STATIC="no"
 DO_CLEANUP="yes"
 COMPILE_DEBUG="no"
 HAVE_VALGRIND="--without-valgrind"
+HAVE_OPCACHE="yes"
 FLAGS_LTO=""
 
 LD_PRELOAD=""
@@ -804,7 +805,7 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 
 	mv ext/mysqlnd/config9.m4 ext/mysqlnd/config.m4
 	sed  -i=".backup" "s{ext/mysqlnd/php_mysqlnd_config.h{config.h{" ext/mysqlnd/mysqlnd_portability.h
-	CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-opcache=no"
+	HAVE_OPCACHE="no"
 elif [ "$DO_STATIC" == "yes" ]; then
 	export LIBS="$LIBS -ldl"
 fi
@@ -878,7 +879,7 @@ $HAVE_MYSQLI \
 --enable-cli \
 --enable-zip \
 --enable-ftp \
---enable-opcache=no \
+--enable-opcache=$HAVE_OPCACHE \
 --enable-igbinary \
 --enable-ds \
 --with-crypto \
@@ -943,16 +944,14 @@ echo "display_errors=1" >> "$DIR/bin/php7/bin/php.ini"
 echo "display_startup_errors=1" >> "$DIR/bin/php7/bin/php.ini"
 echo "recursionguard.enabled=0 ;disabled due to minor performance impact, only enable this if you need it for debugging" >> "$DIR/bin/php7/bin/php.ini"
 
-if [ "$IS_CROSSCOMPILE" != "yes" ] && [ "$DO_STATIC" == "no" ]; then
-	echo ";zend_extension=opcache.so" >> "$DIR/bin/php7/bin/php.ini"
+if [ "$HAVE_OPCACHE" == "yes" ]; then
+	echo "zend_extension=opcache.so" >> "$DIR/bin/php7/bin/php.ini"
 	echo "opcache.enable=1" >> "$DIR/bin/php7/bin/php.ini"
 	echo "opcache.enable_cli=1" >> "$DIR/bin/php7/bin/php.ini"
 	echo "opcache.save_comments=1" >> "$DIR/bin/php7/bin/php.ini"
-	echo "opcache.fast_shutdown=0" >> "$DIR/bin/php7/bin/php.ini"
-	echo "opcache.max_accelerated_files=4096" >> "$DIR/bin/php7/bin/php.ini"
-	echo "opcache.interned_strings_buffer=8" >> "$DIR/bin/php7/bin/php.ini"
-	echo "opcache.memory_consumption=128" >> "$DIR/bin/php7/bin/php.ini"
-	echo "opcache.optimization_level=0xffffffff" >> "$DIR/bin/php7/bin/php.ini"
+	echo "opcache.validate_timestamps=0" >> "$DIR/bin/php7/bin/php.ini"
+	echo "opcache.file_update_protection=0" >> "$DIR/bin/php7/bin/php.ini"
+	echo "opcache.optimization_level=0x7FFEBFFF ;https://github.com/php/php-src/blob/53c1b485741f31a17b24f4db2b39afeb9f4c8aba/ext/opcache/Optimizer/zend_optimizer.h" >> "$DIR/bin/php7/bin/php.ini"
 fi
 
 echo " done!"
