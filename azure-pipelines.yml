@@ -1,7 +1,7 @@
 jobs:
 - job: Linux
   pool:
-    name: Hosted Ubuntu 1604
+    vmImage: 'ubuntu-16.04'
   steps:
   - bash: |
       sudo apt-get update
@@ -34,7 +34,7 @@ jobs:
     condition: succeededOrFailed()
 - job: Windows
   pool:
-    name: Hosted VS2017
+    vmImage: 'vs2017-win2016'
   steps:
   - script: |
       choco install wget --no-progress
@@ -63,7 +63,7 @@ jobs:
     condition: succeededOrFailed()
 - job: MacOS
   pool:
-    name: Hosted macOS
+    vmImage: 'macOS-10.14'
   steps:
   - bash: |
       brew install libtool autoconf automake pkg-config
