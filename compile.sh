@@ -7,7 +7,6 @@ ZLIB_VERSION="1.2.11"
 GMP_VERSION="6.2.0"
 CURL_VERSION="curl-7_68_0"
 READLINE_VERSION="6.3"
-NCURSES_VERSION="6.0"
 YAML_VERSION="0.2.2"
 LEVELDB_VERSION="10f59b56bec1db3ffe42ff265afe22182073e0e2"
 LIBXML_VERSION="2.9.10"
@@ -16,7 +15,6 @@ LIBJPEG_VERSION="9d"
 OPENSSL_VERSION="1.1.1d"
 LIBZIP_VERSION="1.6.1"
 
-EXT_NCURSES_VERSION="1.0.2"
 EXT_PTHREADS_VERSION="ba86cfbe4a6a658df8cf394a653e74fa643dadf1"
 EXT_YAML_VERSION="2.0.4"
 EXT_LEVELDB_VERSION="9bcae79f71b81a5c3ea6f67e45ae9ae9fb2775a5"
@@ -131,7 +129,7 @@ while getopts "::t:oj:srdlxzff:ugnv" OPTION; do
 			THREADS="$OPTARG"
 			;;
 		r)
-			echo "[opt] Will compile readline and ncurses"
+			echo "[opt] Will compile readline"
 			COMPILE_FANCY="yes"
 			;;
 		d)
@@ -363,35 +361,6 @@ echo " done!"
 
 if [ "$COMPILE_FANCY" == "yes" ]; then
 	if [ "$DO_STATIC" == "yes" ]; then
-		EXTRA_FLAGS="--without-shared --with-static"
-	else
-		EXTRA_FLAGS="--with-shared --without-static"
-	fi
-	#ncurses
-	echo -n "[ncurses] downloading $NCURSES_VERSION..."
-	download_file "http://ftp.gnu.org/gnu/ncurses/ncurses-$NCURSES_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv ncurses-$NCURSES_VERSION ncurses
-	echo -n " checking..."
-	cd ncurses
-	./configure --prefix="$DIR/bin/php7" \
-	--without-ada \
-	--without-manpages \
-	--without-progs \
-	--without-tests \
-	--with-normal \
-	--with-pthread \
-	--without-debug \
-	$EXTRA_FLAGS \
-	$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
-	echo -n " compiling..."
-	make -j $THREADS >> "$DIR/install.log" 2>&1
-	echo -n " installing..."
-	make install >> "$DIR/install.log" 2>&1
-	cd ..
-	echo " done!"
-	HAVE_NCURSES="--with-ncurses=$DIR/bin/php7"
-
-	if [ "$DO_STATIC" == "yes" ]; then
 		EXTRA_FLAGS="--enable-shared=no --enable-static=yes"
 	else
 		EXTRA_FLAGS="--enable-shared=yes --enable-static=no"
@@ -421,7 +390,6 @@ if [ "$COMPILE_FANCY" == "yes" ]; then
 	echo " done!"
 	set -e
 else
-	HAVE_NCURSES="--without-ncurses"
 	HAVE_READLINE="--without-readline"
 fi
 
@@ -747,8 +715,6 @@ fi
 #	HAS_PROFILER=""
 #fi
 
-#get_pecl_extension "ncurses" "$EXT_NCURSES_VERSION"
-
 get_github_extension "pthreads" "$EXT_PTHREADS_VERSION" "pmmp" "pthreads" #"v" needed for release tags because github removes the "v"
 #get_pecl_extension "pthreads" "$EXT_PTHREADS_VERSION"
 
@@ -865,7 +831,6 @@ RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS_LTO" LDFLA
 $HAS_LIBPNG \
 $HAS_LIBJPEG \
 $HAS_GD \
-$HAVE_NCURSES \
 $HAVE_READLINE \
 $HAS_LEVELDB \
 $HAS_PROFILER \
