@@ -15,7 +15,6 @@ Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have
 #### Android 64-bit (cross-compile)
 - Only aarch64 targets are supported for Android cross-compile.
 - The `aarch64-linux-musl` toolchain is required. You can compile and install it using https://github.com/pmmp/musl-cross-make (PMMP fork includes musl-libc patches for DNS resolver config path and increasing stack size limit for LevelDB)
-- Android cross-compile binaries MUST be compiled statically (using `-s`) or the binary will not work correctly.
 - It is strongly recommended that you enable abusive optimizations for Android targets (`-f` flag) for best performance.
 
 | Script flags | Description                                                                           |
@@ -32,11 +31,11 @@ Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have
 
 ### Example:
 
-| Target          | Arguments                           |
-| --------------- | ----------------------------------- |
-| linux64         | ``-t linux64 -l -j4 -f x86_64``     |
-| mac64           | ``-t mac64 -l -j4 -f``              |
-| android-aarch64 | ``-t android-aarch64 -x -s -j4 -f`` |
+| Target          | Arguments                        |
+| --------------- | -------------------------------- |
+| linux64         | ``-t linux64 -l -j4 -f x86_64``  |
+| mac64           | ``-t mac64 -l -j4 -f``           |
+| android-aarch64 | ``-t android-aarch64 -x -j4 -f`` |
 
 ### Common pitfalls
 - If used, the `-t` option (target) MUST be specified BEFORE the `-f` option (optimizations)
