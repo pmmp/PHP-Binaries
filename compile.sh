@@ -781,6 +781,11 @@ if [ "$DO_STATIC" == "yes" ]; then
 	fi
 fi
 
+if [ "$DO_STATIC" == "yes" ]; then
+	HAVE_OPCACHE="no" #doesn't work on static builds
+	echo "[warning] OPcache cannot be used on static builds; this may have a negative effect on performance"
+fi
+
 if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 	sed -i=".backup" 's/pthreads_working=no/pthreads_working=yes/' ./configure
 	if [ "$IS_WINDOWS" != "yes" ]; then
@@ -796,8 +801,6 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 	mv ext/mysqlnd/config9.m4 ext/mysqlnd/config.m4
 	sed  -i=".backup" "s{ext/mysqlnd/php_mysqlnd_config.h{config.h{" ext/mysqlnd/mysqlnd_portability.h
 elif [ "$DO_STATIC" == "yes" ]; then
-	HAVE_OPCACHE="no" #doesn't work on static builds
-	echo "[warning] OPcache cannot be used on static builds; this may have a negative effect on performance"
 	export LIBS="$LIBS -ldl"
 fi
 
