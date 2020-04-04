@@ -12,7 +12,7 @@ LEVELDB_VERSION="10f59b56bec1db3ffe42ff265afe22182073e0e2"
 LIBXML_VERSION="2.9.10"
 LIBPNG_VERSION="1.6.37"
 LIBJPEG_VERSION="9d"
-OPENSSL_VERSION="1.1.1d"
+OPENSSL_VERSION="1.1.1f"
 LIBZIP_VERSION="1.6.1"
 
 EXT_PTHREADS_VERSION="b9c5aa3cfcfa612106c8c12e3260db7c74ed0751"
@@ -758,6 +758,11 @@ if [ "$DO_STATIC" == "yes" ]; then
 	fi
 fi
 
+if [ "$DO_STATIC" == "yes" ]; then
+	HAVE_OPCACHE="no" #doesn't work on static builds
+	echo "[warning] OPcache cannot be used on static builds; this may have a negative effect on performance"
+fi
+
 if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 	sed -i=".backup" 's/pthreads_working=no/pthreads_working=yes/' ./configure
 	if [ "$IS_WINDOWS" != "yes" ]; then
@@ -773,8 +778,6 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 	mv ext/mysqlnd/config9.m4 ext/mysqlnd/config.m4
 	sed  -i=".backup" "s{ext/mysqlnd/php_mysqlnd_config.h{config.h{" ext/mysqlnd/mysqlnd_portability.h
 elif [ "$DO_STATIC" == "yes" ]; then
-	HAVE_OPCACHE="no" #doesn't work on static builds
-	echo "[warning] OPcache cannot be used on static builds; this may have a negative effect on performance"
 	export LIBS="$LIBS -ldl"
 fi
 
