@@ -288,8 +288,9 @@ REM TODO: more entries
 
 cd ..\..
 
-call :pm-echo "Downloading Microsoft Visual C++ Redistributable 2017"
-wget https://aka.ms/vs/15/release/vc_redist.x64.exe --no-check-certificate -q -O vc_redist.x64.exe || exit 1
+REM this includes all the stuff necessary to run anything needing 2015, 2017 and 2019 in one package
+call :pm-echo "Downloading Microsoft Visual C++ Redistributable 2015-2019"
+wget https://aka.ms/vs/16/release/vc_redist.x64.exe --no-check-certificate -q -O vc_redist.x64.exe || exit 1
 
 call :pm-echo "Checking PHP build works..."
 bin\php\php.exe --version >>"%log_file%" 2>&1 || call :pm-fatal-error "PHP build isn't working"
