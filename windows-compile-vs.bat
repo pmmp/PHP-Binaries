@@ -76,7 +76,7 @@ if exist "%SOURCES_PATH%" (
 )
 
 call :pm-echo "Getting SDK..."
-git clone https://github.com/OSTC/php-sdk-binary-tools.git -b php-sdk-%PHP_SDK_VER% --depth=1 -q "%SOURCES_PATH%" >>"%log_file%" 2>&1
+git clone https://github.com/OSTC/php-sdk-binary-tools.git -b php-sdk-%PHP_SDK_VER% --depth=1 -q "%SOURCES_PATH%" >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to download SDK"
 
 cd "%SOURCES_PATH%"
 
