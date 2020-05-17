@@ -14,12 +14,12 @@ if "%PHP_DEBUG_BUILD%"=="" (
 	set PHP_DEBUG_BUILD=0
 )
 
-set LIBYAML_VER=0.2.2
+set LIBYAML_VER=0.2.4
 set PTHREAD_W32_VER=3.0.0
 set LEVELDB_MCPE_VER=10f59b56bec1db3ffe42ff265afe22182073e0e2
 
 set PHP_PTHREADS_VER=646dac62ae0d48c1ada7b007e15575fb84f7d71d
-set PHP_YAML_VER=2.0.4
+set PHP_YAML_VER=2.1.0
 set PHP_POCKETMINE_CHUNKUTILS_VER=master
 set PHP_IGBINARY_VER=3.1.2
 REM this is 1.2.9 but tags with a "v" prefix are a pain in the ass
