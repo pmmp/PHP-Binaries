@@ -57,6 +57,11 @@ if "%SOURCES_PATH%"=="" (
 )
 call :pm-echo "Using path %SOURCES_PATH% for build sources"
 
+if not exist "C:\Program Files (x86)\Microsoft Visual Studio\2017" (
+	REM TODO: technically we only need the VS2017 toolset but some other stuff breaks
+	call :pm-fatal-error "Visual Studio 2017 is required"
+)
+
 REM export an env var to override this if you're using something other than the community edition
 if "%VS_EDITION%"=="" (
 	set VS_EDITION=Community
