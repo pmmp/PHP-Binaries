@@ -323,7 +323,7 @@ exit /B 0
 :get-zip
 wget %~1 --no-check-certificate -q -O temp.zip || exit /B 1
 7z x -y temp.zip >nul || exit /B 1
-rm temp.zip
+del /s /q temp.zip >nul || exit /B 1
 exit /B 0
 
 :pm-fatal-error
