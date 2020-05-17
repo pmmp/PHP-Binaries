@@ -68,7 +68,7 @@ if "%VS_EDITION%"=="" (
 )
 call "C:\Program Files (x86)\Microsoft Visual Studio\2017\%VS_EDITION%\VC\Auxiliary\Build\vcvarsall.bat" %ARCH% >>"%log_file%" 2>&1 || call :pm-fatal-error "Error initializing Visual Studio environment"
 
-cd "%outpath%"
+cd /D "%outpath%"
 
 if exist bin (
 	call :pm-echo "Deleting old binary folder..."
@@ -83,7 +83,7 @@ if exist "%SOURCES_PATH%" (
 call :pm-echo "Getting SDK..."
 git clone https://github.com/OSTC/php-sdk-binary-tools.git -b php-sdk-%PHP_SDK_VER% --depth=1 -q "%SOURCES_PATH%" >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to download SDK"
 
-cd "%SOURCES_PATH%"
+cd /D "%SOURCES_PATH%"
 
 call bin\phpsdk_setvars.bat >>"%log_file%" 2>&1
 
@@ -103,12 +103,12 @@ call bin\phpsdk_deps.bat -u -t %VC_VER% -b %PHP_MAJOR_VER% -a %ARCH% -f -d %DEPS
 
 
 call :pm-echo "Getting additional dependencies..."
-cd "%DEPS_DIR%"
+cd /D "%DEPS_DIR%"
 
 call :pm-echo "Downloading LibYAML version %LIBYAML_VER%..."
 call :get-zip https://github.com/yaml/libyaml/archive/%LIBYAML_VER%.zip || exit 1
 move libyaml-%LIBYAML_VER% libyaml >>"%log_file%" 2>&1
-cd libyaml
+cd /D libyaml
 cmake -G "%CMAKE_TARGET%" -DBUILD_SHARED_LIBS=ON . >>"%log_file%" 2>&1 || exit 1
 call :pm-echo "Compiling..."
 msbuild yaml.sln /p:Configuration=RelWithDebInfo /m >>"%log_file%" 2>&1 || exit 1
@@ -118,14 +118,14 @@ copy RelWithDebInfo\yaml.dll "%DEPS_DIR%\bin\yaml.dll" >>"%log_file%" 2>&1 || ex
 copy RelWithDebInfo\yaml.pdb "%DEPS_DIR%\bin\yaml.pdb" >>"%log_file%" 2>&1 || exit 1
 copy include\yaml.h "%DEPS_DIR%\include\yaml.h" >>"%log_file%" 2>&1 || exit 1
 
-cd "%DEPS_DIR%"
+cd /D "%DEPS_DIR%"
 
 call :pm-echo "Downloading pthread-w32 version %PTHREAD_W32_VER%..."
 mkdir pthread-w32
-cd pthread-w32
+cd /D pthread-w32
 call :get-zip https://netcologne.dl.sourceforge.net/project/pthreads4w/pthreads4w-code-v%PTHREAD_W32_VER%.zip || exit 1
 move pthreads4w-code-* pthreads4w-code >>"%log_file%" 2>&1
-cd pthreads4w-code
+cd /D pthreads4w-code
 
 call :pm-echo "Compiling..."
 nmake VC >>"%log_file%" 2>&1 || exit 1
@@ -139,12 +139,12 @@ copy pthreadVC3.lib "%DEPS_DIR%\lib\pthreadVC3.lib" >>"%log_file%" 2>&1 || exit 
 copy pthreadVC3.dll "%DEPS_DIR%\bin\pthreadVC3.dll" >>"%log_file%" 2>&1 || exit 1
 copy pthreadVC3.pdb "%DEPS_DIR%\bin\pthreadVC3.pdb" >>"%log_file%" 2>&1 || exit 1
 
-cd "%DEPS_DIR%"
+cd /D "%DEPS_DIR%"
 
 call :pm-echo "Downloading leveldb-mcpe version %LEVELDB_MCPE_VER%..."
 call :get-zip https://github.com/pmmp/leveldb-mcpe/archive/%LEVELDB_MCPE_VER%.zip || exit 1
 move leveldb-mcpe-%LEVELDB_MCPE_VER% leveldb >>"%log_file%" 2>&1
-cd leveldb
+cd /D leveldb
 
 call :pm-echo "Compiling..."
 msbuild leveldb.sln /p:Configuration=Release /p:ZlibIncludePath="%DEPS_DIR%\include" /p:ZlibLibPath="%DEPS_DIR%\lib\zlib_a.lib" /m >>"%log_file%" 2>&1 || exit 1
@@ -156,12 +156,12 @@ copy x64\Release\leveldb.lib "%DEPS_DIR%\lib\leveldb.lib" >>"%log_file%" 2>&1
 copy x64\Release\leveldb.dll "%DEPS_DIR%\bin\leveldb.dll" >>"%log_file%" 2>&1
 copy x64\Release\leveldb.pdb "%DEPS_DIR%\bin\leveldb.pdb" >>"%log_file%" 2>&1
 
-cd "%DEPS_DIR%"
+cd /D "%DEPS_DIR%"
 
-cd ..
+cd /D ..
 
 call :pm-echo "Getting additional PHP extensions..."
-cd php-src\ext
+cd /D php-src\ext
 
 call :get-extension-zip-from-github "pthreads"              "%PHP_PTHREADS_VER%"              "pmmp"     "pthreads"                || exit 1
 call :get-extension-zip-from-github "yaml"                  "%PHP_YAML_VER%"                  "php"      "pecl-file_formats-yaml"  || exit 1
@@ -173,15 +173,15 @@ call :get-extension-zip-from-github "recursionguard"        "%PHP_RECURSIONGUARD
 
 call :pm-echo " - crypto: downloading %PHP_CRYPTO_VER%..."
 git clone https://github.com/bukka/php-crypto.git crypto >>"%log_file%" 2>&1 || exit 1
-cd crypto
+cd /D crypto
 git checkout %PHP_CRYPTO_VER% >>"%log_file%" 2>&1 || exit 1
 git submodule update --init --recursive >>"%log_file%" 2>&1 || exit 1
-cd ..
+cd /D ..
 
-cd ..\..
+cd /D ..\..
 
 :skip
-cd php-src
+cd /D php-src
 call :pm-echo "Configuring PHP..."
 call buildconf.bat >>"%log_file%" 2>&1
 
@@ -252,10 +252,10 @@ del /q "%SOURCES_PATH%\php-src\%ARCH%\Release_TS\php-%PHP_VER%\gmodule-*.dll" 2>
 rmdir /s /q "%SOURCES_PATH%\php-src\%ARCH%\Release_TS\php-%PHP_VER%\lib\enchant\" 2>&1
 
 call :pm-echo "Copying artifacts..."
-cd "%outpath%"
+cd /D "%outpath%"
 mkdir bin
 move "%SOURCES_PATH%\php-src\%ARCH%\%OUT_PATH_REL%_TS\php-%PHP_VER%" bin\php
-cd bin\php
+cd /D bin\php
 
 set php_ini=php.ini
 call :pm-echo "Generating php.ini..."
@@ -291,7 +291,7 @@ call :pm-echo "Generating php.ini..."
 (echo recursionguard.enabled=0 ;disabled due to minor performance impact, only enable this if you need it for debugging)>>"%php_ini%"
 REM TODO: more entries
 
-cd ..\..
+cd /D ..\..
 
 REM this includes all the stuff necessary to run anything needing 2015, 2017 and 2019 in one package
 call :pm-echo "Downloading Microsoft Visual C++ Redistributable 2015-2019"
