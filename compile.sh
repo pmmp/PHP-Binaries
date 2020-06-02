@@ -115,7 +115,7 @@ LD_PRELOAD=""
 COMPILE_POCKETMINE_CHUNKUTILS="no"
 COMPILE_GD="no"
 
-while getopts "::t:oj:srdlxzff:ugnv" OPTION; do
+while getopts "::t:j:srdlxff:ugnv" OPTION; do
 
 	case $OPTION in
 		t)
