@@ -67,9 +67,9 @@ jobs:
   steps:
   - bash: |
       brew install libtool autoconf automake pkg-config bison
-      export PATH="/usr/local/opt/bison/bin:$PATH"
     displayName: Install Dependencies
   - bash: |
+      export PATH="/usr/local/opt/bison/bin:$PATH"
       set -ex
       trap "exit 1" ERR
 
