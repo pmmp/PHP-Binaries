@@ -67,7 +67,7 @@ jobs:
   steps:
   - bash: |
       brew install libtool autoconf automake pkg-config bison
-      brew link bison --force
+      export PATH="/usr/local/opt/bison/bin:$PATH"
     displayName: Install Dependencies
   - bash: |
       set -ex
