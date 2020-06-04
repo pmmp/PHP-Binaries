@@ -1,8 +1,6 @@
 #!/bin/bash
 [ -z "$PHP_VERSION" ] && PHP_VERSION="7.3.18"
 
-PHP_IS_BETA="no"
-
 ZLIB_VERSION="1.2.11"
 GMP_VERSION="6.2.0"
 CURL_VERSION="curl-7_70_0"
@@ -115,7 +113,7 @@ LD_PRELOAD=""
 
 COMPILE_GD="no"
 
-while getopts "::t:oj:srdxzff:gnv" OPTION; do
+while getopts "::t:j:srdxff:gnv" OPTION; do
 
 	case $OPTION in
 		t)
@@ -338,14 +336,8 @@ set -e
 #PHP 7
 echo -n "[PHP] downloading $PHP_VERSION..."
 
-if [[ "$PHP_IS_BETA" == "yes" ]]; then
-	download_file "https://github.com/php/php-src/archive/php-$PHP_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv php-src-php-$PHP_VERSION php
-else
-	download_file "https://www.php.net/distributions/php-$PHP_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv php-$PHP_VERSION php
-fi
-
+download_file "https://github.com/php/php-src/archive/php-$PHP_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+mv php-src-php-$PHP_VERSION php
 echo " done!"
 
 if [ "$COMPILE_FANCY" == "yes" ]; then

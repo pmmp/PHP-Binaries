@@ -66,9 +66,10 @@ jobs:
     vmImage: 'macOS-10.14'
   steps:
   - bash: |
-      brew install libtool autoconf automake pkg-config
+      brew install libtool autoconf automake pkg-config bison
     displayName: Install Dependencies
   - bash: |
+      export PATH="/usr/local/opt/bison/bin:$PATH"
       set -ex
       trap "exit 1" ERR
 
