@@ -1,5 +1,5 @@
 #!/bin/bash
-[ -z "$PHP_VERSION" ] && PHP_VERSION="7.3.18"
+[ -z "$PHP_VERSION" ] && PHP_VERSION="7.4.7RC1"
 
 ZLIB_VERSION="1.2.11"
 GMP_VERSION="6.2.0"
@@ -12,8 +12,9 @@ LIBPNG_VERSION="1.6.37"
 LIBJPEG_VERSION="9d"
 OPENSSL_VERSION="1.1.1g"
 LIBZIP_VERSION="1.6.1"
+SQLITE3_VERSION="3320200" #3.32.2
 
-EXT_PTHREADS_VERSION="646dac62ae0d48c1ada7b007e15575fb84f7d71d"
+EXT_PTHREADS_VERSION="b4a2e9ed1c393663d29217552f98cf2fb91b15f2"
 EXT_YAML_VERSION="2.1.0"
 EXT_LEVELDB_VERSION="9bcae79f71b81a5c3ea6f67e45ae9ae9fb2775a5"
 EXT_POCKETMINE_CHUNKUTILS_VERSION="master"
@@ -662,6 +663,22 @@ make install >> "$DIR/install.log" 2>&1
 cd ..
 echo " done!"
 
+#sqlite3
+echo -n "[sqlite3] downloading $SQLITE3_VERSION..."
+download_file "https://www.sqlite.org/2020/sqlite-autoconf-$SQLITE3_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+mv sqlite-autoconf-$SQLITE3_VERSION sqlite3 >> "$DIR/install.log" 2>&1
+echo -n " checking"
+cd sqlite3
+LDFLAGS="$LDFLAGS -L${DIR}/bin/php7/lib" CPPFLAGS="$CPPFLAGS -I${DIR}/bin/php7/include" RANLIB=$RANLIB ./configure \
+--prefix="$DIR/bin/php7" \
+$EXTRA_FLAGS \
+$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
+echo -n " compiling..."
+make -j $THREADS >> "$DIR/install.log" 2>&1
+echo -n " installing..."
+make install >> "$DIR/install.log" 2>&1
+cd ..
+echo " done!"
 
 
 # PECL libraries
@@ -817,13 +834,13 @@ fi
 
 RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS_LTO" LDFLAGS="$LDFLAGS $FLAGS_LTO" ./configure $PHP_OPTIMIZATION --prefix="$DIR/bin/php7" \
 --exec-prefix="$DIR/bin/php7" \
---with-curl="$DIR/bin/php7" \
---with-zlib="$DIR/bin/php7" \
---with-zlib-dir="$DIR/bin/php7" \
---with-gmp="$DIR/bin/php7" \
---with-yaml="$DIR/bin/php7" \
---with-openssl="$DIR/bin/php7" \
---with-libzip="$DIR/bin/php7" \
+--with-curl \
+--with-zlib \
+--with-zlib \
+--with-gmp \
+--with-yaml \
+--with-openssl \
+--with-zip \
 $HAS_LIBPNG \
 $HAS_LIBJPEG \
 $HAS_GD \
@@ -833,10 +850,11 @@ $HAS_PROFILER \
 $HAS_DEBUG \
 $HAS_POCKETMINE_CHUNKUTILS \
 --enable-mbstring \
+--disable-mbregex \
 --enable-calendar \
 --enable-pthreads \
 --disable-fileinfo \
---with-libxml-dir="$DIR/bin/php7" \
+--with-libxml \
 --enable-xml \
 --enable-dom \
 --enable-simplexml \
@@ -862,7 +880,6 @@ $HAVE_PCNTL \
 $HAVE_MYSQLI \
 --enable-bcmath \
 --enable-cli \
---enable-zip \
 --enable-ftp \
 --enable-opcache=$HAVE_OPCACHE \
 --enable-igbinary \
