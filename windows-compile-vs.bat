@@ -2,8 +2,8 @@
 
 REM For future users: This file MUST have CRLF line endings. If it doesn't, lots of inexplicable undesirable strange behaviour will result.
 REM Also: Don't modify this version with sed, or it will screw up your line endings.
-set PHP_MAJOR_VER=7.3
-set PHP_VER=%PHP_MAJOR_VER%.18
+set PHP_MAJOR_VER=7.4
+set PHP_VER=%PHP_MAJOR_VER%.7RC1
 set PHP_IS_BETA="no"
 set PHP_SDK_VER=2.2.0
 set PATH=C:\Program Files\7-Zip;C:\Program Files (x86)\GnuWin32\bin;%PATH%
@@ -18,7 +18,7 @@ set LIBYAML_VER=0.2.4
 set PTHREAD_W32_VER=3.0.0
 set LEVELDB_MCPE_VER=10f59b56bec1db3ffe42ff265afe22182073e0e2
 
-set PHP_PTHREADS_VER=646dac62ae0d48c1ada7b007e15575fb84f7d71d
+set PHP_PTHREADS_VER=b4a2e9ed1c393663d29217552f98cf2fb91b15f2
 set PHP_YAML_VER=2.1.0
 set PHP_POCKETMINE_CHUNKUTILS_VER=master
 set PHP_IGBINARY_VER=3.1.2
