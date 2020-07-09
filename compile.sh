@@ -620,6 +620,7 @@ sed -i.bak 's{libtoolize --version{"$LIBTOOLIZE" --version{' autogen.sh #needed 
 ./autogen.sh --prefix="$DIR/bin/php7" \
 	--without-iconv \
 	--without-python \
+	--without-lzma \
 	--with-zlib="$DIR/bin/php7" \
 	--config-cache \
 	$EXTRA_FLAGS \
