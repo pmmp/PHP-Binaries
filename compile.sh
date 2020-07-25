@@ -335,6 +335,10 @@ export LDFLAGS="$LDFLAGS"
 export CPPFLAGS="$CPPFLAGS"
 export LIBRARY_PATH="$DIR/bin/php7/lib:$LIBRARY_PATH"
 
+#some stuff (like curl) makes assumptions about library paths that break due to different behaviour in pkgconf vs pkg-config
+export PKG_CONFIG_ALLOW_SYSTEM_LIBS="yes"
+export PKG_CONFIG_ALLOW_SYSTEM_CFLAGS="yes"
+
 rm -r -f install_data/ >> "$DIR/install.log" 2>&1
 rm -r -f bin/ >> "$DIR/install.log" 2>&1
 mkdir -m 0755 install_data >> "$DIR/install.log" 2>&1
