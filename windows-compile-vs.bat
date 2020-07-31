@@ -9,7 +9,9 @@ set PHP_SDK_VER=2.2.0
 set PATH=C:\Program Files\7-Zip;C:\Program Files (x86)\GnuWin32\bin;%PATH%
 set VC_VER=vc15
 set ARCH=x64
-set CMAKE_TARGET=Visual Studio 15 2017
+set VS_VER=
+set VS_YEAR=
+set CMAKE_TARGET=
 if "%PHP_DEBUG_BUILD%"=="" (
 	set PHP_DEBUG_BUILD=0
 )
@@ -57,16 +59,15 @@ if "%SOURCES_PATH%"=="" (
 )
 call :pm-echo "Using path %SOURCES_PATH% for build sources"
 
-if not exist "C:\Program Files (x86)\Microsoft Visual Studio\2017" (
-	REM TODO: technically we only need the VS2017 toolset but some other stuff breaks
-	call :pm-fatal-error "Visual Studio 2017 is required"
-)
+call :check-vs-exists 2017 15 || call :check-vs-exists 2019 16 || call :pm-fatal-error "Please install Visual Studio 2017 or 2019"
 
 REM export an env var to override this if you're using something other than the community edition
 if "%VS_EDITION%"=="" (
 	set VS_EDITION=Community
 )
-call "C:\Program Files (x86)\Microsoft Visual Studio\2017\%VS_EDITION%\VC\Auxiliary\Build\vcvarsall.bat" %ARCH% >>"%log_file%" 2>&1 || call :pm-fatal-error "Error initializing Visual Studio environment"
+call "C:\Program Files (x86)\Microsoft Visual Studio\%VS_YEAR%\%VS_EDITION%\VC\Auxiliary\Build\vcvarsall.bat" %ARCH% -vcvars_ver=14.16 >>"%log_file%" 2>&1 || call :pm-fatal-error "Error initializing Visual Studio environment"
+:batchfiles-are-stupid
+move "%log_file%" "%log_file%" >nul 2>nul || goto :batchfiles-are-stupid
 
 cd /D "%outpath%"
 
@@ -321,6 +322,20 @@ move "%SOURCES_PATH%\php-src\%ARCH%\%OUT_PATH_REL%_TS\php-debug-pack*.zip" .
 call :pm-echo "Done?"
 
 exit 0
+
+:check-vs-exists
+if exist "C:\Program Files (x86)\Microsoft Visual Studio\%~1" (
+    set VS_VER=%~2
+    set VS_YEAR=%~1
+    set CMAKE_TARGET=Visual Studio %~2 %~1
+    call :pm-echo "Found Visual Studio %~1"
+    exit /B 0
+) else (
+    call :pm-echo "DID NOT FIND VS %~1"
+    set VS_VER=
+    set VS_YEAR=
+    exit /B 1
+)
 
 :get-extension-zip-from-github:
 call :pm-echo " - %~1: downloading %~2..."
