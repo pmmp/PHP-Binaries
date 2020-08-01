@@ -9,7 +9,7 @@ set PHP_SDK_VER=2.2.0
 set PATH=C:\Program Files\7-Zip;C:\Program Files (x86)\GnuWin32\bin;%PATH%
 set VC_VER=vc15
 set ARCH=x64
-set CMAKE_TARGET=Visual Studio 15 2017 Win64
+set CMAKE_TARGET=Visual Studio 15 2017
 if "%PHP_DEBUG_BUILD%"=="" (
 	set PHP_DEBUG_BUILD=0
 )
@@ -109,7 +109,7 @@ call :pm-echo "Downloading LibYAML version %LIBYAML_VER%..."
 call :get-zip https://github.com/yaml/libyaml/archive/%LIBYAML_VER%.zip || exit 1
 move libyaml-%LIBYAML_VER% libyaml >>"%log_file%" 2>&1
 cd /D libyaml
-cmake -G "%CMAKE_TARGET%" -DBUILD_SHARED_LIBS=ON . >>"%log_file%" 2>&1 || exit 1
+cmake -G "%CMAKE_TARGET%" -A "%ARCH%" -DBUILD_SHARED_LIBS=ON . >>"%log_file%" 2>&1 || exit 1
 call :pm-echo "Compiling..."
 msbuild yaml.sln /p:Configuration=RelWithDebInfo /m >>"%log_file%" 2>&1 || exit 1
 call :pm-echo "Copying files..."
