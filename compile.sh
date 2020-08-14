@@ -458,6 +458,11 @@ OPENSSL_CMD="./config"
 if [ "$OPENSSL_TARGET" != "" ]; then
 	OPENSSL_CMD="./Configure $OPENSSL_TARGET"
 fi
+if [ "$DO_STATIC" == "yes" ]; then
+	EXTRA_FLAGS="no-shared"
+else
+	EXTRA_FLAGS="shared"
+fi
 
 export PKG_CONFIG_PATH="$DIR/bin/php7/lib/pkgconfig"
 WITH_OPENSSL="--with-openssl=$DIR/bin/php7"
@@ -472,8 +477,8 @@ RANLIB=$RANLIB $OPENSSL_CMD \
 --openssldir="$DIR/bin/php7" \
 no-asm \
 no-hw \
-no-shared \
-no-engine >> "$DIR/install.log" 2>&1
+no-engine \
+$EXTRA_FLAGS >> "$DIR/install.log" 2>&1
 
 echo -n " compiling..."
 make -j $THREADS >> "$DIR/install.log" 2>&1
