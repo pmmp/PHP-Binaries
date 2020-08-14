@@ -270,6 +270,11 @@ else
 	fi
 fi
 
+if [ "$DO_STATIC" == "yes" ]; then
+	HAVE_OPCACHE="no" #doesn't work on static builds
+	echo "[warning] OPcache cannot be used on static builds; this may have a negative effect on performance"
+fi
+
 if [ "$DO_OPTIMIZE" != "no" ]; then
 	#FLAGS_LTO="-fvisibility=hidden -flto"
 	ffast_math="-fno-math-errno -funsafe-math-optimizations -fno-signed-zeros -fno-trapping-math -ffinite-math-only -fno-rounding-math -fno-signaling-nans" #workaround SQLite3 fail
@@ -783,10 +788,6 @@ if [ "$DO_STATIC" == "yes" ]; then
 	fi
 fi
 
-if [ "$DO_STATIC" == "yes" ]; then
-	HAVE_OPCACHE="no" #doesn't work on static builds
-	echo "[warning] OPcache cannot be used on static builds; this may have a negative effect on performance"
-fi
 
 if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 	sed -i=".backup" 's/pthreads_working=no/pthreads_working=yes/' ./configure
