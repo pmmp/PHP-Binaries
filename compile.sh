@@ -33,6 +33,10 @@ function write_error {
 
 echo "[PocketMine] PHP compiler for Linux, MacOS and Android"
 DIR="$(pwd)"
+BASE_BUILD_DIR="$DIR/install_data"
+#libtool and autoconf have a "feature" where it looks for install.sh/install-sh in ./ ../ and ../../
+#this extra subdir makes sure that it doesn't find anything it's not supposed to be looking for.
+BUILD_DIR="$BASE_BUILD_DIR/subdir"
 date > "$DIR/install.log" 2>&1
 
 uname -a >> "$DIR/install.log" 2>&1
@@ -256,6 +260,11 @@ else
 	fi
 fi
 
+if [ "$DO_STATIC" == "yes" ]; then
+	HAVE_OPCACHE="no" #doesn't work on static builds
+	echo "[warning] OPcache cannot be used on static builds; this may have a negative effect on performance"
+fi
+
 if [ "$DO_OPTIMIZE" != "no" ]; then
 	#FLAGS_LTO="-fvisibility=hidden -flto"
 	ffast_math="-fno-math-errno -funsafe-math-optimizations -fno-signed-zeros -fno-trapping-math -ffinite-math-only -fno-rounding-math -fno-signaling-nans" #workaround SQLite3 fail
@@ -329,12 +338,13 @@ export LIBRARY_PATH="$DIR/bin/php7/lib:$LIBRARY_PATH"
 export PKG_CONFIG_ALLOW_SYSTEM_LIBS="yes"
 export PKG_CONFIG_ALLOW_SYSTEM_CFLAGS="yes"
 
-rm -r -f install_data/ >> "$DIR/install.log" 2>&1
+rm -r -f "$BASE_BUILD_DIR" >> "$DIR/install.log" 2>&1
 rm -r -f bin/ >> "$DIR/install.log" 2>&1
-mkdir -m 0755 install_data >> "$DIR/install.log" 2>&1
+mkdir -m 0755 "$BASE_BUILD_DIR" >> "$DIR/install.log" 2>&1
+mkdir -m 0755 "$BUILD_DIR" >> "$DIR/install.log" 2>&1
 mkdir -m 0755 bin >> "$DIR/install.log" 2>&1
 mkdir -m 0755 bin/php7 >> "$DIR/install.log" 2>&1
-cd install_data
+cd "$BUILD_DIR"
 set -e
 
 #PHP 7
@@ -438,6 +448,11 @@ OPENSSL_CMD="./config"
 if [ "$OPENSSL_TARGET" != "" ]; then
 	OPENSSL_CMD="./Configure $OPENSSL_TARGET"
 fi
+if [ "$DO_STATIC" == "yes" ]; then
+	EXTRA_FLAGS="no-shared"
+else
+	EXTRA_FLAGS="shared"
+fi
 
 export PKG_CONFIG_PATH="$DIR/bin/php7/lib/pkgconfig"
 WITH_OPENSSL="--with-openssl=$DIR/bin/php7"
@@ -452,8 +467,8 @@ RANLIB=$RANLIB $OPENSSL_CMD \
 --openssldir="$DIR/bin/php7" \
 no-asm \
 no-hw \
-no-shared \
-no-engine >> "$DIR/install.log" 2>&1
+no-engine \
+$EXTRA_FLAGS >> "$DIR/install.log" 2>&1
 
 echo -n " compiling..."
 make -j $THREADS >> "$DIR/install.log" 2>&1
@@ -666,7 +681,7 @@ echo " done!"
 function get_extension_tar_gz {
 	echo -n "  $1: downloading $2..."
 	download_file "$3" | tar -zx >> "$DIR/install.log" 2>&1
-	mv "$4" "$DIR/install_data/php/ext/$1"
+	mv "$4" "$BUILD_DIR/php/ext/$1"
 	echo " done!"
 }
 
@@ -712,11 +727,11 @@ get_github_extension "ds" "$EXT_DS_VERSION" "php-ds" "ext-ds"
 get_github_extension "recursionguard" "$EXT_RECURSIONGUARD_VERSION" "pmmp" "ext-recursionguard"
 
 echo -n "  crypto: downloading $EXT_CRYPTO_VERSION..."
-git clone https://github.com/bukka/php-crypto.git "$DIR/install_data/php/ext/crypto" >> "$DIR/install.log" 2>&1
-cd "$DIR/install_data/php/ext/crypto"
+git clone https://github.com/bukka/php-crypto.git "$BUILD_DIR/php/ext/crypto" >> "$DIR/install.log" 2>&1
+cd "$BUILD_DIR/php/ext/crypto"
 git checkout "$EXT_CRYPTO_VERSION" >> "$DIR/install.log" 2>&1
 git submodule update --init --recursive >> "$DIR/install.log" 2>&1
-cd "$DIR/install_data"
+cd "$BUILD_DIR"
 echo " done!"
 
 get_github_extension "leveldb" "$EXT_LEVELDB_VERSION" "reeze" "php-leveldb"
@@ -748,17 +763,13 @@ if [ "$DO_STATIC" == "yes" ]; then
 	if [ ! -z "$PKG_CONFIG" ]; then
 		#only export this if pkg-config exists, otherwise leave it (it'll fall back to curl-config)
 
-		echo '#!/bin/sh' > "$DIR/install_data/pkg-config-wrapper"
-		echo 'exec '$PKG_CONFIG' "$@" --static' >> "$DIR/install_data/pkg-config-wrapper"
-		chmod +x "$DIR/install_data/pkg-config-wrapper"
-		export PKG_CONFIG="$DIR/install_data/pkg-config-wrapper"
+		echo '#!/bin/sh' > "$BUILD_DIR/pkg-config-wrapper"
+		echo 'exec '$PKG_CONFIG' "$@" --static' >> "$BUILD_DIR/pkg-config-wrapper"
+		chmod +x "$BUILD_DIR/pkg-config-wrapper"
+		export PKG_CONFIG="$BUILD_DIR/pkg-config-wrapper"
 	fi
 fi
 
-if [ "$DO_STATIC" == "yes" ]; then
-	HAVE_OPCACHE="no" #doesn't work on static builds
-	echo "[warning] OPcache cannot be used on static builds; this may have a negative effect on performance"
-fi
 
 if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 	sed -i=".backup" 's/pthreads_working=no/pthreads_working=yes/' ./configure
@@ -926,7 +937,7 @@ echo " done!"
 
 if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
 	echo -n "[xdebug] checking..."
-	cd "$DIR/install_data/php/ext/xdebug"
+	cd "$BUILD_DIR/php/ext/xdebug"
 	$DIR/bin/php7/bin/phpize >> "$DIR/install.log" 2>&1
 	./configure --with-php-config="$DIR/bin/php7/bin/php-config" >> "$DIR/install.log" 2>&1
 	echo -n " compiling..."
@@ -940,7 +951,7 @@ fi
 cd "$DIR"
 if [ "$DO_CLEANUP" == "yes" ]; then
 	echo -n "[INFO] Cleaning up..."
-	rm -r -f install_data/ >> "$DIR/install.log" 2>&1
+	rm -r -f "$BUILD_DIR" >> "$DIR/install.log" 2>&1
 	rm -f bin/php7/bin/curl* >> "$DIR/install.log" 2>&1
 	rm -f bin/php7/bin/curl-config* >> "$DIR/install.log" 2>&1
 	rm -f bin/php7/bin/c_rehash* >> "$DIR/install.log" 2>&1
