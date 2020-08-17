@@ -111,13 +111,14 @@ DO_CLEANUP="yes"
 COMPILE_DEBUG="no"
 HAVE_VALGRIND="--without-valgrind"
 HAVE_OPCACHE="yes"
+FSANITIZE_OPTIONS=""
 FLAGS_LTO=""
 
 LD_PRELOAD=""
 
 COMPILE_GD="no"
 
-while getopts "::t:j:srdxff:gnv" OPTION; do
+while getopts "::t:j:srdxff:gnva:" OPTION; do
 
 	case $OPTION in
 		t)
@@ -164,6 +165,10 @@ while getopts "::t:j:srdxff:gnv" OPTION; do
 		v)
 			echo "[opt] Will enable valgrind support in PHP"
 			HAVE_VALGRIND="--with-valgrind"
+			;;
+		a)
+			echo "[opt] Will pass -fsanitize=$OPTARG to compilers and linkers"
+			FSANITIZE_OPTIONS="$OPTARG"
 			;;
 		\?)
 			echo "Invalid option: -$OPTION$OPTARG" >&2
@@ -263,6 +268,9 @@ fi
 if [ "$DO_STATIC" == "yes" ]; then
 	HAVE_OPCACHE="no" #doesn't work on static builds
 	echo "[warning] OPcache cannot be used on static builds; this may have a negative effect on performance"
+	if [ "$FSANITIZE_OPTIONS" != "" ]; then
+		echo "[warning] Sanitizers cannot be used on static builds"
+	fi
 fi
 
 if [ "$DO_OPTIMIZE" != "no" ]; then
@@ -320,6 +328,19 @@ else
 	$CC -march=$march $CFLAGS -o test test.c >> "$DIR/install.log" 2>&1
 	if [ $? -eq 0 ]; then
 		CFLAGS="-march=$march -fno-gcse $CFLAGS"
+	fi
+fi
+
+if [ "$FSANITIZE_OPTIONS" != "" ]; then
+	CFLAGS="$CFLAGS" CXXFLAGS="$CXXFLAGS" LDFLAGS="$LDFLAGS" $CC -fsanitize=$FSANITIZE_OPTIONS -o asan-test test.c >> "$DIR/install.log" 2>&1 && \
+		chmod +x asan-test >> "$DIR/install.log" 2>&1 && \
+		./asan-test >> "$DIR/install.log" 2>&1 && \
+		rm asan-test >> "$DIR/install.log" 2>&1
+	if [ $? -ne 0 ]; then
+		echo "[ERROR] One or more sanitizers are not working. Check install.log for details."
+		exit 1
+	else
+		echo "[INFO] All selected sanitizers are working"
 	fi
 fi
 
@@ -806,6 +827,12 @@ if [[ "$COMPILE_DEBUG" == "yes" ]]; then
 	HAS_DEBUG="--enable-debug"
 else
 	HAS_DEBUG="--disable-debug"
+fi
+
+if [ "$FSANITIZE_OPTIONS" != "" ]; then
+	CFLAGS="$CFLAGS -fsanitize=$FSANITIZE_OPTIONS -fno-omit-frame-pointer"
+	CXXFLAGS="$CXXFLAGS -fsanitize=$FSANITIZE_OPTIONS -fno-omit-frame-pointer"
+	LDFLAGS="-fsanitize=$FSANITIZE_OPTIONS $LDFLAGS"
 fi
 
 RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS_LTO" LDFLAGS="$LDFLAGS $FLAGS_LTO" ./configure $PHP_OPTIMIZATION --prefix="$DIR/bin/php7" \
