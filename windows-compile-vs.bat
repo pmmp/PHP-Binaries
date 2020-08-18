@@ -9,19 +9,19 @@ set PHP_SDK_VER=2.2.0
 set PATH=C:\Program Files\7-Zip;C:\Program Files (x86)\GnuWin32\bin;%PATH%
 set VC_VER=vc15
 set ARCH=x64
-set CMAKE_TARGET=Visual Studio 15 2017 Win64
+set CMAKE_TARGET=Visual Studio 15 2017
 if "%PHP_DEBUG_BUILD%"=="" (
 	set PHP_DEBUG_BUILD=0
 )
 
-set LIBYAML_VER=0.2.4
+set LIBYAML_VER=0.2.5
 set PTHREAD_W32_VER=3.0.0
 set LEVELDB_MCPE_VER=10f59b56bec1db3ffe42ff265afe22182073e0e2
 
 set PHP_PTHREADS_VER=e2591d2a4177de20247d7623dbee02ef8a916138
 set PHP_YAML_VER=2.1.0
 set PHP_POCKETMINE_CHUNKUTILS_VER=master
-set PHP_IGBINARY_VER=3.1.2
+set PHP_IGBINARY_VER=3.1.4
 REM this is 1.2.9 but tags with a "v" prefix are a pain in the ass
 set PHP_DS_VER=2ddef84d3e9391c37599cb716592184315e23921
 set PHP_LEVELDB_VER=f4ed9f57ee99ddbfe86439fb361cf52cc9676225
@@ -109,14 +109,17 @@ call :pm-echo "Downloading LibYAML version %LIBYAML_VER%..."
 call :get-zip https://github.com/yaml/libyaml/archive/%LIBYAML_VER%.zip || exit 1
 move libyaml-%LIBYAML_VER% libyaml >>"%log_file%" 2>&1
 cd /D libyaml
-cmake -G "%CMAKE_TARGET%" -DBUILD_SHARED_LIBS=ON . >>"%log_file%" 2>&1 || exit 1
+call :pm-echo "Generating build configuration..."
+cmake -G "%CMAKE_TARGET%" -A "%ARCH%"^
+ -DCMAKE_PREFIX_PATH="%DEPS_DIR%"^
+ -DCMAKE_INSTALL_PREFIX="%DEPS_DIR%"^
+ -DBUILD_SHARED_LIBS=ON^
+ . >>"%log_file%" 2>&1 || exit 1
 call :pm-echo "Compiling..."
-msbuild yaml.sln /p:Configuration=RelWithDebInfo /m >>"%log_file%" 2>&1 || exit 1
-call :pm-echo "Copying files..."
-copy RelWithDebInfo\yaml.lib "%DEPS_DIR%\lib\yaml.lib" >>"%log_file%" 2>&1 || exit 1
-copy RelWithDebInfo\yaml.dll "%DEPS_DIR%\bin\yaml.dll" >>"%log_file%" 2>&1 || exit 1
+msbuild ALL_BUILD.vcxproj /p:Configuration=RelWithDebInfo /m >>"%log_file%" 2>&1 || exit 1
+call :pm-echo "Installing files..."
+msbuild INSTALL.vcxproj /p:Configuration=RelWithDebInfo /m >>"%log_file%" 2>&1 || exit 1
 copy RelWithDebInfo\yaml.pdb "%DEPS_DIR%\bin\yaml.pdb" >>"%log_file%" 2>&1 || exit 1
-copy include\yaml.h "%DEPS_DIR%\include\yaml.h" >>"%log_file%" 2>&1 || exit 1
 
 cd /D "%DEPS_DIR%"
 

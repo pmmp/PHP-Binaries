@@ -3,23 +3,23 @@
 
 ZLIB_VERSION="1.2.11"
 GMP_VERSION="6.2.0"
-CURL_VERSION="curl-7_70_0"
+CURL_VERSION="curl-7_71_1"
 READLINE_VERSION="6.3"
-YAML_VERSION="0.2.4"
+YAML_VERSION="0.2.5"
 LEVELDB_VERSION="10f59b56bec1db3ffe42ff265afe22182073e0e2"
 LIBXML_VERSION="2.9.10"
 LIBPNG_VERSION="1.6.37"
 LIBJPEG_VERSION="9d"
 OPENSSL_VERSION="1.1.1g"
-LIBZIP_VERSION="1.6.1"
+LIBZIP_VERSION="1.7.3"
 SQLITE3_VERSION="3320200" #3.32.2
 
 EXT_PTHREADS_VERSION="e2591d2a4177de20247d7623dbee02ef8a916138"
 EXT_YAML_VERSION="2.1.0"
 EXT_LEVELDB_VERSION="f4ed9f57ee99ddbfe86439fb361cf52cc9676225"
 EXT_POCKETMINE_CHUNKUTILS_VERSION="master"
-EXT_XDEBUG_VERSION="2.9.5"
-EXT_IGBINARY_VERSION="3.1.2"
+EXT_XDEBUG_VERSION="2.9.6"
+EXT_IGBINARY_VERSION="3.1.4"
 EXT_DS_VERSION="2ddef84d3e9391c37599cb716592184315e23921"
 EXT_CRYPTO_VERSION="5f26ac91b0ba96742cc6284cd00f8db69c3788b2"
 EXT_RECURSIONGUARD_VERSION="d6ed5da49178762ed81dc0184cd34ff4d3254720"
@@ -34,6 +34,10 @@ function write_error {
 
 echo "[PocketMine] PHP compiler for Linux, MacOS and Android"
 DIR="$(pwd)"
+BASE_BUILD_DIR="$DIR/install_data"
+#libtool and autoconf have a "feature" where it looks for install.sh/install-sh in ./ ../ and ../../
+#this extra subdir makes sure that it doesn't find anything it's not supposed to be looking for.
+BUILD_DIR="$BASE_BUILD_DIR/subdir"
 date > "$DIR/install.log" 2>&1
 
 uname -a >> "$DIR/install.log" 2>&1
@@ -109,6 +113,7 @@ COMPILE_DEBUG="no"
 COMPILE_LEVELDB="no"
 HAVE_VALGRIND="--without-valgrind"
 HAVE_OPCACHE="yes"
+FSANITIZE_OPTIONS=""
 FLAGS_LTO=""
 
 LD_PRELOAD=""
@@ -116,7 +121,7 @@ LD_PRELOAD=""
 COMPILE_POCKETMINE_CHUNKUTILS="no"
 COMPILE_GD="no"
 
-while getopts "::t:j:srdlxff:ugnv" OPTION; do
+while getopts "::t:j:srdlxff:ugnva:" OPTION; do
 
 	case $OPTION in
 		t)
@@ -171,6 +176,10 @@ while getopts "::t:j:srdlxff:ugnv" OPTION; do
 		v)
 			echo "[opt] Will enable valgrind support in PHP"
 			HAVE_VALGRIND="--with-valgrind"
+			;;
+		a)
+			echo "[opt] Will pass -fsanitize=$OPTARG to compilers and linkers"
+			FSANITIZE_OPTIONS="$OPTARG"
 			;;
 		\?)
 			echo "Invalid option: -$OPTION$OPTARG" >&2
@@ -267,6 +276,14 @@ else
 	fi
 fi
 
+if [ "$DO_STATIC" == "yes" ]; then
+	HAVE_OPCACHE="no" #doesn't work on static builds
+	echo "[warning] OPcache cannot be used on static builds; this may have a negative effect on performance"
+	if [ "$FSANITIZE_OPTIONS" != "" ]; then
+		echo "[warning] Sanitizers cannot be used on static builds"
+	fi
+fi
+
 if [ "$DO_OPTIMIZE" != "no" ]; then
 	#FLAGS_LTO="-fvisibility=hidden -flto"
 	ffast_math="-fno-math-errno -funsafe-math-optimizations -fno-signed-zeros -fno-trapping-math -ffinite-math-only -fno-rounding-math -fno-signaling-nans" #workaround SQLite3 fail
@@ -325,6 +342,19 @@ else
 	fi
 fi
 
+if [ "$FSANITIZE_OPTIONS" != "" ]; then
+	CFLAGS="$CFLAGS" CXXFLAGS="$CXXFLAGS" LDFLAGS="$LDFLAGS" $CC -fsanitize=$FSANITIZE_OPTIONS -o asan-test test.c >> "$DIR/install.log" 2>&1 && \
+		chmod +x asan-test >> "$DIR/install.log" 2>&1 && \
+		./asan-test >> "$DIR/install.log" 2>&1 && \
+		rm asan-test >> "$DIR/install.log" 2>&1
+	if [ $? -ne 0 ]; then
+		echo "[ERROR] One or more sanitizers are not working. Check install.log for details."
+		exit 1
+	else
+		echo "[INFO] All selected sanitizers are working"
+	fi
+fi
+
 rm test.* >> "$DIR/install.log" 2>&1
 rm test >> "$DIR/install.log" 2>&1
 
@@ -336,12 +366,17 @@ export LDFLAGS="$LDFLAGS"
 export CPPFLAGS="$CPPFLAGS"
 export LIBRARY_PATH="$DIR/bin/php7/lib:$LIBRARY_PATH"
 
-rm -r -f install_data/ >> "$DIR/install.log" 2>&1
+#some stuff (like curl) makes assumptions about library paths that break due to different behaviour in pkgconf vs pkg-config
+export PKG_CONFIG_ALLOW_SYSTEM_LIBS="yes"
+export PKG_CONFIG_ALLOW_SYSTEM_CFLAGS="yes"
+
+rm -r -f "$BASE_BUILD_DIR" >> "$DIR/install.log" 2>&1
 rm -r -f bin/ >> "$DIR/install.log" 2>&1
-mkdir -m 0755 install_data >> "$DIR/install.log" 2>&1
+mkdir -m 0755 "$BASE_BUILD_DIR" >> "$DIR/install.log" 2>&1
+mkdir -m 0755 "$BUILD_DIR" >> "$DIR/install.log" 2>&1
 mkdir -m 0755 bin >> "$DIR/install.log" 2>&1
 mkdir -m 0755 bin/php7 >> "$DIR/install.log" 2>&1
-cd install_data
+cd "$BUILD_DIR"
 set -e
 
 #PHP 7
@@ -445,6 +480,11 @@ OPENSSL_CMD="./config"
 if [ "$OPENSSL_TARGET" != "" ]; then
 	OPENSSL_CMD="./Configure $OPENSSL_TARGET"
 fi
+if [ "$DO_STATIC" == "yes" ]; then
+	EXTRA_FLAGS="no-shared"
+else
+	EXTRA_FLAGS="shared"
+fi
 
 export PKG_CONFIG_PATH="$DIR/bin/php7/lib/pkgconfig"
 WITH_OPENSSL="--with-openssl=$DIR/bin/php7"
@@ -459,8 +499,8 @@ RANLIB=$RANLIB $OPENSSL_CMD \
 --openssldir="$DIR/bin/php7" \
 no-asm \
 no-hw \
-no-shared \
-no-engine >> "$DIR/install.log" 2>&1
+no-engine \
+$EXTRA_FLAGS >> "$DIR/install.log" 2>&1
 
 echo -n " compiling..."
 make -j $THREADS >> "$DIR/install.log" 2>&1
@@ -633,6 +673,7 @@ sed -i.bak 's{libtoolize --version{"$LIBTOOLIZE" --version{' autogen.sh #needed 
 ./autogen.sh --prefix="$DIR/bin/php7" \
 	--without-iconv \
 	--without-python \
+	--without-lzma \
 	--with-zlib="$DIR/bin/php7" \
 	--config-cache \
 	$EXTRA_FLAGS \
@@ -690,7 +731,7 @@ echo " done!"
 function get_extension_tar_gz {
 	echo -n "  $1: downloading $2..."
 	download_file "$3" | tar -zx >> "$DIR/install.log" 2>&1
-	mv "$4" "$DIR/install_data/php/ext/$1"
+	mv "$4" "$BUILD_DIR/php/ext/$1"
 	echo " done!"
 }
 
@@ -736,11 +777,11 @@ get_github_extension "ds" "$EXT_DS_VERSION" "php-ds" "ext-ds"
 get_github_extension "recursionguard" "$EXT_RECURSIONGUARD_VERSION" "pmmp" "ext-recursionguard"
 
 echo -n "  crypto: downloading $EXT_CRYPTO_VERSION..."
-git clone https://github.com/bukka/php-crypto.git "$DIR/install_data/php/ext/crypto" >> "$DIR/install.log" 2>&1
-cd "$DIR/install_data/php/ext/crypto"
+git clone https://github.com/bukka/php-crypto.git "$BUILD_DIR/php/ext/crypto" >> "$DIR/install.log" 2>&1
+cd "$BUILD_DIR/php/ext/crypto"
 git checkout "$EXT_CRYPTO_VERSION" >> "$DIR/install.log" 2>&1
 git submodule update --init --recursive >> "$DIR/install.log" 2>&1
-cd "$DIR/install_data"
+cd "$BUILD_DIR"
 echo " done!"
 
 if [ "$COMPILE_LEVELDB" == "yes" ]; then
@@ -783,17 +824,13 @@ if [ "$DO_STATIC" == "yes" ]; then
 	if [ ! -z "$PKG_CONFIG" ]; then
 		#only export this if pkg-config exists, otherwise leave it (it'll fall back to curl-config)
 
-		echo '#!/bin/sh' > "$DIR/install_data/pkg-config-wrapper"
-		echo 'exec '$PKG_CONFIG' "$@" --static' >> "$DIR/install_data/pkg-config-wrapper"
-		chmod +x "$DIR/install_data/pkg-config-wrapper"
-		export PKG_CONFIG="$DIR/install_data/pkg-config-wrapper"
+		echo '#!/bin/sh' > "$BUILD_DIR/pkg-config-wrapper"
+		echo 'exec '$PKG_CONFIG' "$@" --static' >> "$BUILD_DIR/pkg-config-wrapper"
+		chmod +x "$BUILD_DIR/pkg-config-wrapper"
+		export PKG_CONFIG="$BUILD_DIR/pkg-config-wrapper"
 	fi
 fi
 
-if [ "$DO_STATIC" == "yes" ]; then
-	HAVE_OPCACHE="no" #doesn't work on static builds
-	echo "[warning] OPcache cannot be used on static builds; this may have a negative effect on performance"
-fi
 
 if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 	sed -i=".backup" 's/pthreads_working=no/pthreads_working=yes/' ./configure
@@ -830,6 +867,12 @@ if [[ "$COMPILE_DEBUG" == "yes" ]]; then
 	HAS_DEBUG="--enable-debug"
 else
 	HAS_DEBUG="--disable-debug"
+fi
+
+if [ "$FSANITIZE_OPTIONS" != "" ]; then
+	CFLAGS="$CFLAGS -fsanitize=$FSANITIZE_OPTIONS -fno-omit-frame-pointer"
+	CXXFLAGS="$CXXFLAGS -fsanitize=$FSANITIZE_OPTIONS -fno-omit-frame-pointer"
+	LDFLAGS="-fsanitize=$FSANITIZE_OPTIONS $LDFLAGS"
 fi
 
 RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS_LTO" LDFLAGS="$LDFLAGS $FLAGS_LTO" ./configure $PHP_OPTIMIZATION --prefix="$DIR/bin/php7" \
@@ -961,7 +1004,7 @@ echo " done!"
 
 if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
 	echo -n "[xdebug] checking..."
-	cd "$DIR/install_data/php/ext/xdebug"
+	cd "$BUILD_DIR/php/ext/xdebug"
 	$DIR/bin/php7/bin/phpize >> "$DIR/install.log" 2>&1
 	./configure --with-php-config="$DIR/bin/php7/bin/php-config" >> "$DIR/install.log" 2>&1
 	echo -n " compiling..."
@@ -975,7 +1018,7 @@ fi
 cd "$DIR"
 if [ "$DO_CLEANUP" == "yes" ]; then
 	echo -n "[INFO] Cleaning up..."
-	rm -r -f install_data/ >> "$DIR/install.log" 2>&1
+	rm -r -f "$BUILD_DIR" >> "$DIR/install.log" 2>&1
 	rm -f bin/php7/bin/curl* >> "$DIR/install.log" 2>&1
 	rm -f bin/php7/bin/curl-config* >> "$DIR/install.log" 2>&1
 	rm -f bin/php7/bin/c_rehash* >> "$DIR/install.log" 2>&1
