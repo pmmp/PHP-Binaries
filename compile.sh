@@ -709,6 +709,11 @@ function build_libzip {
 }
 
 function build_sqlite3 {
+	if [ "$DO_STATIC" == "yes" ]; then
+		local EXTRA_FLAGS="--enable-static=yes --enable-shared=no"
+	else
+		local EXTRA_FLAGS="--enable-static=no --enable-shared=yes"
+	fi
 	#sqlite3
 	echo -n "[sqlite3] downloading $SQLITE3_VERSION..."
 	download_file "https://www.sqlite.org/2020/sqlite-autoconf-$SQLITE3_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
@@ -717,6 +722,8 @@ function build_sqlite3 {
 	cd sqlite3
 	LDFLAGS="$LDFLAGS -L${DIR}/bin/php7/lib" CPPFLAGS="$CPPFLAGS -I${DIR}/bin/php7/include" RANLIB=$RANLIB ./configure \
 	--prefix="$DIR/bin/php7" \
+	--disable-dependency-tracking \
+	--enable-static-shell=no \
 	$EXTRA_FLAGS \
 	$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
 	echo -n " compiling..."
