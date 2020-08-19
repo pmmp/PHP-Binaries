@@ -708,9 +708,7 @@ build_gmp
 build_openssl
 build_curl
 build_yaml
-if [ "$COMPILE_LEVELDB" == "yes" ]; then
-	build_leveldb
-fi
+build_leveldb
 if [ "$COMPILE_GD" == "yes" ]; then
 	build_libpng
 	build_libjpeg
