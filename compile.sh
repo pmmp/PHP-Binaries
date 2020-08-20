@@ -12,7 +12,7 @@ LIBPNG_VERSION="1.6.37"
 LIBJPEG_VERSION="9d"
 OPENSSL_VERSION="1.1.1g"
 LIBZIP_VERSION="1.7.3"
-SQLITE3_VERSION="3320200" #3.32.2
+SQLITE3_VERSION="3330000" #3.33.0
 
 EXT_PTHREADS_VERSION="e0f514dfde01c5e7e9cf94c43615918af482a45c"
 EXT_YAML_VERSION="2.1.0"
@@ -286,8 +286,7 @@ fi
 
 if [ "$DO_OPTIMIZE" != "no" ]; then
 	#FLAGS_LTO="-fvisibility=hidden -flto"
-	ffast_math="-fno-math-errno -funsafe-math-optimizations -fno-signed-zeros -fno-trapping-math -ffinite-math-only -fno-rounding-math -fno-signaling-nans" #workaround SQLite3 fail
-	CFLAGS="$CFLAGS -O2 -DSQLITE_HAVE_ISNAN $ffast_math -ftree-vectorize -fomit-frame-pointer -funswitch-loops -fivopts"
+	CFLAGS="$CFLAGS -O2 -ffast-math -ftree-vectorize -fomit-frame-pointer -funswitch-loops -fivopts"
 	if [ "$COMPILE_TARGET" != "mac" ] && [ "$COMPILE_TARGET" != "mac32" ] && [ "$COMPILE_TARGET" != "mac64" ]; then
 		CFLAGS="$CFLAGS -funsafe-loop-optimizations -fpredictive-commoning -ftracer -ftree-loop-im -frename-registers -fcx-limited-range"
 	fi
@@ -365,6 +364,7 @@ export CXXFLAGS="$CFLAGS $CXXFLAGS"
 export LDFLAGS="$LDFLAGS"
 export CPPFLAGS="$CPPFLAGS"
 export LIBRARY_PATH="$DIR/bin/php7/lib:$LIBRARY_PATH"
+export PKG_CONFIG_PATH="$DIR/bin/php7/lib/pkgconfig"
 
 #some stuff (like curl) makes assumptions about library paths that break due to different behaviour in pkgconf vs pkg-config
 export PKG_CONFIG_ALLOW_SYSTEM_LIBS="yes"
@@ -488,7 +488,6 @@ function build_openssl {
 		local EXTRA_FLAGS="shared"
 	fi
 
-	export PKG_CONFIG_PATH="$DIR/bin/php7/lib/pkgconfig"
 	WITH_OPENSSL="--with-openssl=$DIR/bin/php7"
 	echo -n "[OpenSSL] downloading $OPENSSL_VERSION..."
 	download_file "http://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
@@ -718,7 +717,7 @@ function build_sqlite3 {
 	echo -n "[sqlite3] downloading $SQLITE3_VERSION..."
 	download_file "https://www.sqlite.org/2020/sqlite-autoconf-$SQLITE3_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 	mv sqlite-autoconf-$SQLITE3_VERSION sqlite3 >> "$DIR/install.log" 2>&1
-	echo -n " checking"
+	echo -n " checking..."
 	cd sqlite3
 	LDFLAGS="$LDFLAGS -L${DIR}/bin/php7/lib" CPPFLAGS="$CPPFLAGS -I${DIR}/bin/php7/include" RANLIB=$RANLIB ./configure \
 	--prefix="$DIR/bin/php7" \
