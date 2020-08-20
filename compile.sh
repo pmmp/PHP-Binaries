@@ -12,6 +12,7 @@ LIBPNG_VERSION="1.6.37"
 LIBJPEG_VERSION="9d"
 OPENSSL_VERSION="1.1.1g"
 LIBZIP_VERSION="1.7.3"
+SQLITE3_VERSION="3330000" #3.33.0
 
 EXT_PTHREADS_VERSION="45579e1e622acd80f9c880f3a025ba3b98b8ebef"
 EXT_YAML_VERSION="2.1.0"
@@ -285,8 +286,7 @@ fi
 
 if [ "$DO_OPTIMIZE" != "no" ]; then
 	#FLAGS_LTO="-fvisibility=hidden -flto"
-	ffast_math="-fno-math-errno -funsafe-math-optimizations -fno-signed-zeros -fno-trapping-math -ffinite-math-only -fno-rounding-math -fno-signaling-nans" #workaround SQLite3 fail
-	CFLAGS="$CFLAGS -O2 -DSQLITE_HAVE_ISNAN $ffast_math -ftree-vectorize -fomit-frame-pointer -funswitch-loops -fivopts"
+	CFLAGS="$CFLAGS -O2 -ffast-math -ftree-vectorize -fomit-frame-pointer -funswitch-loops -fivopts"
 	if [ "$COMPILE_TARGET" != "mac" ] && [ "$COMPILE_TARGET" != "mac32" ] && [ "$COMPILE_TARGET" != "mac64" ]; then
 		CFLAGS="$CFLAGS -funsafe-loop-optimizations -fpredictive-commoning -ftracer -ftree-loop-im -frename-registers -fcx-limited-range"
 	fi
@@ -707,6 +707,32 @@ function build_libzip {
 	echo " done!"
 }
 
+function build_sqlite3 {
+	if [ "$DO_STATIC" == "yes" ]; then
+		local EXTRA_FLAGS="--enable-static=yes --enable-shared=no"
+	else
+		local EXTRA_FLAGS="--enable-static=no --enable-shared=yes"
+	fi
+	#sqlite3
+	echo -n "[sqlite3] downloading $SQLITE3_VERSION..."
+	download_file "https://www.sqlite.org/2020/sqlite-autoconf-$SQLITE3_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv sqlite-autoconf-$SQLITE3_VERSION sqlite3 >> "$DIR/install.log" 2>&1
+	echo -n " checking..."
+	cd sqlite3
+	LDFLAGS="$LDFLAGS -L${DIR}/bin/php7/lib" CPPFLAGS="$CPPFLAGS -I${DIR}/bin/php7/include" RANLIB=$RANLIB ./configure \
+	--prefix="$DIR/bin/php7" \
+	--disable-dependency-tracking \
+	--enable-static-shell=no \
+	$EXTRA_FLAGS \
+	$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
+	echo -n " compiling..."
+	make -j $THREADS >> "$DIR/install.log" 2>&1
+	echo -n " installing..."
+	make install >> "$DIR/install.log" 2>&1
+	cd ..
+	echo " done!"
+}
+
 if [ "$COMPILE_FANCY" == "yes" ]; then
 	build_readline
 else
@@ -735,6 +761,7 @@ fi
 
 build_libxml2
 build_libzip
+build_sqlite3
 
 # PECL libraries
 
@@ -898,6 +925,7 @@ RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS_LTO" LDFLA
 --with-yaml="$DIR/bin/php7" \
 --with-openssl="$DIR/bin/php7" \
 --with-libzip="$DIR/bin/php7" \
+--with-sqlite3="$DIR/bin/php7" \
 $HAS_LIBPNG \
 $HAS_LIBJPEG \
 $HAS_GD \
@@ -921,7 +949,7 @@ $HAS_POCKETMINE_CHUNKUTILS \
 --disable-session \
 --without-pear \
 --without-iconv \
---with-pdo-sqlite \
+--with-pdo-sqlite="$DIR/bin/php7" \
 --with-pdo-mysql \
 --with-pic \
 --enable-phar \
