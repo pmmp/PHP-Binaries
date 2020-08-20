@@ -544,6 +544,8 @@ function build_curl {
 	--disable-ldaps \
 	--without-libidn \
 	--without-libidn2 \
+	--without-brotli \
+	--without-nghttp2 \
 	--with-zlib="$DIR/bin/php7" \
 	--with-ssl="$DIR/bin/php7" \
 	--enable-threaded-resolver \
