@@ -364,6 +364,7 @@ export CXXFLAGS="$CFLAGS $CXXFLAGS"
 export LDFLAGS="$LDFLAGS"
 export CPPFLAGS="$CPPFLAGS"
 export LIBRARY_PATH="$DIR/bin/php7/lib:$LIBRARY_PATH"
+export PKG_CONFIG_PATH="$DIR/bin/php7/lib/pkgconfig"
 
 #some stuff (like curl) makes assumptions about library paths that break due to different behaviour in pkgconf vs pkg-config
 export PKG_CONFIG_ALLOW_SYSTEM_LIBS="yes"
@@ -487,7 +488,6 @@ function build_openssl {
 		local EXTRA_FLAGS="shared"
 	fi
 
-	export PKG_CONFIG_PATH="$DIR/bin/php7/lib/pkgconfig"
 	WITH_OPENSSL="--with-openssl=$DIR/bin/php7"
 	echo -n "[OpenSSL] downloading $OPENSSL_VERSION..."
 	download_file "http://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
