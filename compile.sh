@@ -12,8 +12,9 @@ LIBPNG_VERSION="1.6.37"
 LIBJPEG_VERSION="9d"
 OPENSSL_VERSION="1.1.1g"
 LIBZIP_VERSION="1.7.3"
+SQLITE3_VERSION="3330000" #3.33.0
 
-EXT_PTHREADS_VERSION="45579e1e622acd80f9c880f3a025ba3b98b8ebef"
+EXT_PTHREADS_VERSION="ab5e5db62a75c15e02cdbe095fd807bf79b3944c"
 EXT_YAML_VERSION="2.1.0"
 EXT_LEVELDB_VERSION="9bcae79f71b81a5c3ea6f67e45ae9ae9fb2775a5"
 EXT_CHUNKUTILS2_VERSION="318b63b48f6b557f34795eabcebced2bf767a1f0"
@@ -275,8 +276,7 @@ fi
 
 if [ "$DO_OPTIMIZE" != "no" ]; then
 	#FLAGS_LTO="-fvisibility=hidden -flto"
-	ffast_math="-fno-math-errno -funsafe-math-optimizations -fno-signed-zeros -fno-trapping-math -ffinite-math-only -fno-rounding-math -fno-signaling-nans" #workaround SQLite3 fail
-	CFLAGS="$CFLAGS -O2 -DSQLITE_HAVE_ISNAN $ffast_math -ftree-vectorize -fomit-frame-pointer -funswitch-loops -fivopts"
+	CFLAGS="$CFLAGS -O2 -ffast-math -ftree-vectorize -fomit-frame-pointer -funswitch-loops -fivopts"
 	if [ "$COMPILE_TARGET" != "mac" ] && [ "$COMPILE_TARGET" != "mac32" ] && [ "$COMPILE_TARGET" != "mac64" ]; then
 		CFLAGS="$CFLAGS -funsafe-loop-optimizations -fpredictive-commoning -ftracer -ftree-loop-im -frename-registers -fcx-limited-range"
 	fi
@@ -354,6 +354,7 @@ export CXXFLAGS="$CFLAGS $CXXFLAGS"
 export LDFLAGS="$LDFLAGS"
 export CPPFLAGS="$CPPFLAGS"
 export LIBRARY_PATH="$DIR/bin/php7/lib:$LIBRARY_PATH"
+export PKG_CONFIG_PATH="$DIR/bin/php7/lib/pkgconfig"
 
 #some stuff (like curl) makes assumptions about library paths that break due to different behaviour in pkgconf vs pkg-config
 export PKG_CONFIG_ALLOW_SYSTEM_LIBS="yes"
@@ -477,7 +478,6 @@ function build_openssl {
 		local EXTRA_FLAGS="shared"
 	fi
 
-	export PKG_CONFIG_PATH="$DIR/bin/php7/lib/pkgconfig"
 	WITH_OPENSSL="--with-openssl=$DIR/bin/php7"
 	echo -n "[OpenSSL] downloading $OPENSSL_VERSION..."
 	download_file "http://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
@@ -534,6 +534,8 @@ function build_curl {
 	--disable-ldaps \
 	--without-libidn \
 	--without-libidn2 \
+	--without-brotli \
+	--without-nghttp2 \
 	--with-zlib="$DIR/bin/php7" \
 	--with-ssl="$DIR/bin/php7" \
 	--enable-threaded-resolver \
@@ -697,6 +699,32 @@ function build_libzip {
 	echo " done!"
 }
 
+function build_sqlite3 {
+	if [ "$DO_STATIC" == "yes" ]; then
+		local EXTRA_FLAGS="--enable-static=yes --enable-shared=no"
+	else
+		local EXTRA_FLAGS="--enable-static=no --enable-shared=yes"
+	fi
+	#sqlite3
+	echo -n "[sqlite3] downloading $SQLITE3_VERSION..."
+	download_file "https://www.sqlite.org/2020/sqlite-autoconf-$SQLITE3_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv sqlite-autoconf-$SQLITE3_VERSION sqlite3 >> "$DIR/install.log" 2>&1
+	echo -n " checking..."
+	cd sqlite3
+	LDFLAGS="$LDFLAGS -L${DIR}/bin/php7/lib" CPPFLAGS="$CPPFLAGS -I${DIR}/bin/php7/include" RANLIB=$RANLIB ./configure \
+	--prefix="$DIR/bin/php7" \
+	--disable-dependency-tracking \
+	--enable-static-shell=no \
+	$EXTRA_FLAGS \
+	$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
+	echo -n " compiling..."
+	make -j $THREADS >> "$DIR/install.log" 2>&1
+	echo -n " installing..."
+	make install >> "$DIR/install.log" 2>&1
+	cd ..
+	echo " done!"
+}
+
 if [ "$COMPILE_FANCY" == "yes" ]; then
 	build_readline
 else
@@ -723,6 +751,7 @@ fi
 
 build_libxml2
 build_libzip
+build_sqlite3
 
 # PECL libraries
 
@@ -875,6 +904,7 @@ RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS_LTO" LDFLA
 --with-yaml="$DIR/bin/php7" \
 --with-openssl="$DIR/bin/php7" \
 --with-libzip="$DIR/bin/php7" \
+--with-sqlite3="$DIR/bin/php7" \
 $HAS_LIBPNG \
 $HAS_LIBJPEG \
 $HAS_GD \
@@ -898,7 +928,7 @@ $HAS_DEBUG \
 --disable-session \
 --without-pear \
 --without-iconv \
---with-pdo-sqlite \
+--with-pdo-sqlite="$DIR/bin/php7" \
 --with-pdo-mysql \
 --with-pic \
 --enable-phar \
@@ -937,26 +967,37 @@ make -j $THREADS >> "$DIR/install.log" 2>&1
 echo -n " installing..."
 make install >> "$DIR/install.log" 2>&1
 
-if [[ "$(uname -s)" == "Darwin" ]] && [[ "$IS_CROSSCOMPILE" != "yes" ]]; then
-	set +e
-	install_name_tool -delete_rpath "$DIR/bin/php7/lib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
-
-	IFS=$'\n' OTOOL_OUTPUT=($(otool -L "$DIR/bin/php7/bin/php"))
+function relativize_macos_library_paths {
+	IFS=$'\n' OTOOL_OUTPUT=($(otool -L "$1"))
 
 	for (( i=0; i<${#OTOOL_OUTPUT[@]}; i++ ))
 		do
 		CURRENT_DYLIB_NAME=$(echo ${OTOOL_OUTPUT[$i]} | sed 's# (compatibility version .*##' | xargs)
-		if [[ $CURRENT_DYLIB_NAME == "$DIR/bin/php7/lib/"*".dylib"* ]]; then
-			NEW_DYLIB_NAME=$(echo "$CURRENT_DYLIB_NAME" | sed "s{$DIR/bin/php7/lib{@loader_path/../lib{" | xargs)
-			install_name_tool -change "$CURRENT_DYLIB_NAME" "$NEW_DYLIB_NAME" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
+		if [[ "$CURRENT_DYLIB_NAME" == "$DIR/bin/php7/"* ]]; then
+			NEW_DYLIB_NAME=$(echo "$CURRENT_DYLIB_NAME" | sed "s{$DIR/bin/php7{@loader_path/..{" | xargs)
+			install_name_tool -change "$CURRENT_DYLIB_NAME" "$NEW_DYLIB_NAME" "$1" >> "$DIR/install.log" 2>&1
+		elif [[ "$CURRENT_DYLIB_NAME" != "/usr/lib/"* ]] && [[ "$CURRENT_DYLIB_NAME" != "/System/"* ]] && [[ "$CURRENT_DYLIB_NAME" != "@loader_path"* ]] && [[ "$CURRENT_DYLIB_NAME" != "@rpath"* ]]; then
+			echo "[ERROR] Detected linkage to non-local non-system library $CURRENT_DYLIB_NAME by $1"
+			exit 1
 		fi
 	done
+}
 
-	install_name_tool -change "$DIR/bin/php7/lib/libssl.1.0.0.dylib" "@loader_path/../lib/libssl.1.0.0.dylib" "$DIR/bin/php7/lib/libcurl.4.dylib" >> "$DIR/install.log" 2>&1
-	install_name_tool -change "$DIR/bin/php7/lib/libcrypto.1.0.0.dylib" "@loader_path/../lib/libcrypto.1.0.0.dylib" "$DIR/bin/php7/lib/libcurl.4.dylib" >> "$DIR/install.log" 2>&1
-	chmod 0777 "$DIR/bin/php7/lib/libssl.1.0.0.dylib" >> "$DIR/install.log" 2>&1
-	install_name_tool -change "$DIR/bin/php7/lib/libcrypto.1.0.0.dylib" "@loader_path/libcrypto.1.0.0.dylib" "$DIR/bin/php7/lib/libssl.1.0.0.dylib" >> "$DIR/install.log" 2>&1
-	chmod 0755 "$DIR/bin/php7/lib/libssl.1.0.0.dylib" >> "$DIR/install.log" 2>&1
+function relativize_macos_all_libraries_paths {
+	set +e
+	for _library in $(ls "$DIR/bin/php7/lib/"*".dylib"); do
+		relativize_macos_library_paths "$_library"
+	done
+	set -e
+}
+
+if [[ "$(uname -s)" == "Darwin" ]] && [[ "$IS_CROSSCOMPILE" != "yes" ]]; then
+	set +e
+	install_name_tool -delete_rpath "$DIR/bin/php7/lib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
+
+	relativize_macos_library_paths "$DIR/bin/php7/bin/php"
+
+	relativize_macos_all_libraries_paths
 	set -e
 fi
 
