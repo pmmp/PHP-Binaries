@@ -14,7 +14,7 @@ OPENSSL_VERSION="1.1.1g"
 LIBZIP_VERSION="1.7.3"
 SQLITE3_VERSION="3330000" #3.33.0
 
-EXT_PTHREADS_VERSION="e0f514dfde01c5e7e9cf94c43615918af482a45c"
+EXT_PTHREADS_VERSION="130d29d5fd5ba7210fd577660fc6d57f39f3974a"
 EXT_YAML_VERSION="2.1.0"
 EXT_LEVELDB_VERSION="f4ed9f57ee99ddbfe86439fb361cf52cc9676225"
 EXT_POCKETMINE_CHUNKUTILS_VERSION="master"
@@ -544,6 +544,8 @@ function build_curl {
 	--disable-ldaps \
 	--without-libidn \
 	--without-libidn2 \
+	--without-brotli \
+	--without-nghttp2 \
 	--with-zlib="$DIR/bin/php7" \
 	--with-ssl="$DIR/bin/php7" \
 	--enable-threaded-resolver \
@@ -987,26 +989,37 @@ make -j $THREADS >> "$DIR/install.log" 2>&1
 echo -n " installing..."
 make install >> "$DIR/install.log" 2>&1
 
-if [[ "$(uname -s)" == "Darwin" ]] && [[ "$IS_CROSSCOMPILE" != "yes" ]]; then
-	set +e
-	install_name_tool -delete_rpath "$DIR/bin/php7/lib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
-
-	IFS=$'\n' OTOOL_OUTPUT=($(otool -L "$DIR/bin/php7/bin/php"))
+function relativize_macos_library_paths {
+	IFS=$'\n' OTOOL_OUTPUT=($(otool -L "$1"))
 
 	for (( i=0; i<${#OTOOL_OUTPUT[@]}; i++ ))
 		do
 		CURRENT_DYLIB_NAME=$(echo ${OTOOL_OUTPUT[$i]} | sed 's# (compatibility version .*##' | xargs)
-		if [[ $CURRENT_DYLIB_NAME == "$DIR/bin/php7/lib/"*".dylib"* ]]; then
-			NEW_DYLIB_NAME=$(echo "$CURRENT_DYLIB_NAME" | sed "s{$DIR/bin/php7/lib{@loader_path/../lib{" | xargs)
-			install_name_tool -change "$CURRENT_DYLIB_NAME" "$NEW_DYLIB_NAME" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
+		if [[ "$CURRENT_DYLIB_NAME" == "$DIR/bin/php7/"* ]]; then
+			NEW_DYLIB_NAME=$(echo "$CURRENT_DYLIB_NAME" | sed "s{$DIR/bin/php7{@loader_path/..{" | xargs)
+			install_name_tool -change "$CURRENT_DYLIB_NAME" "$NEW_DYLIB_NAME" "$1" >> "$DIR/install.log" 2>&1
+		elif [[ "$CURRENT_DYLIB_NAME" != "/usr/lib/"* ]] && [[ "$CURRENT_DYLIB_NAME" != "/System/"* ]] && [[ "$CURRENT_DYLIB_NAME" != "@loader_path"* ]] && [[ "$CURRENT_DYLIB_NAME" != "@rpath"* ]]; then
+			echo "[ERROR] Detected linkage to non-local non-system library $CURRENT_DYLIB_NAME by $1"
+			exit 1
 		fi
 	done
+}
 
-	install_name_tool -change "$DIR/bin/php7/lib/libssl.1.0.0.dylib" "@loader_path/../lib/libssl.1.0.0.dylib" "$DIR/bin/php7/lib/libcurl.4.dylib" >> "$DIR/install.log" 2>&1
-	install_name_tool -change "$DIR/bin/php7/lib/libcrypto.1.0.0.dylib" "@loader_path/../lib/libcrypto.1.0.0.dylib" "$DIR/bin/php7/lib/libcurl.4.dylib" >> "$DIR/install.log" 2>&1
-	chmod 0777 "$DIR/bin/php7/lib/libssl.1.0.0.dylib" >> "$DIR/install.log" 2>&1
-	install_name_tool -change "$DIR/bin/php7/lib/libcrypto.1.0.0.dylib" "@loader_path/libcrypto.1.0.0.dylib" "$DIR/bin/php7/lib/libssl.1.0.0.dylib" >> "$DIR/install.log" 2>&1
-	chmod 0755 "$DIR/bin/php7/lib/libssl.1.0.0.dylib" >> "$DIR/install.log" 2>&1
+function relativize_macos_all_libraries_paths {
+	set +e
+	for _library in $(ls "$DIR/bin/php7/lib/"*".dylib"); do
+		relativize_macos_library_paths "$_library"
+	done
+	set -e
+}
+
+if [[ "$(uname -s)" == "Darwin" ]] && [[ "$IS_CROSSCOMPILE" != "yes" ]]; then
+	set +e
+	install_name_tool -delete_rpath "$DIR/bin/php7/lib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
+
+	relativize_macos_library_paths "$DIR/bin/php7/bin/php"
+
+	relativize_macos_all_libraries_paths
 	set -e
 fi
 
