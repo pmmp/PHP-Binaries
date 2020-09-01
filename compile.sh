@@ -706,6 +706,8 @@ function build_libzip {
 	mv libzip-$LIBZIP_VERSION libzip >> "$DIR/install.log" 2>&1
 	echo -n " checking..."
 	cd libzip
+
+	#we're using OpenSSL for crypto
 	cmake . \
 		-DCMAKE_PREFIX_PATH="$DIR/bin/php7" \
 		-DCMAKE_INSTALL_PREFIX="$DIR/bin/php7" \
@@ -716,7 +718,11 @@ function build_libzip {
 		-DBUILD_EXAMPLES=OFF \
 		-DBUILD_DOC=OFF \
 		-DENABLE_BZIP2=OFF \
-		-DENABLE_LZMA=OFF >> "$DIR/install.log" 2>&1
+		-DENABLE_COMMONCRYPTO=OFF \
+		-DENABLE_GNUTLS=OFF \
+		-DENABLE_MBEDTLS=OFF \
+		-DENABLE_LZMA=OFF \
+		-DENABLE_ZSTD=OFF >> "$DIR/install.log" 2>&1
 	echo -n " compiling..."
 	make -j $THREADS >> "$DIR/install.log" 2>&1
 	echo -n " installing..."
