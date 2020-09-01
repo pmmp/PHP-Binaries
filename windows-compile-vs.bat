@@ -3,28 +3,30 @@
 REM For future users: This file MUST have CRLF line endings. If it doesn't, lots of inexplicable undesirable strange behaviour will result.
 REM Also: Don't modify this version with sed, or it will screw up your line endings.
 set PHP_MAJOR_VER=7.3
-set PHP_VER=%PHP_MAJOR_VER%.21
+set PHP_VER=%PHP_MAJOR_VER%.22
 set PHP_IS_BETA="no"
 set PHP_SDK_VER=2.2.0
 set PATH=C:\Program Files\7-Zip;C:\Program Files (x86)\GnuWin32\bin;%PATH%
 set VC_VER=vc15
 set ARCH=x64
-set CMAKE_TARGET=Visual Studio 15 2017
+set VS_VER=
+set VS_YEAR=
+set CMAKE_TARGET=
 if "%PHP_DEBUG_BUILD%"=="" (
 	set PHP_DEBUG_BUILD=0
 )
 
 set LIBYAML_VER=0.2.5
 set PTHREAD_W32_VER=3.0.0
-set LEVELDB_MCPE_VER=10f59b56bec1db3ffe42ff265afe22182073e0e2
+set LEVELDB_MCPE_VER=84348b9b826cc280cde659185695d2170b54824c
 
-set PHP_PTHREADS_VER=ab5e5db62a75c15e02cdbe095fd807bf79b3944c
+set PHP_PTHREADS_VER=d644826b5c70f24e5f77fc35554f86096575475a
 set PHP_YAML_VER=2.1.0
 set PHP_CHUNKUTILS2_VER=318b63b48f6b557f34795eabcebced2bf767a1f0
 set PHP_IGBINARY_VER=3.1.4
 REM this is 1.2.9 but tags with a "v" prefix are a pain in the ass
 set PHP_DS_VER=2ddef84d3e9391c37599cb716592184315e23921
-set PHP_LEVELDB_VER=9bcae79f71b81a5c3ea6f67e45ae9ae9fb2775a5
+set PHP_LEVELDB_VER=2e3f740b55af1eb6dfc648dd451bcb7d6151c26c
 set PHP_CRYPTO_VER=5f26ac91b0ba96742cc6284cd00f8db69c3788b2
 set PHP_RECURSIONGUARD_VER=d6ed5da49178762ed81dc0184cd34ff4d3254720
 
@@ -57,16 +59,15 @@ if "%SOURCES_PATH%"=="" (
 )
 call :pm-echo "Using path %SOURCES_PATH% for build sources"
 
-if not exist "C:\Program Files (x86)\Microsoft Visual Studio\2017" (
-	REM TODO: technically we only need the VS2017 toolset but some other stuff breaks
-	call :pm-fatal-error "Visual Studio 2017 is required"
-)
+call :check-vs-exists 2017 15 || call :check-vs-exists 2019 16 || call :pm-fatal-error "Please install Visual Studio 2017 or 2019"
 
 REM export an env var to override this if you're using something other than the community edition
 if "%VS_EDITION%"=="" (
 	set VS_EDITION=Community
 )
-call "C:\Program Files (x86)\Microsoft Visual Studio\2017\%VS_EDITION%\VC\Auxiliary\Build\vcvarsall.bat" %ARCH% >>"%log_file%" 2>&1 || call :pm-fatal-error "Error initializing Visual Studio environment"
+call "C:\Program Files (x86)\Microsoft Visual Studio\%VS_YEAR%\%VS_EDITION%\VC\Auxiliary\Build\vcvarsall.bat" %ARCH% -vcvars_ver=14.16 >>"%log_file%" 2>&1 || call :pm-fatal-error "Error initializing Visual Studio environment"
+:batchfiles-are-stupid
+move "%log_file%" "%log_file%" >nul 2>nul || goto :batchfiles-are-stupid
 
 cd /D "%outpath%"
 
@@ -144,20 +145,25 @@ copy pthreadVC3.pdb "%DEPS_DIR%\bin\pthreadVC3.pdb" >>"%log_file%" 2>&1 || exit 
 
 cd /D "%DEPS_DIR%"
 
-call :pm-echo "Downloading leveldb-mcpe version %LEVELDB_MCPE_VER%..."
-call :get-zip https://github.com/pmmp/leveldb-mcpe/archive/%LEVELDB_MCPE_VER%.zip || exit 1
-move leveldb-mcpe-%LEVELDB_MCPE_VER% leveldb >>"%log_file%" 2>&1
+call :pm-echo "Downloading pmmp/leveldb version %LEVELDB_MCPE_VER%..."
+call :get-zip https://github.com/pmmp/leveldb/archive/%LEVELDB_MCPE_VER%.zip || exit 1
+move leveldb-%LEVELDB_MCPE_VER% leveldb >>"%log_file%" 2>&1
 cd /D leveldb
 
-call :pm-echo "Compiling..."
-msbuild leveldb.sln /p:Configuration=Release /p:ZlibIncludePath="%DEPS_DIR%\include" /p:ZlibLibPath="%DEPS_DIR%\lib\zlib_a.lib" /m >>"%log_file%" 2>&1 || exit 1
-call :pm-echo "Copying files..."
-mkdir "%DEPS_DIR%\include\leveldb" >>"%log_file%" 2>&1 || exit 1
-xcopy include\leveldb %DEPS_DIR%\include\leveldb >>"%log_file%" 2>&1 || exit 1
-
-copy x64\Release\leveldb.lib "%DEPS_DIR%\lib\leveldb.lib" >>"%log_file%" 2>&1
-copy x64\Release\leveldb.dll "%DEPS_DIR%\bin\leveldb.dll" >>"%log_file%" 2>&1
-copy x64\Release\leveldb.pdb "%DEPS_DIR%\bin\leveldb.pdb" >>"%log_file%" 2>&1
+call :pm-echo "Generating build configuration..."
+cmake -G "%CMAKE_TARGET%" -A "%ARCH%"^
+ -DCMAKE_PREFIX_PATH="%DEPS_DIR%"^
+ -DCMAKE_INSTALL_PREFIX="%DEPS_DIR%"^
+ -DBUILD_SHARED_LIBS=ON^
+ -DLEVELDB_BUILD_BENCHMARKS=OFF^
+ -DLEVELDB_BUILD_TESTS=OFF^
+ -DZLIB_LIBRARY="%DEPS_DIR%\lib\zlib_a.lib"^
+ . >>"%log_file%" 2>&1 || exit 1
+call :pm-echo "Compiling"
+msbuild ALL_BUILD.vcxproj /p:Configuration=RelWithDebInfo /m >>"%log_file%" 2>&1 || exit 1
+call :pm-echo "Installing files..."
+msbuild INSTALL.vcxproj /p:Configuration=RelWithDebInfo >>"%log_file%" 2>&1 || exit 1
+copy RelWithDebInfo\leveldb.pdb "%DEPS_DIR%\bin\leveldb.pdb" >>"%log_file%" 2>&1 || exit 1
 
 cd /D "%DEPS_DIR%"
 
@@ -171,7 +177,7 @@ call :get-extension-zip-from-github "yaml"                  "%PHP_YAML_VER%"    
 call :get-extension-zip-from-github "chunkutils2"           "%PHP_CHUNKUTILS2_VER%"           "pmmp"     "ext-chunkutils2"         || exit 1
 call :get-extension-zip-from-github "igbinary"              "%PHP_IGBINARY_VER%"              "igbinary" "igbinary"                || exit 1
 call :get-extension-zip-from-github "ds"                    "%PHP_DS_VER%"                    "php-ds"   "ext-ds"                  || exit 1
-call :get-extension-zip-from-github "leveldb"               "%PHP_LEVELDB_VER%"               "reeze"    "php-leveldb"             || exit 1
+call :get-extension-zip-from-github "leveldb"               "%PHP_LEVELDB_VER%"               "pmmp"     "php-leveldb"             || exit 1
 call :get-extension-zip-from-github "recursionguard"        "%PHP_RECURSIONGUARD_VER%"        "pmmp"     "ext-recursionguard"      || exit 1
 
 call :pm-echo " - crypto: downloading %PHP_CRYPTO_VER%..."
@@ -316,6 +322,20 @@ move "%SOURCES_PATH%\php-src\%ARCH%\%OUT_PATH_REL%_TS\php-debug-pack*.zip" .
 call :pm-echo "Done?"
 
 exit 0
+
+:check-vs-exists
+if exist "C:\Program Files (x86)\Microsoft Visual Studio\%~1" (
+    set VS_VER=%~2
+    set VS_YEAR=%~1
+    set CMAKE_TARGET=Visual Studio %~2 %~1
+    call :pm-echo "Found Visual Studio %~1"
+    exit /B 0
+) else (
+    call :pm-echo "DID NOT FIND VS %~1"
+    set VS_VER=
+    set VS_YEAR=
+    exit /B 1
+)
 
 :get-extension-zip-from-github:
 call :pm-echo " - %~1: downloading %~2..."
