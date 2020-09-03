@@ -1,5 +1,5 @@
 #!/bin/bash
-[ -z "$PHP_VERSION" ] && PHP_VERSION="7.3.22"
+[ -z "$PHP_VERSION" ] && PHP_VERSION="7.4.10"
 
 ZLIB_VERSION="1.2.11"
 GMP_VERSION="6.2.0"
@@ -14,7 +14,7 @@ OPENSSL_VERSION="1.1.1g"
 LIBZIP_VERSION="1.7.3"
 SQLITE3_VERSION="3330000" #3.33.0
 
-EXT_PTHREADS_VERSION="a5702f59e0a1f4e31fd9b5963bc74132033b5cb3"
+EXT_PTHREADS_VERSION="d644826b5c70f24e5f77fc35554f86096575475a"
 EXT_YAML_VERSION="2.1.0"
 EXT_LEVELDB_VERSION="2e3f740b55af1eb6dfc648dd451bcb7d6151c26c"
 EXT_POCKETMINE_CHUNKUTILS_VERSION="master"
@@ -43,7 +43,7 @@ date > "$DIR/install.log" 2>&1
 uname -a >> "$DIR/install.log" 2>&1
 echo "[INFO] Checking dependencies"
 
-COMPILE_SH_DEPENDENCIES=( make autoconf automake m4 getconf gzip bzip2 bison g++ git cmake pkg-config)
+COMPILE_SH_DEPENDENCIES=( make autoconf automake m4 getconf gzip bzip2 bison g++ git cmake pkg-config re2c)
 ERRORS=0
 for(( i=0; i<${#COMPILE_SH_DEPENDENCIES[@]}; i++ ))
 do
@@ -942,14 +942,13 @@ fi
 
 RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS_LTO" LDFLAGS="$LDFLAGS $FLAGS_LTO" ./configure $PHP_OPTIMIZATION --prefix="$DIR/bin/php7" \
 --exec-prefix="$DIR/bin/php7" \
---with-curl="$DIR/bin/php7" \
---with-zlib="$DIR/bin/php7" \
---with-zlib-dir="$DIR/bin/php7" \
---with-gmp="$DIR/bin/php7" \
---with-yaml="$DIR/bin/php7" \
---with-openssl="$DIR/bin/php7" \
---with-libzip="$DIR/bin/php7" \
---with-sqlite3="$DIR/bin/php7" \
+--with-curl \
+--with-zlib \
+--with-zlib \
+--with-gmp \
+--with-yaml \
+--with-openssl \
+--with-zip \
 $HAS_LIBPNG \
 $HAS_LIBJPEG \
 $HAS_GD \
@@ -959,10 +958,11 @@ $HAS_PROFILER \
 $HAS_DEBUG \
 $HAS_POCKETMINE_CHUNKUTILS \
 --enable-mbstring \
+--disable-mbregex \
 --enable-calendar \
 --enable-pthreads \
 --disable-fileinfo \
---with-libxml-dir="$DIR/bin/php7" \
+--with-libxml \
 --enable-xml \
 --enable-dom \
 --enable-simplexml \
@@ -973,7 +973,7 @@ $HAS_POCKETMINE_CHUNKUTILS \
 --disable-session \
 --without-pear \
 --without-iconv \
---with-pdo-sqlite="$DIR/bin/php7" \
+--with-pdo-sqlite \
 --with-pdo-mysql \
 --with-pic \
 --enable-phar \
@@ -988,7 +988,6 @@ $HAVE_PCNTL \
 $HAVE_MYSQLI \
 --enable-bcmath \
 --enable-cli \
---enable-zip \
 --enable-ftp \
 --enable-opcache=$HAVE_OPCACHE \
 --enable-igbinary \
