@@ -1,5 +1,5 @@
 #!/bin/bash
-[ -z "$PHP_VERSION" ] && PHP_VERSION="7.3.22"
+[ -z "$PHP_VERSION" ] && PHP_VERSION="7.4.10"
 
 ZLIB_VERSION="1.2.11"
 GMP_VERSION="6.2.0"
@@ -43,7 +43,7 @@ date > "$DIR/install.log" 2>&1
 uname -a >> "$DIR/install.log" 2>&1
 echo "[INFO] Checking dependencies"
 
-COMPILE_SH_DEPENDENCIES=( make autoconf automake m4 getconf gzip bzip2 bison g++ git cmake pkg-config)
+COMPILE_SH_DEPENDENCIES=( make autoconf automake m4 getconf gzip bzip2 bison g++ git cmake pkg-config re2c)
 ERRORS=0
 for(( i=0; i<${#COMPILE_SH_DEPENDENCIES[@]}; i++ ))
 do
@@ -919,14 +919,13 @@ fi
 
 RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS_LTO" LDFLAGS="$LDFLAGS $FLAGS_LTO" ./configure $PHP_OPTIMIZATION --prefix="$DIR/bin/php7" \
 --exec-prefix="$DIR/bin/php7" \
---with-curl="$DIR/bin/php7" \
---with-zlib="$DIR/bin/php7" \
---with-zlib-dir="$DIR/bin/php7" \
---with-gmp="$DIR/bin/php7" \
---with-yaml="$DIR/bin/php7" \
---with-openssl="$DIR/bin/php7" \
---with-libzip="$DIR/bin/php7" \
---with-sqlite3="$DIR/bin/php7" \
+--with-curl \
+--with-zlib \
+--with-zlib \
+--with-gmp \
+--with-yaml \
+--with-openssl \
+--with-zip \
 $HAS_LIBPNG \
 $HAS_LIBJPEG \
 $HAS_GD \
@@ -936,10 +935,11 @@ $HAS_PROFILER \
 $HAS_DEBUG \
 --enable-chunkutils2 \
 --enable-mbstring \
+--disable-mbregex \
 --enable-calendar \
 --enable-pthreads \
 --disable-fileinfo \
---with-libxml-dir="$DIR/bin/php7" \
+--with-libxml \
 --enable-xml \
 --enable-dom \
 --enable-simplexml \
@@ -950,7 +950,7 @@ $HAS_DEBUG \
 --disable-session \
 --without-pear \
 --without-iconv \
---with-pdo-sqlite="$DIR/bin/php7" \
+--with-pdo-sqlite \
 --with-pdo-mysql \
 --with-pic \
 --enable-phar \
@@ -965,7 +965,6 @@ $HAVE_PCNTL \
 $HAVE_MYSQLI \
 --enable-bcmath \
 --enable-cli \
---enable-zip \
 --enable-ftp \
 --enable-opcache=$HAVE_OPCACHE \
 --enable-igbinary \
