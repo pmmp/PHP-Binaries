@@ -100,7 +100,7 @@ function download_file {
 #fi
 
 COMPILE_FOR_ANDROID=no
-HAVE_MYSQLI="--enable-embedded-mysqli --enable-mysqlnd --with-mysqli=mysqlnd"
+HAVE_MYSQLI="--enable-mysqlnd --with-mysqli=mysqlnd"
 COMPILE_TARGET=""
 COMPILE_FANCY="no"
 IS_CROSSCOMPILE="no"
@@ -762,12 +762,10 @@ build_leveldb
 if [ "$COMPILE_GD" == "yes" ]; then
 	build_libpng
 	build_libjpeg
-	HAS_GD="--with-gd"
-	HAS_LIBPNG="--with-png-dir=${DIR}/bin/php7"
-	HAS_LIBJPEG="--with-jpeg-dir=${DIR}/bin/php7"
+	HAS_GD="--enable-gd"
+	HAS_LIBJPEG="--with-jpeg"
 else
 	HAS_GD=""
-	HAS_LIBPNG=""
 	HAS_LIBJPEG=""
 fi
 
@@ -926,7 +924,6 @@ RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS_LTO" LDFLA
 --with-yaml \
 --with-openssl \
 --with-zip \
-$HAS_LIBPNG \
 $HAS_LIBJPEG \
 $HAS_GD \
 $HAVE_READLINE \
