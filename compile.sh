@@ -100,7 +100,7 @@ function download_file {
 #fi
 
 COMPILE_FOR_ANDROID=no
-HAVE_MYSQLI="--enable-embedded-mysqli --enable-mysqlnd --with-mysqli=mysqlnd"
+HAVE_MYSQLI="--enable-mysqlnd --with-mysqli=mysqlnd"
 COMPILE_TARGET=""
 COMPILE_FANCY="no"
 IS_CROSSCOMPILE="no"
