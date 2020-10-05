@@ -32,6 +32,13 @@ function write_error {
 	write_out ERROR "$1" >&2
 }
 
+function interactive_exit {
+	if [[ $PS1 ]] && [[ $- == *i* ]]; then
+		read -p "Press [Enter] to continue..."
+	fi
+	exit 1
+}
+
 echo "[PocketMine] PHP compiler for Linux, MacOS and Android"
 DIR="$(pwd)"
 BASE_BUILD_DIR="$DIR/install_data"
@@ -63,8 +70,7 @@ else
 fi
 
 if [ $ERRORS -ne 0 ]; then
-	read -p "Press [Enter] to continue..."
-	exit 1
+	interactive_exit
 fi
 
 #Needed to use aliases
@@ -306,7 +312,7 @@ echo "return 0;" >> test.c
 echo "}" >> test.c
 
 
-type $CC >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"$CC\""; read -p "Press [Enter] to continue..."; exit 1; }
+type $CC >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"$CC\""; interactive_exit; }
 
 [ -z "$THREADS" ] && THREADS=1;
 [ -z "$march" ] && march=native;
