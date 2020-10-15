@@ -761,6 +761,8 @@ function build_libdeflate {
 		rm "$DIR/bin/php7/lib/libdeflate.so"*
 	else
 		rm "$DIR/bin/php7/lib/libdeflate.a"
+		#libdeflate makefile doesn't set this correctly
+		install_name_tool -id "$DIR/bin/php7/lib/libdeflate.0.dylib" "$DIR/bin/php7/lib/libdeflate.0.dylib"
 	fi
 	cd ..
 	echo " done!"
