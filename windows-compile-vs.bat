@@ -29,6 +29,7 @@ set PHP_DS_VER=2ddef84d3e9391c37599cb716592184315e23921
 set PHP_LEVELDB_VER=2e3f740b55af1eb6dfc648dd451bcb7d6151c26c
 set PHP_CRYPTO_VER=5f26ac91b0ba96742cc6284cd00f8db69c3788b2
 set PHP_RECURSIONGUARD_VER=d6ed5da49178762ed81dc0184cd34ff4d3254720
+set PHP_MORTON_VER=0.1.0
 
 set script_path=%~dp0
 set log_file=%script_path%compile.log
@@ -179,6 +180,7 @@ call :get-extension-zip-from-github "igbinary"              "%PHP_IGBINARY_VER%"
 call :get-extension-zip-from-github "ds"                    "%PHP_DS_VER%"                    "php-ds"   "ext-ds"                  || exit 1
 call :get-extension-zip-from-github "leveldb"               "%PHP_LEVELDB_VER%"               "pmmp"     "php-leveldb"             || exit 1
 call :get-extension-zip-from-github "recursionguard"        "%PHP_RECURSIONGUARD_VER%"        "pmmp"     "ext-recursionguard"      || exit 1
+call :get-extension-zip-from-github "morton"                "%PHP_MORTON_VER%"                "pmmp"     "ext-morton"              || exit 1
 
 call :pm-echo " - crypto: downloading %PHP_CRYPTO_VER%..."
 git clone https://github.com/bukka/php-crypto.git crypto >>"%log_file%" 2>&1 || exit 1
@@ -214,6 +216,7 @@ call configure^
  --enable-igbinary=shared^
  --enable-json^
  --enable-mbstring^
+ --enable-morton^
  --enable-opcache^
  --enable-phar^
  --enable-recursionguard=shared^
