@@ -19,6 +19,7 @@ if "%PHP_DEBUG_BUILD%"=="" (
 set LIBYAML_VER=0.2.5
 set PTHREAD_W32_VER=3.0.0
 set LEVELDB_MCPE_VER=84348b9b826cc280cde659185695d2170b54824c
+set LIBDEFLATE_VER=448e3f3b042219bccb0080e393ba3eb68c2091d5
 
 set PHP_PTHREADS_VER=6f56da9ea201ce76464f208ab8f90d6ff7148429
 set PHP_YAML_VER=2.1.0
@@ -30,6 +31,7 @@ set PHP_LEVELDB_VER=2e3f740b55af1eb6dfc648dd451bcb7d6151c26c
 set PHP_CRYPTO_VER=5f26ac91b0ba96742cc6284cd00f8db69c3788b2
 set PHP_RECURSIONGUARD_VER=d6ed5da49178762ed81dc0184cd34ff4d3254720
 set PHP_MORTON_VER=0.1.1
+set PHP_LIBDEFLATE_VER=be5367c81c61c612271377cdae9ffacac0f6e53a
 
 set script_path=%~dp0
 set log_file=%script_path%compile.log
@@ -168,6 +170,20 @@ copy RelWithDebInfo\leveldb.pdb "%DEPS_DIR%\bin\leveldb.pdb" >>"%log_file%" 2>&1
 
 cd /D "%DEPS_DIR%"
 
+call :pm-echo "Downloading libdeflate version %LIBDEFLATE_VER%..."
+call :get-zip https://github.com/ebiggers/libdeflate/archive/%LIBDEFLATE_VER%.zip || exit 1
+move libdeflate-%LIBDEFLATE_VER% libdeflate >>"%log_file%" 2>&1
+cd /D libdeflate
+
+call :pm-echo "Compiling..."
+nmake /f Makefile.msc >>"%log_file%" 2>&1 || exit 1
+call :pm-echo "Copying files..."
+copy libdeflate.dll "%DEPS_DIR%\bin\libdeflate.dll" >>"%log_file%" 2>&1 || exit 1
+copy libdeflate.lib "%DEPS_DIR%\lib\libdeflate.lib" >>"%log_file%" 2>&1 || exit 1
+copy libdeflate.h "%DEPS_DIR%\include\libdeflate.h" >>"%log_file%" 2>&1 || exit 1
+
+cd /D "%DEPS_DIR%"
+
 cd /D ..
 
 call :pm-echo "Getting additional PHP extensions..."
@@ -181,6 +197,7 @@ call :get-extension-zip-from-github "ds"                    "%PHP_DS_VER%"      
 call :get-extension-zip-from-github "leveldb"               "%PHP_LEVELDB_VER%"               "pmmp"     "php-leveldb"             || exit 1
 call :get-extension-zip-from-github "recursionguard"        "%PHP_RECURSIONGUARD_VER%"        "pmmp"     "ext-recursionguard"      || exit 1
 call :get-extension-zip-from-github "morton"                "%PHP_MORTON_VER%"                "pmmp"     "ext-morton"              || exit 1
+call :get-extension-zip-from-github "libdeflate"            "%PHP_LIBDEFLATE_VER%"            "pmmp"     "ext-libdeflate"          || exit 1
 
 call :pm-echo " - crypto: downloading %PHP_CRYPTO_VER%..."
 git clone https://github.com/bukka/php-crypto.git crypto >>"%log_file%" 2>&1 || exit 1
@@ -234,6 +251,7 @@ call configure^
  --with-gmp^
  --with-iconv^
  --with-leveldb=shared^
+ --with-libdeflate=shared^
  --with-libxml^
  --with-mysqli=shared^
  --with-mysqlnd^
@@ -286,6 +304,7 @@ call :pm-echo "Generating php.ini..."
 (echo extension=php_ds.dll)>>"%php_ini%"
 (echo extension=php_leveldb.dll)>>"%php_ini%"
 (echo extension=php_crypto.dll)>>"%php_ini%"
+(echo extension=php_libdeflate.dll)>>"%php_ini%
 (echo igbinary.compact_strings=0)>>"%php_ini%"
 (echo zend_extension=php_opcache.dll)>>"%php_ini%"
 (echo opcache.enable=1)>>"%php_ini%"
