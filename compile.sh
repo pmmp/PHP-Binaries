@@ -1,5 +1,5 @@
 #!/bin/bash
-[ -z "$PHP_VERSION" ] && PHP_VERSION="7.4.11"
+[ -z "$PHP_VERSION" ] && PHP_VERSION="7.4.13"
 
 ZLIB_VERSION="1.2.11"
 GMP_VERSION="6.2.0"
@@ -25,6 +25,7 @@ EXT_DS_VERSION="2ddef84d3e9391c37599cb716592184315e23921"
 EXT_CRYPTO_VERSION="5f26ac91b0ba96742cc6284cd00f8db69c3788b2"
 EXT_RECURSIONGUARD_VERSION="d6ed5da49178762ed81dc0184cd34ff4d3254720"
 EXT_LIBDEFLATE_VERSION="be5367c81c61c612271377cdae9ffacac0f6e53a"
+EXT_MORTON_VERSION="0.1.1"
 
 function write_out {
 	echo "[$1] $2"
@@ -65,7 +66,6 @@ else
 fi
 
 if [ $ERRORS -ne 0 ]; then
-	read -p "Press [Enter] to continue..."
 	exit 1
 fi
 
@@ -308,7 +308,7 @@ echo "return 0;" >> test.c
 echo "}" >> test.c
 
 
-type $CC >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"$CC\""; read -p "Press [Enter] to continue..."; exit 1; }
+type $CC >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"$CC\""; exit 1; }
 
 [ -z "$THREADS" ] && THREADS=1;
 [ -z "$march" ] && march=native;
@@ -594,6 +594,7 @@ function build_leveldb {
 	cmake . \
 		-DCMAKE_INSTALL_PREFIX="$DIR/bin/php7" \
 		-DCMAKE_PREFIX_PATH="$DIR/bin/php7" \
+		-DCMAKE_INSTALL_LIBDIR=lib \
 		-DLEVELDB_BUILD_TESTS=OFF \
 		-DLEVELDB_BUILD_BENCHMARKS=OFF \
 		-DLEVELDB_SNAPPY=OFF \
@@ -865,6 +866,8 @@ get_github_extension "chunkutils2" "$EXT_CHUNKUTILS2_VERSION" "pmmp" "ext-chunku
 
 get_github_extension "libdeflate" "$EXT_LIBDEFLATE_VERSION" "pmmp" "ext-libdeflate"
 
+get_github_extension "morton" "$EXT_MORTON_VERSION" "pmmp" "ext-morton"
+
 echo -n "[PHP]"
 
 if [ "$DO_OPTIMIZE" != "no" ]; then
@@ -957,6 +960,7 @@ $HAVE_READLINE \
 $HAS_PROFILER \
 $HAS_DEBUG \
 --enable-chunkutils2 \
+--enable-morton \
 --enable-mbstring \
 --disable-mbregex \
 --enable-calendar \
