@@ -13,6 +13,7 @@ LIBJPEG_VERSION="9d"
 OPENSSL_VERSION="1.1.1g"
 LIBZIP_VERSION="1.7.3"
 SQLITE3_VERSION="3330000" #3.33.0
+LIBDEFLATE_VERSION="448e3f3b042219bccb0080e393ba3eb68c2091d5" #1.7
 
 EXT_PTHREADS_VERSION="6f56da9ea201ce76464f208ab8f90d6ff7148429"
 EXT_YAML_VERSION="2.1.0"
@@ -23,6 +24,7 @@ EXT_IGBINARY_VERSION="3.1.4"
 EXT_DS_VERSION="2ddef84d3e9391c37599cb716592184315e23921"
 EXT_CRYPTO_VERSION="5f26ac91b0ba96742cc6284cd00f8db69c3788b2"
 EXT_RECURSIONGUARD_VERSION="d6ed5da49178762ed81dc0184cd34ff4d3254720"
+EXT_LIBDEFLATE_VERSION="be5367c81c61c612271377cdae9ffacac0f6e53a"
 EXT_MORTON_VERSION="0.1.1"
 
 function write_out {
@@ -748,6 +750,27 @@ function build_sqlite3 {
 	echo " done!"
 }
 
+function build_libdeflate {
+	echo -n "[libdeflate] downloading $LIBDEFLATE_VERSION..."
+	download_file "https://github.com/ebiggers/libdeflate/archive/$LIBDEFLATE_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv libdeflate-$LIBDEFLATE_VERSION libdeflate >> "$DIR/install.log" 2>&1
+	cd libdeflate
+	echo -n " compiling..."
+	PREFIX="$DIR/bin/php7" make -j $THREADS install >> "$DIR/install.log" 2>&1
+	echo -n " cleaning..."
+	if [ "$DO_STATIC" == "yes" ]; then
+		rm "$DIR/bin/php7/lib/libdeflate.so"*
+	else
+		rm "$DIR/bin/php7/lib/libdeflate.a"
+		if [ "$(uname -s)" == "Darwin" ]; then
+			#libdeflate makefile doesn't set this correctly
+			install_name_tool -id "$DIR/bin/php7/lib/libdeflate.0.dylib" "$DIR/bin/php7/lib/libdeflate.0.dylib"
+		fi
+	fi
+	cd ..
+	echo " done!"
+}
+
 if [ "$COMPILE_FANCY" == "yes" ]; then
 	build_readline
 else
@@ -773,6 +796,7 @@ fi
 build_libxml2
 build_libzip
 build_sqlite3
+build_libdeflate
 
 # PECL libraries
 
@@ -839,6 +863,8 @@ echo " done!"
 get_github_extension "leveldb" "$EXT_LEVELDB_VERSION" "pmmp" "php-leveldb"
 
 get_github_extension "chunkutils2" "$EXT_CHUNKUTILS2_VERSION" "pmmp" "ext-chunkutils2"
+
+get_github_extension "libdeflate" "$EXT_LIBDEFLATE_VERSION" "pmmp" "ext-libdeflate"
 
 get_github_extension "morton" "$EXT_MORTON_VERSION" "pmmp" "ext-morton"
 
@@ -926,6 +952,7 @@ RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS_LTO" LDFLA
 --with-yaml \
 --with-openssl \
 --with-zip \
+--with-libdeflate="$DIR/bin/php7" \
 $HAS_LIBJPEG \
 $HAS_GD \
 $HAVE_READLINE \
