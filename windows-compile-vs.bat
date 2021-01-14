@@ -3,7 +3,7 @@
 REM For future users: This file MUST have CRLF line endings. If it doesn't, lots of inexplicable undesirable strange behaviour will result.
 REM Also: Don't modify this version with sed, or it will screw up your line endings.
 set PHP_MAJOR_VER=7.4
-set PHP_VER=%PHP_MAJOR_VER%.13
+set PHP_VER=%PHP_MAJOR_VER%.14
 set PHP_IS_BETA=no
 set PHP_SDK_VER=2.2.0
 set PATH=C:\Program Files\7-Zip;C:\Program Files (x86)\GnuWin32\bin;%PATH%
@@ -18,13 +18,13 @@ if "%PHP_DEBUG_BUILD%"=="" (
 
 set LIBYAML_VER=0.2.5
 set PTHREAD_W32_VER=3.0.0
-set LEVELDB_MCPE_VER=84348b9b826cc280cde659185695d2170b54824c
+set LEVELDB_MCPE_VER=c66f4648c262dfe47ad089aa9af8156c58765c72
 set LIBDEFLATE_VER=448e3f3b042219bccb0080e393ba3eb68c2091d5
 
-set PHP_PTHREADS_VER=6f56da9ea201ce76464f208ab8f90d6ff7148429
-set PHP_YAML_VER=2.1.0
+set PHP_PTHREADS_VER=bc16ee7b5a21faee9bd1743f830f7135b763fb56
+set PHP_YAML_VER=2.2.0
 set PHP_CHUNKUTILS2_VER=5a4dcd6ed74e0db2ca9a54948d4f3a065e386db5
-set PHP_IGBINARY_VER=3.1.4
+set PHP_IGBINARY_VER=3.2.1
 REM this is 1.2.9 but tags with a "v" prefix are a pain in the ass
 set PHP_DS_VER=2ddef84d3e9391c37599cb716592184315e23921
 set PHP_LEVELDB_VER=2e3f740b55af1eb6dfc648dd451bcb7d6151c26c
