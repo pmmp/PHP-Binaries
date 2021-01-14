@@ -545,6 +545,7 @@ function build_curl {
 	--without-libidn2 \
 	--without-brotli \
 	--without-nghttp2 \
+	--without-zstd \
 	--with-zlib="$DIR/bin/php7" \
 	--with-ssl="$DIR/bin/php7" \
 	--enable-threaded-resolver \
