@@ -4,7 +4,6 @@
 ZLIB_VERSION="1.2.11"
 GMP_VERSION="6.2.1"
 CURL_VERSION="curl-7_74_0"
-READLINE_VERSION="6.3"
 YAML_VERSION="0.2.5"
 LEVELDB_VERSION="c66f4648c262dfe47ad089aa9af8156c58765c72"
 LIBXML_VERSION="2.9.10"
@@ -101,7 +100,6 @@ function download_file {
 COMPILE_FOR_ANDROID=no
 HAVE_MYSQLI="--enable-mysqlnd --with-mysqli=mysqlnd"
 COMPILE_TARGET=""
-COMPILE_FANCY="no"
 IS_CROSSCOMPILE="no"
 IS_WINDOWS="no"
 DO_OPTIMIZE="no"
@@ -130,10 +128,6 @@ while getopts "::t:j:srdlxff:ugnva:" OPTION; do
 		j)
 			echo "[opt] Set make threads to $OPTARG"
 			THREADS="$OPTARG"
-			;;
-		r)
-			echo "[opt] Will compile readline"
-			COMPILE_FANCY="yes"
 			;;
 		d)
 			echo "[opt] Will compile profiler and xdebug, will not remove sources"
@@ -384,38 +378,6 @@ echo -n "[PHP] downloading $PHP_VERSION..."
 download_file "https://github.com/php/php-src/archive/php-$PHP_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 mv php-src-php-$PHP_VERSION php
 echo " done!"
-
-function build_readline {
-	if [ "$DO_STATIC" == "yes" ]; then
-		EXTRA_FLAGS="--enable-shared=no --enable-static=yes"
-	else
-		EXTRA_FLAGS="--enable-shared=yes --enable-static=no"
-	fi
-	#readline
-	set +e
-	echo -n "[readline] downloading $READLINE_VERSION..."
-	download_file "http://ftp.gnu.org/gnu/readline/readline-$READLINE_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv readline-$READLINE_VERSION readline
-	echo -n " checking..."
-	cd readline
-	./configure --prefix="$DIR/bin/php7" \
-	--with-curses="$DIR/bin/php7" \
-	--enable-multibyte \
-	$EXTRA_FLAGS \
-	$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
-	echo -n " compiling..."
-	if make -j $THREADS >> "$DIR/install.log" 2>&1; then
-		echo -n " installing..."
-		make install >> "$DIR/install.log" 2>&1
-		HAVE_READLINE="--with-readline=$DIR/bin/php7"
-	else
-		echo -n " disabling..."
-		HAVE_READLINE="--without-readline"
-	fi
-	cd ..
-	echo " done!"
-	set -e
-}
 
 function build_zlib {
 	if [ "$DO_STATIC" == "yes" ]; then
@@ -758,12 +720,6 @@ function build_sqlite3 {
 	echo " done!"
 }
 
-if [ "$COMPILE_FANCY" == "yes" ]; then
-	build_readline
-else
-	HAVE_READLINE="--without-readline"
-fi
-
 build_zlib
 build_gmp
 build_openssl
@@ -950,7 +906,7 @@ RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS_LTO" LDFLA
 --with-zip \
 $HAS_LIBJPEG \
 $HAS_GD \
-$HAVE_READLINE \
+--without-readline \
 $HAS_LEVELDB \
 $HAS_PROFILER \
 $HAS_DEBUG \

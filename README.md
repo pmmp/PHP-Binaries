@@ -25,7 +25,6 @@ Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have
 | -j           | Set make threads to #                                                                 |
 | -l           | Will compile with LevelDB support (experimental with PHP7)                            |
 | -n           | Don't remove sources after completing compilation                                     |
-| -r           | Will compile Readline                                                                 |
 | -s           | Will compile everything statically                                                    |
 | -t           | Set target                                                                            |
 | -u           | Will compile PocketMine-ChunkUtils C extension (recommended if using PC Anvil worlds) |
