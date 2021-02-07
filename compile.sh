@@ -11,6 +11,7 @@ LIBPNG_VERSION="1.6.37"
 LIBJPEG_VERSION="9d"
 OPENSSL_VERSION="1.1.1i"
 LIBZIP_VERSION="1.7.3"
+SQLITE3_YEAR="2021"
 SQLITE3_VERSION="3340100" #3.34.1
 
 EXT_PTHREADS_VERSION="5ece3055bfc637329a9d6652d24ab4ed278414a3"
@@ -702,7 +703,7 @@ function build_sqlite3 {
 	fi
 	#sqlite3
 	echo -n "[sqlite3] downloading $SQLITE3_VERSION..."
-	download_file "https://www.sqlite.org/2020/sqlite-autoconf-$SQLITE3_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	download_file "https://www.sqlite.org/$SQLITE3_YEAR/sqlite-autoconf-$SQLITE3_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 	mv sqlite-autoconf-$SQLITE3_VERSION sqlite3 >> "$DIR/install.log" 2>&1
 	echo -n " checking..."
 	cd sqlite3
