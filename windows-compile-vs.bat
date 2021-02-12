@@ -3,7 +3,7 @@
 REM For future users: This file MUST have CRLF line endings. If it doesn't, lots of inexplicable undesirable strange behaviour will result.
 REM Also: Don't modify this version with sed, or it will screw up your line endings.
 set PHP_MAJOR_VER=7.4
-set PHP_VER=%PHP_MAJOR_VER%.14
+set PHP_VER=%PHP_MAJOR_VER%.15
 set PHP_IS_BETA=no
 set PHP_SDK_VER=2.2.0
 set PATH=C:\Program Files\7-Zip;C:\Program Files (x86)\GnuWin32\bin;%PATH%
@@ -21,15 +21,15 @@ set PTHREAD_W32_VER=3.0.0
 set LEVELDB_MCPE_VER=c66f4648c262dfe47ad089aa9af8156c58765c72
 set LIBDEFLATE_VER=448e3f3b042219bccb0080e393ba3eb68c2091d5
 
-set PHP_PTHREADS_VER=bc16ee7b5a21faee9bd1743f830f7135b763fb56
-set PHP_YAML_VER=2.2.0
+set PHP_PTHREADS_VER=5ece3055bfc637329a9d6652d24ab4ed278414a3
+set PHP_YAML_VER=2.2.1
 set PHP_CHUNKUTILS2_VER=5a4dcd6ed74e0db2ca9a54948d4f3a065e386db5
 set PHP_IGBINARY_VER=3.2.1
 REM this is 1.2.9 but tags with a "v" prefix are a pain in the ass
-set PHP_DS_VER=2ddef84d3e9391c37599cb716592184315e23921
+set PHP_DS_VER=4fdda13350a3b6c6e3c4de97484f68e203033fec
 set PHP_LEVELDB_VER=2e3f740b55af1eb6dfc648dd451bcb7d6151c26c
-set PHP_CRYPTO_VER=5f26ac91b0ba96742cc6284cd00f8db69c3788b2
-set PHP_RECURSIONGUARD_VER=d6ed5da49178762ed81dc0184cd34ff4d3254720
+set PHP_CRYPTO_VER=a821ab84ebea0b89b89571071aa340a137167807
+set PHP_RECURSIONGUARD_VER=0.1.0
 set PHP_MORTON_VER=0.1.2
 set PHP_LIBDEFLATE_VER=be5367c81c61c612271377cdae9ffacac0f6e53a
 

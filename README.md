@@ -24,7 +24,6 @@ Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have
 | -g           | Will compile GD2                                                                      |
 | -j           | Set make threads to #                                                                 |
 | -n           | Don't remove sources after completing compilation                                     |
-| -r           | Will compile Readline                                                                 |
 | -s           | Will compile everything statically                                                    |
 | -t           | Set target                                                                            |
 | -v           | Enable Valgrind support in PHP                                                        |

@@ -1,10 +1,9 @@
 #!/bin/bash
-[ -z "$PHP_VERSION" ] && PHP_VERSION="7.4.14"
+[ -z "$PHP_VERSION" ] && PHP_VERSION="7.4.15"
 
 ZLIB_VERSION="1.2.11"
 GMP_VERSION="6.2.1"
-CURL_VERSION="curl-7_74_0"
-READLINE_VERSION="6.3"
+CURL_VERSION="curl-7_75_0"
 YAML_VERSION="0.2.5"
 LEVELDB_VERSION="c66f4648c262dfe47ad089aa9af8156c58765c72"
 LIBXML_VERSION="2.9.10"
@@ -12,18 +11,19 @@ LIBPNG_VERSION="1.6.37"
 LIBJPEG_VERSION="9d"
 OPENSSL_VERSION="1.1.1i"
 LIBZIP_VERSION="1.7.3"
-SQLITE3_VERSION="3340000" #3.33.0
+SQLITE3_YEAR="2021"
+SQLITE3_VERSION="3340100" #3.34.1
 LIBDEFLATE_VERSION="448e3f3b042219bccb0080e393ba3eb68c2091d5" #1.7
 
-EXT_PTHREADS_VERSION="bc16ee7b5a21faee9bd1743f830f7135b763fb56"
-EXT_YAML_VERSION="2.2.0"
+EXT_PTHREADS_VERSION="5ece3055bfc637329a9d6652d24ab4ed278414a3"
+EXT_YAML_VERSION="2.2.1"
 EXT_LEVELDB_VERSION="2e3f740b55af1eb6dfc648dd451bcb7d6151c26c"
 EXT_CHUNKUTILS2_VERSION="5a4dcd6ed74e0db2ca9a54948d4f3a065e386db5"
 EXT_XDEBUG_VERSION="3.0.2"
 EXT_IGBINARY_VERSION="3.2.1"
-EXT_DS_VERSION="2ddef84d3e9391c37599cb716592184315e23921"
-EXT_CRYPTO_VERSION="5f26ac91b0ba96742cc6284cd00f8db69c3788b2"
-EXT_RECURSIONGUARD_VERSION="d6ed5da49178762ed81dc0184cd34ff4d3254720"
+EXT_DS_VERSION="4fdda13350a3b6c6e3c4de97484f68e203033fec"
+EXT_CRYPTO_VERSION="a821ab84ebea0b89b89571071aa340a137167807"
+EXT_RECURSIONGUARD_VERSION="0.1.0"
 EXT_LIBDEFLATE_VERSION="be5367c81c61c612271377cdae9ffacac0f6e53a"
 EXT_MORTON_VERSION="0.1.2"
 
@@ -104,7 +104,6 @@ function download_file {
 COMPILE_FOR_ANDROID=no
 HAVE_MYSQLI="--enable-mysqlnd --with-mysqli=mysqlnd"
 COMPILE_TARGET=""
-COMPILE_FANCY="no"
 IS_CROSSCOMPILE="no"
 IS_WINDOWS="no"
 DO_OPTIMIZE="no"
@@ -131,10 +130,6 @@ while getopts "::t:j:srdxff:gnva:" OPTION; do
 		j)
 			echo "[opt] Set make threads to $OPTARG"
 			THREADS="$OPTARG"
-			;;
-		r)
-			echo "[opt] Will compile readline"
-			COMPILE_FANCY="yes"
 			;;
 		d)
 			echo "[opt] Will compile profiler and xdebug, will not remove sources"
@@ -377,38 +372,6 @@ echo -n "[PHP] downloading $PHP_VERSION..."
 download_file "https://github.com/php/php-src/archive/php-$PHP_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 mv php-src-php-$PHP_VERSION php
 echo " done!"
-
-function build_readline {
-	if [ "$DO_STATIC" == "yes" ]; then
-		EXTRA_FLAGS="--enable-shared=no --enable-static=yes"
-	else
-		EXTRA_FLAGS="--enable-shared=yes --enable-static=no"
-	fi
-	#readline
-	set +e
-	echo -n "[readline] downloading $READLINE_VERSION..."
-	download_file "http://ftp.gnu.org/gnu/readline/readline-$READLINE_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv readline-$READLINE_VERSION readline
-	echo -n " checking..."
-	cd readline
-	./configure --prefix="$DIR/bin/php7" \
-	--with-curses="$DIR/bin/php7" \
-	--enable-multibyte \
-	$EXTRA_FLAGS \
-	$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
-	echo -n " compiling..."
-	if make -j $THREADS >> "$DIR/install.log" 2>&1; then
-		echo -n " installing..."
-		make install >> "$DIR/install.log" 2>&1
-		HAVE_READLINE="--with-readline=$DIR/bin/php7"
-	else
-		echo -n " disabling..."
-		HAVE_READLINE="--without-readline"
-	fi
-	cd ..
-	echo " done!"
-	set -e
-}
 
 function build_zlib {
 	if [ "$DO_STATIC" == "yes" ]; then
@@ -733,7 +696,7 @@ function build_sqlite3 {
 	fi
 	#sqlite3
 	echo -n "[sqlite3] downloading $SQLITE3_VERSION..."
-	download_file "https://www.sqlite.org/2020/sqlite-autoconf-$SQLITE3_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	download_file "https://www.sqlite.org/$SQLITE3_YEAR/sqlite-autoconf-$SQLITE3_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 	mv sqlite-autoconf-$SQLITE3_VERSION sqlite3 >> "$DIR/install.log" 2>&1
 	echo -n " checking..."
 	cd sqlite3
@@ -771,12 +734,6 @@ function build_libdeflate {
 	cd ..
 	echo " done!"
 }
-
-if [ "$COMPILE_FANCY" == "yes" ]; then
-	build_readline
-else
-	HAVE_READLINE="--without-readline"
-fi
 
 build_zlib
 build_gmp
@@ -956,8 +913,8 @@ RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS_LTO" LDFLA
 --with-libdeflate="$DIR/bin/php7" \
 $HAS_LIBJPEG \
 $HAS_GD \
-$HAVE_READLINE \
 --with-leveldb="$DIR/bin/php7" \
+--without-readline \
 $HAS_PROFILER \
 $HAS_DEBUG \
 --enable-chunkutils2 \
