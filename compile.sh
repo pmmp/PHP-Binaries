@@ -947,6 +947,7 @@ $HAVE_MYSQLI \
 --enable-cli \
 --enable-ftp \
 --enable-opcache=$HAVE_OPCACHE \
+--enable-opcache-jit=$HAVE_OPCACHE \
 --enable-igbinary \
 --enable-ds \
 --with-crypto \
