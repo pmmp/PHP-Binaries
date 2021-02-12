@@ -2,12 +2,12 @@
 
 REM For future users: This file MUST have CRLF line endings. If it doesn't, lots of inexplicable undesirable strange behaviour will result.
 REM Also: Don't modify this version with sed, or it will screw up your line endings.
-set PHP_MAJOR_VER=7.4
-set PHP_VER=%PHP_MAJOR_VER%.15
+set PHP_MAJOR_VER=8.0
+set PHP_VER=%PHP_MAJOR_VER%.2
 set PHP_IS_BETA=no
 set PHP_SDK_VER=2.2.0
 set PATH=C:\Program Files\7-Zip;C:\Program Files (x86)\GnuWin32\bin;%PATH%
-set VC_VER=vc15
+set VC_VER=vs16
 set ARCH=x64
 set VS_VER=
 set VS_YEAR=
@@ -20,14 +20,14 @@ set LIBYAML_VER=0.2.5
 set PTHREAD_W32_VER=3.0.0
 set LEVELDB_MCPE_VER=c66f4648c262dfe47ad089aa9af8156c58765c72
 
-set PHP_PTHREADS_VER=5ece3055bfc637329a9d6652d24ab4ed278414a3
+set PHP_PTHREADS_VER=acc6e52b2144c61c434b62a3cb680d537e06828e
 set PHP_YAML_VER=2.2.1
 set PHP_POCKETMINE_CHUNKUTILS_VER=0.1.0
 set PHP_IGBINARY_VER=3.2.1
 REM this is 1.2.9 but tags with a "v" prefix are a pain in the ass
 set PHP_DS_VER=4fdda13350a3b6c6e3c4de97484f68e203033fec
-set PHP_LEVELDB_VER=2e3f740b55af1eb6dfc648dd451bcb7d6151c26c
-set PHP_CRYPTO_VER=a821ab84ebea0b89b89571071aa340a137167807
+set PHP_LEVELDB_VER=98f2fc73d41e25ce74c59dd49c43380be1cbcf09
+set PHP_CRYPTO_VER=c8867aa944fa5227eaea9d11a6ce282e64c15af9
 set PHP_RECURSIONGUARD_VER=0.1.0
 
 set script_path=%~dp0
@@ -59,13 +59,13 @@ if "%SOURCES_PATH%"=="" (
 )
 call :pm-echo "Using path %SOURCES_PATH% for build sources"
 
-call :check-vs-exists 2017 15 || call :check-vs-exists 2019 16 || call :pm-fatal-error "Please install Visual Studio 2017 or 2019"
+call :check-vs-exists 2019 16 || call :pm-fatal-error "Please install Visual Studio 2019"
 
 REM export an env var to override this if you're using something other than the community edition
 if "%VS_EDITION%"=="" (
 	set VS_EDITION=Community
 )
-call "C:\Program Files (x86)\Microsoft Visual Studio\%VS_YEAR%\%VS_EDITION%\VC\Auxiliary\Build\vcvarsall.bat" %ARCH% -vcvars_ver=14.16 >>"%log_file%" 2>&1 || call :pm-fatal-error "Error initializing Visual Studio environment"
+call "C:\Program Files (x86)\Microsoft Visual Studio\%VS_YEAR%\%VS_EDITION%\VC\Auxiliary\Build\vcvarsall.bat" %ARCH% >>"%log_file%" 2>&1 || call :pm-fatal-error "Error initializing Visual Studio environment"
 :batchfiles-are-stupid
 move "%log_file%" "%log_file%" >nul 2>nul || goto :batchfiles-are-stupid
 
