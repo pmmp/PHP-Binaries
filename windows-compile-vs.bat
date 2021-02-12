@@ -194,6 +194,9 @@ cd /D php-src
 call :pm-echo "Configuring PHP..."
 call buildconf.bat >>"%log_file%" 2>&1
 
+REM https://github.com/php/php-src/pull/6658 - this is needed until 8.0.3 releases because php-sdk gives us dependencies that won't otherwise build
+set LDFLAGS="/d2:-AllowCompatibleILVersions"
+
 call configure^
  --with-mp=auto^
  --with-prefix=pocketmine-php-bin^
