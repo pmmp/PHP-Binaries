@@ -217,6 +217,7 @@ call configure^
  --enable-json^
  --enable-mbstring^
  --enable-opcache^
+ --enable-opcache-jit^
  --enable-phar^
  --enable-pocketmine-chunkutils=shared^
  --enable-recursionguard=shared^
@@ -295,6 +296,8 @@ call :pm-echo "Generating php.ini..."
 (echo opcache.revalidate_freq=0)>>"%php_ini%"
 (echo opcache.file_update_protection=0)>>"%php_ini%"
 (echo opcache.optimization_level=0x7FFEBFFF)>>"%php_ini%"
+(echo opcache.jit=1205 ;https://www.php.net/manual/en/opcache.configuration.php#ini.opcache.jit)>>"%php_ini%"
+(echo opcache.jit_buffer_size=128M)>>"%php_ini%"
 (echo ;Optional extensions, supplied for plugin use)>>"%php_ini%"
 (echo extension=php_gd.dll)>>"%php_ini%"
 (echo extension=php_mysqli.dll)>>"%php_ini%"
