@@ -14,6 +14,7 @@ set CMAKE_TARGET=
 if "%PHP_DEBUG_BUILD%"=="" (
 	set PHP_DEBUG_BUILD=0
 )
+set MSBUILD_CONFIGURATION=RelWithDebInfo
 
 set LIBYAML_VER=0.2.5
 set PTHREAD_W32_VER=3.0.0
@@ -50,6 +51,8 @@ if "%PHP_DEBUG_BUILD%"=="0" (
 ) else (
 	set OUT_PATH_REL=Debug
 	set PHP_HAVE_DEBUG=enable-debug
+	REM I don't like this, but YAML will crash if it's not built with the same target as PHP
+	set MSBUILD_CONFIGURATION=Debug
 	call :pm-echo "Building debug binaries"
 )
 
@@ -112,10 +115,10 @@ cmake -G "%CMAKE_TARGET%" -A "%ARCH%"^
  -DBUILD_SHARED_LIBS=ON^
  . >>"%log_file%" 2>&1 || exit 1
 call :pm-echo "Compiling..."
-msbuild ALL_BUILD.vcxproj /p:Configuration=RelWithDebInfo /m >>"%log_file%" 2>&1 || exit 1
+msbuild ALL_BUILD.vcxproj /p:Configuration=%MSBUILD_CONFIGURATION% /m >>"%log_file%" 2>&1 || exit 1
 call :pm-echo "Installing files..."
-msbuild INSTALL.vcxproj /p:Configuration=RelWithDebInfo /m >>"%log_file%" 2>&1 || exit 1
-copy RelWithDebInfo\yaml.pdb "%DEPS_DIR%\bin\yaml.pdb" >>"%log_file%" 2>&1 || exit 1
+msbuild INSTALL.vcxproj /p:Configuration=%MSBUILD_CONFIGURATION% /m >>"%log_file%" 2>&1 || exit 1
+copy %MSBUILD_CONFIGURATION%\yaml.pdb "%DEPS_DIR%\bin\yaml.pdb" >>"%log_file%" 2>&1 || exit 1
 
 cd /D "%DEPS_DIR%"
 
@@ -155,10 +158,10 @@ cmake -G "%CMAKE_TARGET%" -A "%ARCH%"^
  -DZLIB_LIBRARY="%DEPS_DIR%\lib\zlib_a.lib"^
  . >>"%log_file%" 2>&1 || exit 1
 call :pm-echo "Compiling"
-msbuild ALL_BUILD.vcxproj /p:Configuration=RelWithDebInfo /m >>"%log_file%" 2>&1 || exit 1
+msbuild ALL_BUILD.vcxproj /p:Configuration=%MSBUILD_CONFIGURATION% /m >>"%log_file%" 2>&1 || exit 1
 call :pm-echo "Installing files..."
-msbuild INSTALL.vcxproj /p:Configuration=RelWithDebInfo >>"%log_file%" 2>&1 || exit 1
-copy RelWithDebInfo\leveldb.pdb "%DEPS_DIR%\bin\leveldb.pdb" >>"%log_file%" 2>&1 || exit 1
+msbuild INSTALL.vcxproj /p:Configuration=%MSBUILD_CONFIGURATION% >>"%log_file%" 2>&1 || exit 1
+copy %MSBUILD_CONFIGURATION%\leveldb.pdb "%DEPS_DIR%\bin\leveldb.pdb" >>"%log_file%" 2>&1 || exit 1
 
 cd /D "%DEPS_DIR%"
 
