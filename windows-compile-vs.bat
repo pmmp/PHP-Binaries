@@ -89,12 +89,8 @@ cd /D "%SOURCES_PATH%"
 call bin\phpsdk_setvars.bat >>"%log_file%" 2>&1
 
 call :pm-echo "Downloading PHP source version %PHP_VER%..."
-if "%PHP_IS_BETA%" == "yes" (
-	git clone https://github.com/php/php-src -b php-%PHP_VER% --depth=1 -q php-src >>"%log_file%" 2>&1 || exit 1
-) else (
-	call :get-zip http://windows.php.net/downloads/releases/php-%PHP_VER%-src.zip >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to download PHP source"
-	move php-%PHP_VER%-src php-src >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to move PHP source to target directory"
-)
+call :get-zip https://github.com/php/php-src/archive/php-%PHP_VER%.zip >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to download PHP source"
+move php-src-php-%PHP_VER% php-src >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to move PHP source to target directory"
 
 set DEPS_DIR_NAME=deps
 set DEPS_DIR="%SOURCES_PATH%\%DEPS_DIR_NAME%"
