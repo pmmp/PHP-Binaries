@@ -4,7 +4,6 @@ REM For future users: This file MUST have CRLF line endings. If it doesn't, lots
 REM Also: Don't modify this version with sed, or it will screw up your line endings.
 set PHP_MAJOR_VER=7.4
 set PHP_VER=%PHP_MAJOR_VER%.15
-set PHP_IS_BETA=no
 set PHP_SDK_VER=2.2.0
 set PATH=C:\Program Files\7-Zip;C:\Program Files (x86)\GnuWin32\bin;%PATH%
 set VC_VER=vc15
@@ -92,12 +91,8 @@ cd /D "%SOURCES_PATH%"
 call bin\phpsdk_setvars.bat >>"%log_file%" 2>&1
 
 call :pm-echo "Downloading PHP source version %PHP_VER%..."
-if "%PHP_IS_BETA%" == "yes" (
-	git clone https://github.com/php/php-src -b php-%PHP_VER% --depth=1 -q php-src >>"%log_file%" 2>&1 || exit 1
-) else (
-	call :get-zip http://windows.php.net/downloads/releases/php-%PHP_VER%-src.zip >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to download PHP source"
-	move php-%PHP_VER%-src php-src >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to move PHP source to target directory"
-)
+call :get-zip https://github.com/php/php-src/archive/php-%PHP_VER%.zip >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to download PHP source"
+move php-src-php-%PHP_VER% php-src >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to move PHP source to target directory"
 
 set DEPS_DIR_NAME=deps
 set DEPS_DIR="%SOURCES_PATH%\%DEPS_DIR_NAME%"
