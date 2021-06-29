@@ -130,7 +130,7 @@ while getopts "::t:j:srdlxff:ugnva:" OPTION; do
 			THREADS="$OPTARG"
 			;;
 		d)
-			echo "[opt] Will compile profiler and xdebug, will not remove sources"
+			echo "[opt] Will compile xdebug, will not remove sources"
 			COMPILE_DEBUG="yes"
 			DO_CLEANUP="no"
 			CFLAGS="$CFLAGS -g"
@@ -776,14 +776,6 @@ if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
 	get_pecl_extension "xdebug" "$EXT_XDEBUG_VERSION"
 fi
 
-#TODO Uncomment this when it's ready for PHP7
-#if [ "$COMPILE_DEBUG" == "yes" ]; then
-#   get_github_extension "profiler" "master" "krakjoe" "profiler"
-#	HAS_PROFILER="--enable-profiler --with-profiler-max-frames=1000"
-#else
-#	HAS_PROFILER=""
-#fi
-
 get_github_extension "pthreads" "$EXT_PTHREADS_VERSION" "pmmp" "pthreads" #"v" needed for release tags because github removes the "v"
 #get_pecl_extension "pthreads" "$EXT_PTHREADS_VERSION"
 
@@ -906,7 +898,6 @@ $HAS_LIBJPEG \
 $HAS_GD \
 --without-readline \
 $HAS_LEVELDB \
-$HAS_PROFILER \
 $HAS_DEBUG \
 $HAS_POCKETMINE_CHUNKUTILS \
 --enable-mbstring \
