@@ -20,7 +20,6 @@ EXT_LEVELDB_VERSION="98f2fc73d41e25ce74c59dd49c43380be1cbcf09"
 EXT_POCKETMINE_CHUNKUTILS_VERSION="0.1.0"
 EXT_XDEBUG_VERSION="3.0.4"
 EXT_IGBINARY_VERSION="3.2.3"
-EXT_DS_VERSION="4fdda13350a3b6c6e3c4de97484f68e203033fec"
 EXT_CRYPTO_VERSION="0.3.2"
 EXT_RECURSIONGUARD_VERSION="0.1.0"
 
@@ -793,8 +792,6 @@ get_github_extension "yaml" "$EXT_YAML_VERSION" "php" "pecl-file_formats-yaml"
 
 get_github_extension "igbinary" "$EXT_IGBINARY_VERSION" "igbinary" "igbinary"
 
-get_github_extension "ds" "$EXT_DS_VERSION" "php-ds" "ext-ds"
-
 get_github_extension "recursionguard" "$EXT_RECURSIONGUARD_VERSION" "pmmp" "ext-recursionguard"
 
 echo -n "  crypto: downloading $EXT_CRYPTO_VERSION..."
@@ -946,7 +943,6 @@ $HAVE_MYSQLI \
 --enable-ftp \
 --enable-opcache=$HAVE_OPCACHE \
 --enable-igbinary \
---enable-ds \
 --with-crypto \
 --enable-recursionguard \
 $HAVE_VALGRIND \
