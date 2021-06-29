@@ -20,12 +20,11 @@ set LIBYAML_VER=0.2.5
 set PTHREAD_W32_VER=3.0.0
 set LEVELDB_MCPE_VER=623f633d3a588f9e478b95a12dc794d25968234f
 
-set PHP_PTHREADS_VER=374df2d8cf61a30e7f214a7f00a59a6b24a65c21
+set PHP_PTHREADS_VER=2784d4d17dc53be9e2732a5c11dae199b4a57c93
 set PHP_YAML_VER=2.2.1
 set PHP_POCKETMINE_CHUNKUTILS_VER=0.1.0
-set PHP_IGBINARY_VER=3.2.2
+set PHP_IGBINARY_VER=3.2.3
 REM this is 1.2.9 but tags with a "v" prefix are a pain in the ass
-set PHP_DS_VER=4fdda13350a3b6c6e3c4de97484f68e203033fec
 set PHP_LEVELDB_VER=98f2fc73d41e25ce74c59dd49c43380be1cbcf09
 set PHP_CRYPTO_VER=0.3.2
 set PHP_RECURSIONGUARD_VER=0.1.0
@@ -174,7 +173,6 @@ call :get-extension-zip-from-github "pthreads"              "%PHP_PTHREADS_VER%"
 call :get-extension-zip-from-github "yaml"                  "%PHP_YAML_VER%"                  "php"      "pecl-file_formats-yaml"  || exit 1
 call :get-extension-zip-from-github "pocketmine_chunkutils" "%PHP_POCKETMINE_CHUNKUTILS_VER%" "dktapps"  "PocketMine-C-ChunkUtils" || exit 1
 call :get-extension-zip-from-github "igbinary"              "%PHP_IGBINARY_VER%"              "igbinary" "igbinary"                || exit 1
-call :get-extension-zip-from-github "ds"                    "%PHP_DS_VER%"                    "php-ds"   "ext-ds"                  || exit 1
 call :get-extension-zip-from-github "leveldb"               "%PHP_LEVELDB_VER%"               "pmmp"     "php-leveldb"             || exit 1
 call :get-extension-zip-from-github "recursionguard"        "%PHP_RECURSIONGUARD_VER%"        "pmmp"     "ext-recursionguard"      || exit 1
 
@@ -208,7 +206,6 @@ call configure^
  --enable-calendar^
  --enable-com-dotnet^
  --enable-ctype^
- --enable-ds=shared^
  --enable-filter^
  --enable-hash^
  --enable-igbinary=shared^
@@ -282,7 +279,6 @@ call :pm-echo "Generating php.ini..."
 (echo extension=php_openssl.dll)>>"%php_ini%"
 (echo extension=php_pocketmine_chunkutils.dll)>>"%php_ini%"
 (echo extension=php_igbinary.dll)>>"%php_ini%"
-(echo extension=php_ds.dll)>>"%php_ini%"
 (echo extension=php_leveldb.dll)>>"%php_ini%"
 (echo extension=php_crypto.dll)>>"%php_ini%"
 (echo igbinary.compact_strings=0)>>"%php_ini%"

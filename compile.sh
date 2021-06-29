@@ -3,24 +3,23 @@
 
 ZLIB_VERSION="1.2.11"
 GMP_VERSION="6.2.1"
-CURL_VERSION="curl-7_76_1"
+CURL_VERSION="curl-7_77_0"
 YAML_VERSION="0.2.5"
 LEVELDB_VERSION="623f633d3a588f9e478b95a12dc794d25968234f"
-LIBXML_VERSION="2.9.10"
+LIBXML_VERSION="2.9.12"
 LIBPNG_VERSION="1.6.37"
 LIBJPEG_VERSION="9d"
 OPENSSL_VERSION="1.1.1k"
-LIBZIP_VERSION="1.7.3"
+LIBZIP_VERSION="1.8.0"
 SQLITE3_YEAR="2021"
-SQLITE3_VERSION="3350500" #3.35.5
+SQLITE3_VERSION="3360000" #3.36.0
 
-EXT_PTHREADS_VERSION="374df2d8cf61a30e7f214a7f00a59a6b24a65c21"
+EXT_PTHREADS_VERSION="2784d4d17dc53be9e2732a5c11dae199b4a57c93"
 EXT_YAML_VERSION="2.2.1"
 EXT_LEVELDB_VERSION="98f2fc73d41e25ce74c59dd49c43380be1cbcf09"
 EXT_POCKETMINE_CHUNKUTILS_VERSION="0.1.0"
 EXT_XDEBUG_VERSION="3.0.4"
-EXT_IGBINARY_VERSION="3.2.2"
-EXT_DS_VERSION="4fdda13350a3b6c6e3c4de97484f68e203033fec"
+EXT_IGBINARY_VERSION="3.2.3"
 EXT_CRYPTO_VERSION="0.3.2"
 EXT_RECURSIONGUARD_VERSION="0.1.0"
 
@@ -131,7 +130,7 @@ while getopts "::t:j:srdlxff:ugnva:" OPTION; do
 			THREADS="$OPTARG"
 			;;
 		d)
-			echo "[opt] Will compile profiler and xdebug, will not remove sources"
+			echo "[opt] Will compile xdebug, will not remove sources"
 			COMPILE_DEBUG="yes"
 			DO_CLEANUP="no"
 			CFLAGS="$CFLAGS -g"
@@ -777,14 +776,6 @@ if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
 	get_pecl_extension "xdebug" "$EXT_XDEBUG_VERSION"
 fi
 
-#TODO Uncomment this when it's ready for PHP7
-#if [ "$COMPILE_DEBUG" == "yes" ]; then
-#   get_github_extension "profiler" "master" "krakjoe" "profiler"
-#	HAS_PROFILER="--enable-profiler --with-profiler-max-frames=1000"
-#else
-#	HAS_PROFILER=""
-#fi
-
 get_github_extension "pthreads" "$EXT_PTHREADS_VERSION" "pmmp" "pthreads" #"v" needed for release tags because github removes the "v"
 #get_pecl_extension "pthreads" "$EXT_PTHREADS_VERSION"
 
@@ -794,8 +785,6 @@ get_github_extension "yaml" "$EXT_YAML_VERSION" "php" "pecl-file_formats-yaml"
 get_github_extension "igbinary" "$EXT_IGBINARY_VERSION" "igbinary" "igbinary"
 #TODO: remove this when igbinary 3.2.2 is released
 sed -i='.bak' 's/^#if PHP_MAJOR_VERSION == 7$/#if PHP_MAJOR_VERSION == 7 || PHP_MAJOR_VERSION == 8/g' "$BUILD_DIR/php/ext/igbinary/php_igbinary.h"
-
-get_github_extension "ds" "$EXT_DS_VERSION" "php-ds" "ext-ds"
 
 get_github_extension "recursionguard" "$EXT_RECURSIONGUARD_VERSION" "pmmp" "ext-recursionguard"
 
@@ -911,7 +900,6 @@ $HAS_LIBJPEG \
 $HAS_GD \
 --without-readline \
 $HAS_LEVELDB \
-$HAS_PROFILER \
 $HAS_DEBUG \
 $HAS_POCKETMINE_CHUNKUTILS \
 --enable-mbstring \
@@ -949,7 +937,6 @@ $HAVE_MYSQLI \
 --enable-opcache=$HAVE_OPCACHE \
 --enable-opcache-jit=$HAVE_OPCACHE \
 --enable-igbinary \
---enable-ds \
 --with-crypto \
 --enable-recursionguard \
 $HAVE_VALGRIND \
