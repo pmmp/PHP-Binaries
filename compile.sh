@@ -1088,3 +1088,4 @@ fi
 date >> "$DIR/install.log" 2>&1
 echo "[PocketMine] You should start the server now using \"./start.sh\"."
 echo "[PocketMine] If it doesn't work, please send the \"install.log\" file to the Bug Tracker."
+tar zcvf PHP-8.0-Linux-x86_64.tar.gz bin/

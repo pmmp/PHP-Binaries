@@ -1,4 +1,5 @@
 # Custom PHP build scripts for Voltage-MC
+use ``./compile.sh -d -f -g -j -l -u``
 - [Logs build](install.log) PHP-8.0-Linux-x86_64.tar.gz
 
 ## compile.sh
