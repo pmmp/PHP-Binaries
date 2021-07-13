@@ -549,6 +549,34 @@ function build_yaml {
 	echo " done!"
 }
 
+function build_shell2 {
+	if [ "$DO_STATIC" == "yes" ]; then
+		local EXTRA_FLAGS="--disable-shared --enable-static"
+	else
+		local EXTRA_FLAGS="--enable-shared --disable-static"
+	fi
+	echo -n "[SHELL2] downloading 1.3.1..."
+	download_file "https://pecl.php.net/get/ssh2-1.3.1.tgz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv ssh2-1.3.1 yaml
+	cd yaml
+	./bootstrap >> "$DIR/install.log" 2>&1
+
+	echo -n " checking..."
+
+	RANLIB=$RANLIB ./configure \
+	--prefix="$DIR/bin/php7" \
+	$EXTRA_FLAGS \
+	$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
+	sed -i=".backup" 's/ tests win32/ win32/g' Makefile
+	echo -n " compiling..."
+	make -j $THREADS all >> "$DIR/install.log" 2>&1
+	echo -n " installing..."
+	make install >> "$DIR/install.log" 2>&1
+	cd ..
+	echo " done!"
+}
+
+
 function build_leveldb {
 	echo -n "[LevelDB] downloading $LEVELDB_VERSION..."
 	download_file "https://github.com/pmmp/leveldb/archive/$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
@@ -725,6 +753,7 @@ build_gmp
 build_openssl
 build_curl
 build_yaml
+build_shell2
 if [ "$COMPILE_LEVELDB" == "yes" ]; then
 	build_leveldb
 fi
