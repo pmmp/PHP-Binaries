@@ -4,7 +4,7 @@ use ``./compile.sh -d -f -g -j -l -u``
 
 ## compile.sh
 
-Bash script used to compile PHP on Linux platforms. Make sure you have ``apt install -y autoconf automake libtool libtool-bin m4 wget gzip bzip2 bison g++ git cmake pkg-config re2c``.
+Bash script used to compile PHP on Linux platforms. Make sure you have ``apt install -y autoconf automake libtool libtool-bin m4 wget gzip bzip2 bison g++ git cmake pkg-config re2c libssh2-1 libssh2-1-dev``.
 
 | Script flags | Description                                                                           |
 | ------------ | ------------------------------------------------------------------------------------- |

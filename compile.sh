@@ -550,22 +550,15 @@ function build_yaml {
 }
 
 function build_shell2 {
-	if [ "$DO_STATIC" == "yes" ]; then
-		local EXTRA_FLAGS="--disable-shared --enable-static"
-	else
-		local EXTRA_FLAGS="--enable-shared --disable-static"
-	fi
-	echo -n "[SHELL2] downloading 1.3.1..."
-	download_file "https://pecl.php.net/get/ssh2-1.3.1.tgz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv ssh2-1.3.1 yaml
-	cd yaml
-	./bootstrap >> "$DIR/install.log" 2>&1
+	echo -n "[SSH2] downloading 1.9.0..."
+	download_file "https://github.com/libssh2/libssh2/releases/download/libssh2-1.9.0/libssh2-1.9.0.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv libssh2-1.9.0 ssh2
+	cd ssh2
 
 	echo -n " checking..."
 
 	RANLIB=$RANLIB ./configure \
 	--prefix="$DIR/bin/php7" \
-	$EXTRA_FLAGS \
 	$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
 	sed -i=".backup" 's/ tests win32/ win32/g' Makefile
 	echo -n " compiling..."
@@ -811,6 +804,9 @@ get_github_extension "pthreads" "$EXT_PTHREADS_VERSION" "pmmp" "pthreads" #"v" n
 get_github_extension "yaml" "$EXT_YAML_VERSION" "php" "pecl-file_formats-yaml"
 #get_pecl_extension "yaml" "$EXT_YAML_VERSION"
 
+#get_github_extension "ssh2" "$EXT_YAML_VERSION" "php" "pecl-file_formats-ssh2"
+get_pecl_extension "ssh2" "1.3.1"
+
 get_github_extension "igbinary" "$EXT_IGBINARY_VERSION" "igbinary" "igbinary"
 #TODO: remove this when igbinary 3.2.2 is released
 sed -i='.bak' 's/^#if PHP_MAJOR_VERSION == 7$/#if PHP_MAJOR_VERSION == 7 || PHP_MAJOR_VERSION == 8/g' "$BUILD_DIR/php/ext/igbinary/php_igbinary.h"
@@ -924,6 +920,7 @@ RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS_LTO" LDFLA
 --with-gmp \
 --with-yaml \
 --with-openssl \
+--with-ssh2 \
 --with-zip \
 $HAS_LIBJPEG \
 $HAS_GD \
