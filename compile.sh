@@ -718,12 +718,16 @@ function build_libdeflate {
 	download_file "https://github.com/ebiggers/libdeflate/archive/$LIBDEFLATE_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 	mv libdeflate-$LIBDEFLATE_VERSION libdeflate >> "$DIR/install.log" 2>&1
 	cd libdeflate
-	echo -n " compiling..."
-	PREFIX="$DIR/bin/php7" make -j $THREADS install >> "$DIR/install.log" 2>&1
-	echo -n " cleaning..."
 	if [ "$DO_STATIC" == "yes" ]; then
-		rm "$DIR/bin/php7/lib/libdeflate.so"*
+		echo -n " compiling..."
+		make -j $THREADS libdeflate.a >> "$DIR/install.log" 2>&1
+		echo -n " manually copying installation files for static build..."
+		cp ./libdeflate.a "$DIR/bin/php7/lib"
+		cp ./libdeflate.h "$DIR/bin/php7/include"
 	else
+		echo -n " compiling..."
+		PREFIX="$DIR/bin/php7" make -j $THREADS install >> "$DIR/install.log" 2>&1
+		echo -n " cleaning..."
 		rm "$DIR/bin/php7/lib/libdeflate.a"
 		if [ "$(uname -s)" == "Darwin" ]; then
 			#libdeflate makefile doesn't set this correctly
