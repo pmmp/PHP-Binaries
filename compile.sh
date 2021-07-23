@@ -1019,7 +1019,11 @@ if [ "$HAVE_OPCACHE" == "yes" ]; then
 	echo "opcache.revalidate_freq=0" >> "$DIR/bin/php7/bin/php.ini"
 	echo "opcache.file_update_protection=0" >> "$DIR/bin/php7/bin/php.ini"
 	echo "opcache.optimization_level=0x7FFEBFFF ;https://github.com/php/php-src/blob/53c1b485741f31a17b24f4db2b39afeb9f4c8aba/ext/opcache/Optimizer/zend_optimizer.h" >> "$DIR/bin/php7/bin/php.ini"
-	echo "opcache.jit=1205 ;https://www.php.net/manual/en/opcache.configuration.php#ini.opcache.jit" >> "$DIR/bin/php7/bin/php.ini"
+	echo "" >> "$DIR/bin/php7/bin/php.ini"
+	echo "; ---- ! WARNING ! ----" "$DIR/bin/php7/bin/php.ini"
+	echo "; JIT can provide big performance improvements, but as of PHP 8.0.8 it is still unstable. For this reason, it is disabled by default." >> "$DIR/bin/php7/bin/php.ini"
+	echo "; Enable it at your own risk. See https://www.php.net/manual/en/opcache.configuration.php#ini.opcache.jit for possible options." >> "$DIR/bin/php7/bin/php.ini"
+	echo "opcache.jit=off" >> "$DIR/bin/php7/bin/php.ini"
 	echo "opcache.jit_buffer_size=128M" >> "$DIR/bin/php7/bin/php.ini"
 fi
 
