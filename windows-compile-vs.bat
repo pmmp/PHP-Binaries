@@ -2,11 +2,11 @@
 
 REM For future users: This file MUST have CRLF line endings. If it doesn't, lots of inexplicable undesirable strange behaviour will result.
 REM Also: Don't modify this version with sed, or it will screw up your line endings.
-set PHP_MAJOR_VER=7.4
-set PHP_VER=%PHP_MAJOR_VER%.21
+set PHP_MAJOR_VER=8.0
+set PHP_VER=%PHP_MAJOR_VER%.8
 set PHP_SDK_VER=2.2.0
 set PATH=C:\Program Files\7-Zip;C:\Program Files (x86)\GnuWin32\bin;%PATH%
-set VC_VER=vc15
+set VC_VER=vs16
 set ARCH=x64
 set VS_VER=
 set VS_YEAR=
@@ -63,13 +63,13 @@ if "%SOURCES_PATH%"=="" (
 )
 call :pm-echo "Using path %SOURCES_PATH% for build sources"
 
-call :check-vs-exists 2017 15 || call :check-vs-exists 2019 16 || call :pm-fatal-error "Please install Visual Studio 2017 or 2019"
+call :check-vs-exists 2019 16 || call :pm-fatal-error "Please install Visual Studio 2019"
 
 REM export an env var to override this if you're using something other than the community edition
 if "%VS_EDITION%"=="" (
 	set VS_EDITION=Community
 )
-call "C:\Program Files (x86)\Microsoft Visual Studio\%VS_YEAR%\%VS_EDITION%\VC\Auxiliary\Build\vcvarsall.bat" %ARCH% -vcvars_ver=14.16 >>"%log_file%" 2>&1 || call :pm-fatal-error "Error initializing Visual Studio environment"
+call "C:\Program Files (x86)\Microsoft Visual Studio\%VS_YEAR%\%VS_EDITION%\VC\Auxiliary\Build\vcvarsall.bat" %ARCH% >>"%log_file%" 2>&1 || call :pm-fatal-error "Error initializing Visual Studio environment"
 :batchfiles-are-stupid
 move "%log_file%" "%log_file%" >nul 2>nul || goto :batchfiles-are-stupid
 
@@ -209,6 +209,9 @@ cd /D php-src
 call :pm-echo "Configuring PHP..."
 call buildconf.bat >>"%log_file%" 2>&1
 
+REM https://github.com/php/php-src/pull/6658 - this is needed until 8.0.3 releases because php-sdk gives us dependencies that won't otherwise build
+set LDFLAGS="/d2:-AllowCompatibleILVersions"
+
 call configure^
  --with-mp=auto^
  --with-prefix=pocketmine-php-bin^
@@ -230,6 +233,7 @@ call configure^
  --enable-mbstring^
  --enable-morton^
  --enable-opcache^
+ --enable-opcache-jit^
  --enable-phar^
  --enable-recursionguard=shared^
  --enable-sockets^
@@ -310,12 +314,18 @@ call :pm-echo "Generating php.ini..."
 (echo opcache.optimization_level=0x7FFEBFFF)>>"%php_ini%"
 (echo opcache.cache_id=PHP_BINARY ;prevent sharing SHM between different binaries - they won't work because of ASLR)>>"%php_ini%"
 (echo ;Optional extensions, supplied for plugin use)>>"%php_ini%"
-(echo extension=php_gd2.dll)>>"%php_ini%"
+(echo extension=php_gd.dll)>>"%php_ini%"
 (echo extension=php_mysqli.dll)>>"%php_ini%"
 (echo extension=php_sqlite3.dll)>>"%php_ini%"
 (echo ;Optional extensions, supplied for debugging)>>"%php_ini%"
 (echo extension=php_recursionguard.dll)>>"%php_ini%"
 (echo recursionguard.enabled=0 ;disabled due to minor performance impact, only enable this if you need it for debugging)>>"%php_ini%"
+(echo.)>>"%php_ini%"
+(echo ; ---- ! WARNING ! ----)>>"%php_ini%"
+(echo ; JIT can provide big performance improvements, but as of PHP 8.0.8 it is still unstable. For this reason, it is disabled by default.)>>"%php_ini%"
+(echo ; Enable it at your own risk. See https://www.php.net/manual/en/opcache.configuration.php#ini.opcache.jit for possible options.)>>"%php_ini%"
+(echo opcache.jit=off)>>"%php_ini%"
+(echo opcache.jit_buffer_size=128M)>>"%php_ini%"
 REM TODO: more entries
 
 cd /D ..\..
