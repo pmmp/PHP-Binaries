@@ -783,8 +783,6 @@ get_github_extension "yaml" "$EXT_YAML_VERSION" "php" "pecl-file_formats-yaml"
 #get_pecl_extension "yaml" "$EXT_YAML_VERSION"
 
 get_github_extension "igbinary" "$EXT_IGBINARY_VERSION" "igbinary" "igbinary"
-#TODO: remove this when igbinary 3.2.2 is released
-sed -i='.bak' 's/^#if PHP_MAJOR_VERSION == 7$/#if PHP_MAJOR_VERSION == 7 || PHP_MAJOR_VERSION == 8/g' "$BUILD_DIR/php/ext/igbinary/php_igbinary.h"
 
 get_github_extension "recursionguard" "$EXT_RECURSIONGUARD_VERSION" "pmmp" "ext-recursionguard"
 
