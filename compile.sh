@@ -55,6 +55,7 @@ if [ "$(uname -s)" == "Darwin" ]; then
 	type glibtool >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install GNU libtool"; ((ERRORS++)); }
 	export LIBTOOL=glibtool
 	export LIBTOOLIZE=glibtoolize
+	[[ $(bison --version) == "bison (GNU Bison) 3."* ]] || { echo >&2 "[ERROR] MacOS bundled bison is too old. Install bison using Homebrew and update your PATH variable according to its instructions before running this script."; ((ERRORS++)); }
 else
 	type libtool >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"libtool\" or \"libtool-bin\""; ((ERRORS++)); }
 	export LIBTOOL=libtool
