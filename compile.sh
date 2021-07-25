@@ -248,7 +248,7 @@ else
 		ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
 		GMP_ABI="64"
 		OPENSSL_TARGET="darwin64-x86_64-cc"
-		CMAKE_GLOBAL_EXTRA_FLAGS="-DCMAKE_OSX_ARCHITECTURES=x86-64"
+		CMAKE_GLOBAL_EXTRA_FLAGS="-DCMAKE_OSX_ARCHITECTURES=x86_64"
 		echo "[INFO] Compiling for Intel MacOS x86_64"
 	#TODO: add aarch64 platforms (ios, android, rpi)
 	elif [ -z "$CFLAGS" ]; then
