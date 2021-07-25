@@ -178,6 +178,7 @@ done
 GMP_ABI=""
 TOOLCHAIN_PREFIX=""
 OPENSSL_TARGET=""
+CMAKE_GLOBAL_EXTRA_FLAGS=""
 
 if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 	export CROSS_COMPILER="$PATH"
@@ -247,6 +248,7 @@ else
 		ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
 		GMP_ABI="64"
 		OPENSSL_TARGET="darwin64-x86_64-cc"
+		CMAKE_GLOBAL_EXTRA_FLAGS="-DCMAKE_OSX_ARCHITECTURES=x86-64"
 		echo "[INFO] Compiling for Intel MacOS x86_64"
 	#TODO: add aarch64 platforms (ios, android, rpi)
 	elif [ -z "$CFLAGS" ]; then
@@ -565,6 +567,7 @@ function build_leveldb {
 		-DLEVELDB_ZSTD=OFF \
 		-DLEVELDB_TCMALLOC=OFF \
 		-DCMAKE_BUILD_TYPE=Release \
+		$CMAKE_GLOBAL_EXTRA_FLAGS \
 		$EXTRA_FLAGS \
 		>> "$DIR/install.log" 2>&1
 	echo -n " compiling..."
@@ -670,6 +673,7 @@ function build_libzip {
 		-DCMAKE_INSTALL_PREFIX="$DIR/bin/php7" \
 		-DCMAKE_INSTALL_LIBDIR=lib \
 		$CMAKE_LIBZIP_EXTRA_FLAGS \
+		$CMAKE_GLOBAL_EXTRA_FLAGS \
 		-DBUILD_TOOLS=OFF \
 		-DBUILD_REGRESS=OFF \
 		-DBUILD_EXAMPLES=OFF \
