@@ -73,7 +73,7 @@ jobs:
       set -ex
       trap "exit 1" ERR
 
-      ./compile.sh -t mac64 -j4 -f -u -g -l
+      ./compile.sh -t mac-x86-64 -j4 -f -u -g -l
       tar -czf ./PHP_MacOS-x86_64.tar.gz bin
     displayName: Build PHP
   - bash: |
