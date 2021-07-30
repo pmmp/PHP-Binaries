@@ -4,6 +4,8 @@ REM For future users: This file MUST have CRLF line endings. If it doesn't, lots
 REM Also: Don't modify this version with sed, or it will screw up your line endings.
 set PHP_MAJOR_VER=8.0
 set PHP_VER=%PHP_MAJOR_VER%.8
+set PHP_GIT_REV=php-%PHP_VER%
+set PHP_DISPLAY_VER=%PHP_VER%
 set PHP_SDK_VER=2.2.0
 set PATH=C:\Program Files\7-Zip;C:\Program Files (x86)\GnuWin32\bin;%PATH%
 set VC_VER=vs16
@@ -59,7 +61,11 @@ if "%PHP_DEBUG_BUILD%"=="0" (
 )
 
 if "%SOURCES_PATH%"=="" (
-	set SOURCES_PATH=C:\pocketmine-php-sdk
+	if "%PHP_DEBUG_BUILD%"=="0" (
+		set SOURCES_PATH=C:\pocketmine-php-%PHP_DISPLAY_VER%-release
+	) else (
+		set SOURCES_PATH=C:\pocketmine-php-%PHP_DISPLAY_VER%-debug
+	)
 )
 call :pm-echo "Using path %SOURCES_PATH% for build sources"
 
@@ -93,8 +99,8 @@ cd /D "%SOURCES_PATH%"
 call bin\phpsdk_setvars.bat >>"%log_file%" 2>&1
 
 call :pm-echo "Downloading PHP source version %PHP_VER%..."
-call :get-zip https://github.com/php/php-src/archive/php-%PHP_VER%.zip >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to download PHP source"
-move php-src-php-%PHP_VER% php-src >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to move PHP source to target directory"
+call :get-zip https://github.com/php/php-src/archive/%PHP_GIT_REV%.zip >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to download PHP source"
+move php-src-%PHP_GIT_REV% php-src >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to move PHP source to target directory"
 
 set DEPS_DIR_NAME=deps
 set DEPS_DIR="%SOURCES_PATH%\%DEPS_DIR_NAME%"
@@ -274,16 +280,16 @@ nmake snap >>"%log_file%" 2>&1 || call :pm-fatal-error "Error assembling artifac
 
 call :pm-echo "Removing unneeded dependency DLLs..."
 REM remove ICU DLLs copied unnecessarily by nmake snap - this needs to be removed if we ever have ext/intl as a dependency
-del /q "%SOURCES_PATH%\php-src\%ARCH%\Release_TS\php-%PHP_VER%\icu*.dll" 2>&1
+del /q "%SOURCES_PATH%\php-src\%ARCH%\Release_TS\php-%PHP_DISPLAY_VER%\icu*.dll" 2>&1
 REM remove enchant dependencies which are unnecessarily copied - this needs to be removed if we ever have ext/enchant as a dependency
-del /q "%SOURCES_PATH%\php-src\%ARCH%\Release_TS\php-%PHP_VER%\glib-*.dll" 2>&1
-del /q "%SOURCES_PATH%\php-src\%ARCH%\Release_TS\php-%PHP_VER%\gmodule-*.dll" 2>&1
-rmdir /s /q "%SOURCES_PATH%\php-src\%ARCH%\Release_TS\php-%PHP_VER%\lib\enchant\" 2>&1
+del /q "%SOURCES_PATH%\php-src\%ARCH%\Release_TS\php-%PHP_DISPLAY_VER%\glib-*.dll" 2>&1
+del /q "%SOURCES_PATH%\php-src\%ARCH%\Release_TS\php-%PHP_DISPLAY_VER%\gmodule-*.dll" 2>&1
+rmdir /s /q "%SOURCES_PATH%\php-src\%ARCH%\Release_TS\php-%PHP_DISPLAY_VER%\lib\enchant\" 2>&1
 
 call :pm-echo "Copying artifacts..."
 cd /D "%outpath%"
 mkdir bin
-move "%SOURCES_PATH%\php-src\%ARCH%\%OUT_PATH_REL%_TS\php-%PHP_VER%" bin\php
+move "%SOURCES_PATH%\php-src\%ARCH%\%OUT_PATH_REL%_TS\php-%PHP_DISPLAY_VER%" bin\php
 cd /D bin\php
 
 set php_ini=php.ini
@@ -339,7 +345,7 @@ bin\php\php.exe --version >>"%log_file%" 2>&1 || call :pm-fatal-error "PHP build
 bin\php\php.exe -m >>"%log_file%" 2>&1
 
 call :pm-echo "Packaging build..."
-set package_filename=php-%PHP_VER%-%VC_VER%-%ARCH%.zip
+set package_filename=php-%PHP_DISPLAY_VER%-%VC_VER%-%ARCH%.zip
 if exist %package_filename% rm %package_filename%
 7z a -bd %package_filename% bin vc_redist.x64.exe >nul || call :pm-fatal-error "Failed to package the build"
 
