@@ -58,7 +58,7 @@ if "%PHP_DEBUG_BUILD%"=="0" (
 )
 
 if "%SOURCES_PATH%"=="" (
-	set SOURCES_PATH=C:\pocketmine-php-sdk
+	set SOURCES_PATH=%TEMP%\pocketmine-php-sdk
 )
 call :pm-echo "Using path %SOURCES_PATH% for build sources"
 
