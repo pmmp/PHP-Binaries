@@ -1,9 +1,9 @@
 #!/bin/bash
-[ -z "$PHP_VERSION" ] && PHP_VERSION="8.0.8"
+[ -z "$PHP_VERSION" ] && PHP_VERSION="8.0.9"
 
 ZLIB_VERSION="1.2.11"
 GMP_VERSION="6.2.1"
-CURL_VERSION="curl-7_77_0"
+CURL_VERSION="curl-7_78_0"
 YAML_VERSION="0.2.5"
 LEVELDB_VERSION="623f633d3a588f9e478b95a12dc794d25968234f"
 LIBXML_VERSION="2.9.12"
@@ -14,12 +14,12 @@ LIBZIP_VERSION="1.8.0"
 SQLITE3_YEAR="2021"
 SQLITE3_VERSION="3360000" #3.36.0
 
-EXT_PTHREADS_VERSION="2784d4d17dc53be9e2732a5c11dae199b4a57c93"
+EXT_PTHREADS_VERSION="26ddd23b509f654b2a31b92289bbc631aa65d91c"
 EXT_YAML_VERSION="2.2.1"
-EXT_LEVELDB_VERSION="98f2fc73d41e25ce74c59dd49c43380be1cbcf09"
+EXT_LEVELDB_VERSION="317fdcd8415e1566fc2835ce2bdb8e19b890f9f3"
 EXT_POCKETMINE_CHUNKUTILS_VERSION="0.1.0"
 EXT_XDEBUG_VERSION="3.0.4"
-EXT_IGBINARY_VERSION="3.2.3"
+EXT_IGBINARY_VERSION="3.2.4"
 EXT_CRYPTO_VERSION="0.3.2"
 EXT_RECURSIONGUARD_VERSION="0.1.0"
 
@@ -55,6 +55,7 @@ if [ "$(uname -s)" == "Darwin" ]; then
 	type glibtool >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install GNU libtool"; ((ERRORS++)); }
 	export LIBTOOL=glibtool
 	export LIBTOOLIZE=glibtoolize
+	[[ $(bison --version) == "bison (GNU Bison) 3."* ]] || { echo >&2 "[ERROR] MacOS bundled bison is too old. Install bison using Homebrew and update your PATH variable according to its instructions before running this script."; ((ERRORS++)); }
 else
 	type libtool >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"libtool\" or \"libtool-bin\""; ((ERRORS++)); }
 	export LIBTOOL=libtool
@@ -184,6 +185,7 @@ done
 GMP_ABI=""
 TOOLCHAIN_PREFIX=""
 OPENSSL_TARGET=""
+CMAKE_GLOBAL_EXTRA_FLAGS=""
 
 if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 	export CROSS_COMPILER="$PATH"
@@ -230,7 +232,11 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 	fi
 else
 	if [[ "$COMPILE_TARGET" == "" ]] && [[ "$(uname -s)" == "Darwin" ]]; then
-		COMPILE_TARGET="mac"
+		if [ "$(uname -m)" == "arm64" ]; then
+			COMPILE_TARGET="mac-arm64"
+		else
+			COMPILE_TARGET="mac-x86-64"
+		fi
 	fi
 	if [[ "$COMPILE_TARGET" == "linux" ]] || [[ "$COMPILE_TARGET" == "linux64" ]]; then
 		[ -z "$march" ] && march=x86-64;
@@ -239,7 +245,7 @@ else
 		GMP_ABI="64"
 		OPENSSL_TARGET="linux-x86_64"
 		echo "[INFO] Compiling for Linux x86_64"
-	elif [[ "$COMPILE_TARGET" == "mac" ]] || [[ "$COMPILE_TARGET" == "mac64" ]]; then
+	elif [[ "$COMPILE_TARGET" == "mac-x86-64" ]]; then
 		[ -z "$march" ] && march=core2;
 		[ -z "$mtune" ] && mtune=generic;
 		[ -z "$MACOSX_DEPLOYMENT_TARGET" ] && export MACOSX_DEPLOYMENT_TARGET=10.9;
@@ -253,8 +259,25 @@ else
 		ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
 		GMP_ABI="64"
 		OPENSSL_TARGET="darwin64-x86_64-cc"
-		echo "[INFO] Compiling for Intel MacOS x86_64"
+		CMAKE_GLOBAL_EXTRA_FLAGS="-DCMAKE_OSX_ARCHITECTURES=x86_64"
+		echo "[INFO] Compiling for MacOS x86_64"
 	#TODO: add aarch64 platforms (ios, android, rpi)
+	elif [[ "$COMPILE_TARGET" == "mac-arm64" ]]; then
+		[ -z "$MACOSX_DEPLOYMENT_TARGET" ] && export MACOSX_DEPLOYMENT_TARGET=11.0;
+		CFLAGS="$CFLAGS -arch arm64 -fomit-frame-pointer -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET"
+		LDFLAGS="$LDFLAGS -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET"
+		if [ "$DO_STATIC" == "no" ]; then
+			LDFLAGS="$LDFLAGS -Wl,-rpath,@loader_path/../lib";
+			export DYLD_LIBRARY_PATH="@loader_path/../lib"
+		fi
+		CFLAGS="$CFLAGS -Qunused-arguments"
+		GMP_ABI="64"
+		OPENSSL_TARGET="darwin64-arm64-cc"
+		CMAKE_GLOBAL_EXTRA_FLAGS="-DCMAKE_OSX_ARCHITECTURES=arm64"
+		echo "[INFO] Compiling for MacOS M1"
+	elif [[ "$COMPILE_TARGET" != "" ]]; then
+		echo "Please supply a proper platform [mac-arm64 mac-x86-64 linux linux64] to compile for"
+		exit 1
 	elif [ -z "$CFLAGS" ]; then
 		if [ `getconf LONG_BIT` == "64" ]; then
 			echo "[INFO] Compiling for current machine using 64-bit"
@@ -280,7 +303,7 @@ fi
 if [ "$DO_OPTIMIZE" != "no" ]; then
 	#FLAGS_LTO="-fvisibility=hidden -flto"
 	CFLAGS="$CFLAGS -O2 -ffast-math -ftree-vectorize -fomit-frame-pointer -funswitch-loops -fivopts"
-	if [ "$COMPILE_TARGET" != "mac" ] && [ "$COMPILE_TARGET" != "mac32" ] && [ "$COMPILE_TARGET" != "mac64" ]; then
+	if [ "$COMPILE_TARGET" != "mac-x86-64" ] && [ "$COMPILE_TARGET" != "mac-arm64" ]; then
 		CFLAGS="$CFLAGS -funsafe-loop-optimizations -fpredictive-commoning -ftracer -ftree-loop-im -frename-registers -fcx-limited-range"
 	fi
 
@@ -549,27 +572,6 @@ function build_yaml {
 	echo " done!"
 }
 
-function build_shell2 {
-	echo -n "[SSH2] downloading 1.9.0..."
-	download_file "https://github.com/libssh2/libssh2/releases/download/libssh2-1.9.0/libssh2-1.9.0.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv libssh2-1.9.0 ssh2
-	cd ssh2
-
-	echo -n " checking..."
-
-	RANLIB=$RANLIB ./configure \
-	--prefix="$DIR/bin/php7" \
-	$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
-	sed -i=".backup" 's/ tests win32/ win32/g' Makefile
-	echo -n " compiling..."
-	make -j $THREADS all >> "$DIR/install.log" 2>&1
-	echo -n " installing..."
-	make install >> "$DIR/install.log" 2>&1
-	cd ..
-	echo " done!"
-}
-
-
 function build_leveldb {
 	echo -n "[LevelDB] downloading $LEVELDB_VERSION..."
 	download_file "https://github.com/pmmp/leveldb/archive/$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
@@ -592,6 +594,7 @@ function build_leveldb {
 		-DLEVELDB_ZSTD=OFF \
 		-DLEVELDB_TCMALLOC=OFF \
 		-DCMAKE_BUILD_TYPE=Release \
+		$CMAKE_GLOBAL_EXTRA_FLAGS \
 		$EXTRA_FLAGS \
 		>> "$DIR/install.log" 2>&1
 	echo -n " compiling..."
@@ -697,6 +700,7 @@ function build_libzip {
 		-DCMAKE_INSTALL_PREFIX="$DIR/bin/php7" \
 		-DCMAKE_INSTALL_LIBDIR=lib \
 		$CMAKE_LIBZIP_EXTRA_FLAGS \
+		$CMAKE_GLOBAL_EXTRA_FLAGS \
 		-DBUILD_TOOLS=OFF \
 		-DBUILD_REGRESS=OFF \
 		-DBUILD_EXAMPLES=OFF \
@@ -746,7 +750,6 @@ build_gmp
 build_openssl
 build_curl
 build_yaml
-build_shell2
 if [ "$COMPILE_LEVELDB" == "yes" ]; then
 	build_leveldb
 fi
@@ -804,12 +807,7 @@ get_github_extension "pthreads" "$EXT_PTHREADS_VERSION" "pmmp" "pthreads" #"v" n
 get_github_extension "yaml" "$EXT_YAML_VERSION" "php" "pecl-file_formats-yaml"
 #get_pecl_extension "yaml" "$EXT_YAML_VERSION"
 
-#get_github_extension "ssh2" "$EXT_YAML_VERSION" "php" "pecl-file_formats-ssh2"
-get_pecl_extension "ssh2" "1.3.1"
-
 get_github_extension "igbinary" "$EXT_IGBINARY_VERSION" "igbinary" "igbinary"
-#TODO: remove this when igbinary 3.2.2 is released
-sed -i='.bak' 's/^#if PHP_MAJOR_VERSION == 7$/#if PHP_MAJOR_VERSION == 7 || PHP_MAJOR_VERSION == 8/g' "$BUILD_DIR/php/ext/igbinary/php_igbinary.h"
 
 get_github_extension "recursionguard" "$EXT_RECURSIONGUARD_VERSION" "pmmp" "ext-recursionguard"
 
@@ -920,7 +918,6 @@ RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS_LTO" LDFLA
 --with-gmp \
 --with-yaml \
 --with-openssl \
---with-ssh2 \
 --with-zip \
 $HAS_LIBJPEG \
 $HAS_GD \
@@ -1045,7 +1042,11 @@ if [ "$HAVE_OPCACHE" == "yes" ]; then
 	echo "opcache.revalidate_freq=0" >> "$DIR/bin/php7/bin/php.ini"
 	echo "opcache.file_update_protection=0" >> "$DIR/bin/php7/bin/php.ini"
 	echo "opcache.optimization_level=0x7FFEBFFF ;https://github.com/php/php-src/blob/53c1b485741f31a17b24f4db2b39afeb9f4c8aba/ext/opcache/Optimizer/zend_optimizer.h" >> "$DIR/bin/php7/bin/php.ini"
-	echo "opcache.jit=1205 ;https://www.php.net/manual/en/opcache.configuration.php#ini.opcache.jit" >> "$DIR/bin/php7/bin/php.ini"
+	echo "" >> "$DIR/bin/php7/bin/php.ini"
+	echo "; ---- ! WARNING ! ----" >> "$DIR/bin/php7/bin/php.ini"
+	echo "; JIT can provide big performance improvements, but as of PHP 8.0.8 it is still unstable. For this reason, it is disabled by default." >> "$DIR/bin/php7/bin/php.ini"
+	echo "; Enable it at your own risk. See https://www.php.net/manual/en/opcache.configuration.php#ini.opcache.jit for possible options." >> "$DIR/bin/php7/bin/php.ini"
+	echo "opcache.jit=off" >> "$DIR/bin/php7/bin/php.ini"
 	echo "opcache.jit_buffer_size=128M" >> "$DIR/bin/php7/bin/php.ini"
 fi
 
@@ -1085,4 +1086,3 @@ fi
 date >> "$DIR/install.log" 2>&1
 echo "[PocketMine] You should start the server now using \"./start.sh\"."
 echo "[PocketMine] If it doesn't work, please send the \"install.log\" file to the Bug Tracker."
-tar zcvf PHP-8.0-Linux-x86_64.tar.gz bin/
