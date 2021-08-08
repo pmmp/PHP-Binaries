@@ -929,7 +929,7 @@ $HAS_POCKETMINE_CHUNKUTILS \
 --disable-mbregex \
 --enable-calendar \
 --enable-pthreads \
---disable-fileinfo \
+--enable-fileinfo \
 --with-libxml \
 --enable-xml \
 --enable-dom \
