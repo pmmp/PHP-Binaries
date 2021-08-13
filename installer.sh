@@ -131,13 +131,11 @@ else
 			echo "[!] Failed to get download information: $error"
 			exit 1
 		fi
-		FILENAME=$(parse_json "$VERSION_DATA" phar_name)
 		BASE_VERSION=$(parse_json "$VERSION_DATA" base_version)
 		BUILD=$(parse_json "$VERSION_DATA" build_number)
 		MCPE_VERSION=$(parse_json "$VERSION_DATA" mcpe_version)
 		PHP_VERSION=$(parse_json "$VERSION_DATA" php_version)
 		VERSION_DATE=$(parse_json "$VERSION_DATA" date)
-		BASE_URL=$(parse_json "$VERSION_DATA" url)
 		VERSION_DOWNLOAD=$(parse_json "$VERSION_DATA" download_url)
 
 		if [ "$(uname -s)" == "Darwin" ]; then
