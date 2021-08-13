@@ -132,7 +132,7 @@ else
 			exit 1
 		fi
 		BASE_VERSION=$(parse_json "$VERSION_DATA" base_version)
-		BUILD=$(parse_json "$VERSION_DATA" build_number)
+		BUILD=$(parse_json "$VERSION_DATA" build)
 		MCPE_VERSION=$(parse_json "$VERSION_DATA" mcpe_version)
 		PHP_VERSION=$(parse_json "$VERSION_DATA" php_version)
 		VERSION_DATE=$(parse_json "$VERSION_DATA" date)
