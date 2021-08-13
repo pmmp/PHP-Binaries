@@ -211,6 +211,7 @@ call configure^
  --enable-calendar^
  --enable-com-dotnet^
  --enable-ctype^
+ --enable-fileinfo=shared^
  --enable-filter^
  --enable-hash^
  --enable-igbinary=shared^
@@ -297,6 +298,7 @@ call :pm-echo "Generating php.ini..."
 (echo opcache.optimization_level=0x7FFEBFFF)>>"%php_ini%"
 (echo opcache.cache_id=PHP_BINARY ;prevent sharing SHM between different binaries - they won't work because of ASLR)>>"%php_ini%"
 (echo ;Optional extensions, supplied for plugin use)>>"%php_ini%"
+(echo extension=php_fileinfo.dll)>>"%php_ini%"
 (echo extension=php_gd.dll)>>"%php_ini%"
 (echo extension=php_mysqli.dll)>>"%php_ini%"
 (echo extension=php_sqlite3.dll)>>"%php_ini%"
