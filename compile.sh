@@ -940,7 +940,7 @@ $HAS_DEBUG \
 --disable-mbregex \
 --enable-calendar \
 --enable-pthreads \
---disable-fileinfo \
+--enable-fileinfo \
 --with-libxml \
 --enable-xml \
 --enable-dom \
