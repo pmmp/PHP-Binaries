@@ -1,5 +1,5 @@
 #!/bin/bash
-[ -z "$PHP_VERSION" ] && PHP_VERSION="8.0.10"
+[ -z "$PHP_VERSION" ] && PHP_VERSION="8.0.11"
 
 ZLIB_VERSION="1.2.11"
 GMP_VERSION="6.2.1"
