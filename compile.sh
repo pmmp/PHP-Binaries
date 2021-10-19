@@ -275,6 +275,12 @@ else
 		OPENSSL_TARGET="darwin64-arm64-cc"
 		CMAKE_GLOBAL_EXTRA_FLAGS="-DCMAKE_OSX_ARCHITECTURES=arm64"
 		echo "[INFO] Compiling for MacOS M1"
+	elif [ "$COMPILE_TARGET" == "aarch64" ]; then
+		[ -z "$march" ] && march="armv8-a";
+		[ -z "$mtune" ] && mtune=generic;
+		OPENSSL_TARGET="linux-aarch64"
+		export ac_cv_func_fnmatch_works=yes #musl should be OK
+		echo "[INFO] Compiling for ARMv8 (aarch64)"
 	elif [[ "$COMPILE_TARGET" != "" ]]; then
 		echo "Please supply a proper platform [mac-arm64 mac-x86-64 linux linux64] to compile for"
 		exit 1
