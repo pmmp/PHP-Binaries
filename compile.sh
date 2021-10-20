@@ -3,13 +3,13 @@
 
 ZLIB_VERSION="1.2.11"
 GMP_VERSION="6.2.1"
-CURL_VERSION="curl-7_78_0"
+CURL_VERSION="curl-7_79_1"
 YAML_VERSION="0.2.5"
-LEVELDB_VERSION="623f633d3a588f9e478b95a12dc794d25968234f"
+LEVELDB_VERSION="1c7564468b41610da4f498430e795ca4de0931ff"
 LIBXML_VERSION="2.9.12"
 LIBPNG_VERSION="1.6.37"
 LIBJPEG_VERSION="9d"
-OPENSSL_VERSION="1.1.1k"
+OPENSSL_VERSION="1.1.1l"
 LIBZIP_VERSION="1.8.0"
 SQLITE3_YEAR="2021"
 SQLITE3_VERSION="3360000" #3.36.0
@@ -18,8 +18,8 @@ EXT_PTHREADS_VERSION="4213ce7dcdc2cf1d71d63e59950e33144220dfdb"
 EXT_YAML_VERSION="2.2.1"
 EXT_LEVELDB_VERSION="317fdcd8415e1566fc2835ce2bdb8e19b890f9f3"
 EXT_POCKETMINE_CHUNKUTILS_VERSION="0.1.0"
-EXT_XDEBUG_VERSION="3.0.4"
-EXT_IGBINARY_VERSION="3.2.4"
+EXT_XDEBUG_VERSION="3.1.0"
+EXT_IGBINARY_VERSION="3.2.6"
 EXT_CRYPTO_VERSION="0.3.2"
 EXT_RECURSIONGUARD_VERSION="0.1.0"
 
@@ -809,10 +809,6 @@ function get_pecl_extension {
 
 echo "[PHP] Downloading additional extensions..."
 
-if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
-	get_pecl_extension "xdebug" "$EXT_XDEBUG_VERSION"
-fi
-
 get_github_extension "pthreads" "$EXT_PTHREADS_VERSION" "pmmp" "pthreads" #"v" needed for release tags because github removes the "v"
 #get_pecl_extension "pthreads" "$EXT_PTHREADS_VERSION"
 
@@ -1069,6 +1065,7 @@ fi
 echo " done!"
 
 if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
+	get_pecl_extension "xdebug" "$EXT_XDEBUG_VERSION"
 	echo -n "[xdebug] checking..."
 	cd "$BUILD_DIR/php/ext/xdebug"
 	$DIR/bin/php7/bin/phpize >> "$DIR/install.log" 2>&1
