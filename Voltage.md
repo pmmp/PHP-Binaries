@@ -1,4 +1,4 @@
-# Custom PHP build scripts for Voltage-MC
+# Custom PHP build scripts for Voltage-Groups
 
 use ``./compile.sh -t linux64 -j 4 -f -g``
 - [Logs build](install.log) PHP_Linux-x86_64.tar.gz
@@ -30,3 +30,22 @@ Bash script used to compile PHP on Linux platforms. Make sure you have ``apt ins
 ### Common pitfalls
 - If used, the `-t` option (target) MUST be specified BEFORE the `-f` option (optimizations)
 - Avoid using the script in directory trees containing spaces. Some libraries don't like trying to be built in directory trees containing spaces, e.g. `/home/user/my folder/pocketmine-mp/` might experience problems.
+## Contents
+
+- [License](./EUPL.md)
+
+## Community
+
+Active channels:
+
+- Twitter: [@voltagegroups](https://twitter.com/VoltageGroups?t=wSiFVaX5GiHx8Z-LmSC7iQ&s=09)
+- Discord: [ntF6gH6NNm](https://discord.gg/ntF6gH6NNm)
+- © Voltage-Groups
+<div align="center">
+  <img src="http://image.noelshack.com/fichiers/2021/39/5/1633118741-logo-no-background.png" height="50" width="50" align="left"></img>
+</div>
+<br/><br/>
+
+## © Voltage-Groups
+
+Voltage-Groups are not affiliated with Mojang. All brands and trademarks belong to their respective owners. Voltage-Groups is not a Mojang-approved software, nor is it associated with Mojang.
