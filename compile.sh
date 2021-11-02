@@ -13,15 +13,18 @@ OPENSSL_VERSION="1.1.1l"
 LIBZIP_VERSION="1.8.0"
 SQLITE3_YEAR="2021"
 SQLITE3_VERSION="3360000" #3.36.0
+LIBDEFLATE_VERSION="047aa84e01b38d82f3612810e357bd40f14a3d39" #1.8
 
 EXT_PTHREADS_VERSION="4.0.0"
 EXT_YAML_VERSION="2.2.1"
 EXT_LEVELDB_VERSION="317fdcd8415e1566fc2835ce2bdb8e19b890f9f3"
-EXT_POCKETMINE_CHUNKUTILS_VERSION="0.1.0"
+EXT_CHUNKUTILS2_VERSION="0.3.1"
 EXT_XDEBUG_VERSION="3.1.1"
 EXT_IGBINARY_VERSION="3.2.6"
 EXT_CRYPTO_VERSION="0.3.2"
 EXT_RECURSIONGUARD_VERSION="0.1.0"
+EXT_LIBDEFLATE_VERSION="be5367c81c61c612271377cdae9ffacac0f6e53a"
+EXT_MORTON_VERSION="0.1.2"
 
 function write_out {
 	echo "[$1] $2"
@@ -108,7 +111,6 @@ OPTIMIZE_TARGET=""
 DO_STATIC="no"
 DO_CLEANUP="yes"
 COMPILE_DEBUG="no"
-COMPILE_LEVELDB="no"
 HAVE_VALGRIND="--without-valgrind"
 HAVE_OPCACHE="yes"
 FSANITIZE_OPTIONS=""
@@ -116,10 +118,9 @@ FLAGS_LTO=""
 
 LD_PRELOAD=""
 
-COMPILE_POCKETMINE_CHUNKUTILS="no"
 COMPILE_GD="no"
 
-while getopts "::t:j:srdlxff:ugnva:" OPTION; do
+while getopts "::t:j:srdxff:gnva:" OPTION; do
 
 	case $OPTION in
 		t)
@@ -141,10 +142,6 @@ while getopts "::t:j:srdlxff:ugnva:" OPTION; do
 			echo "[opt] Doing cross-compile"
 			IS_CROSSCOMPILE="yes"
 			;;
-		l)
-			echo "[opt] Will compile with LevelDB support"
-			COMPILE_LEVELDB="yes"
-			;;
 		s)
 			echo "[opt] Will compile everything statically"
 			DO_STATIC="yes"
@@ -154,10 +151,6 @@ while getopts "::t:j:srdlxff:ugnva:" OPTION; do
 			echo "[opt] Enabling abusive optimizations..."
 			DO_OPTIMIZE="yes"
 			OPTIMIZE_TARGET="$OPTARG"
-			;;
-		u)
-			echo "[opt] Will compile with PocketMine-ChunkUtils C extension for Anvil"
-			COMPILE_POCKETMINE_CHUNKUTILS="yes"
 			;;
 		g)
 			echo "[opt] Will enable GD2"
@@ -745,22 +738,27 @@ function build_sqlite3 {
 	echo " done!"
 }
 
-function build_shell2 {
-	echo -n "[SSH2] downloading 1.9.0..."
-	download_file "https://github.com/libssh2/libssh2/releases/download/libssh2-1.9.0/libssh2-1.9.0.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv libssh2-1.9.0 ssh2
-	cd ssh2
-
-	echo -n " checking..."
-
-	RANLIB=$RANLIB ./configure \
-	--prefix="$DIR/bin/php7" \
-	$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
-	sed -i=".backup" 's/ tests win32/ win32/g' Makefile
-	echo -n " compiling..."
-	make -j $THREADS all >> "$DIR/install.log" 2>&1
-	echo -n " installing..."
-	make install >> "$DIR/install.log" 2>&1
+function build_libdeflate {
+	echo -n "[libdeflate] downloading $LIBDEFLATE_VERSION..."
+	download_file "https://github.com/ebiggers/libdeflate/archive/$LIBDEFLATE_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv libdeflate-$LIBDEFLATE_VERSION libdeflate >> "$DIR/install.log" 2>&1
+	cd libdeflate
+	if [ "$DO_STATIC" == "yes" ]; then
+		echo -n " compiling..."
+		make -j $THREADS libdeflate.a >> "$DIR/install.log" 2>&1
+		echo -n " manually copying installation files for static build..."
+		cp ./libdeflate.a "$DIR/bin/php7/lib"
+		cp ./libdeflate.h "$DIR/bin/php7/include"
+	else
+		echo -n " compiling..."
+		PREFIX="$DIR/bin/php7" make -j $THREADS install >> "$DIR/install.log" 2>&1
+		echo -n " cleaning..."
+		rm "$DIR/bin/php7/lib/libdeflate.a"
+		if [ "$(uname -s)" == "Darwin" ]; then
+			#libdeflate makefile doesn't set this correctly
+			install_name_tool -id "$DIR/bin/php7/lib/libdeflate.0.dylib" "$DIR/bin/php7/lib/libdeflate.0.dylib"
+		fi
+	fi
 	cd ..
 	echo " done!"
 }
@@ -770,10 +768,7 @@ build_gmp
 build_openssl
 build_curl
 build_yaml
-build_shell2
-if [ "$COMPILE_LEVELDB" == "yes" ]; then
-	build_leveldb
-fi
+build_leveldb
 if [ "$COMPILE_GD" == "yes" ]; then
 	build_libpng
 	build_libjpeg
@@ -787,6 +782,7 @@ fi
 build_libxml2
 build_libzip
 build_sqlite3
+build_libdeflate
 
 # PECL libraries
 
@@ -824,9 +820,6 @@ get_github_extension "pthreads" "$EXT_PTHREADS_VERSION" "pmmp" "pthreads" #"v" n
 get_github_extension "yaml" "$EXT_YAML_VERSION" "php" "pecl-file_formats-yaml"
 #get_pecl_extension "yaml" "$EXT_YAML_VERSION"
 
-#get_github_extension "ssh2" "$EXT_YAML_VERSION" "php" "pecl-file_formats-ssh2"
-get_pecl_extension "ssh2" "1.3.1"
-
 get_github_extension "igbinary" "$EXT_IGBINARY_VERSION" "igbinary" "igbinary"
 
 get_github_extension "recursionguard" "$EXT_RECURSIONGUARD_VERSION" "pmmp" "ext-recursionguard"
@@ -839,21 +832,13 @@ git submodule update --init --recursive >> "$DIR/install.log" 2>&1
 cd "$BUILD_DIR"
 echo " done!"
 
-if [ "$COMPILE_LEVELDB" == "yes" ]; then
-	#PHP LevelDB
-	get_github_extension "leveldb" "$EXT_LEVELDB_VERSION" "pmmp" "php-leveldb"
-	HAS_LEVELDB=--with-leveldb="$DIR/bin/php7"
-else
-	HAS_LEVELDB=""
-fi
+get_github_extension "leveldb" "$EXT_LEVELDB_VERSION" "pmmp" "php-leveldb"
 
-if [ "$COMPILE_POCKETMINE_CHUNKUTILS" == "yes" ]; then
-	get_github_extension "pocketmine-chunkutils" "$EXT_POCKETMINE_CHUNKUTILS_VERSION" "dktapps" "PocketMine-C-ChunkUtils"
-	HAS_POCKETMINE_CHUNKUTILS=--enable-pocketmine-chunkutils
-else
-	HAS_POCKETMINE_CHUNKUTILS=""
-fi
+get_github_extension "chunkutils2" "$EXT_CHUNKUTILS2_VERSION" "pmmp" "ext-chunkutils2"
 
+get_github_extension "libdeflate" "$EXT_LIBDEFLATE_VERSION" "pmmp" "ext-libdeflate"
+
+get_github_extension "morton" "$EXT_MORTON_VERSION" "pmmp" "ext-morton"
 
 echo -n "[PHP]"
 
@@ -938,14 +923,15 @@ RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS_LTO" LDFLA
 --with-gmp \
 --with-yaml \
 --with-openssl \
---with-ssh2 \
 --with-zip \
+--with-libdeflate="$DIR/bin/php7" \
 $HAS_LIBJPEG \
 $HAS_GD \
+--with-leveldb="$DIR/bin/php7" \
 --without-readline \
-$HAS_LEVELDB \
 $HAS_DEBUG \
-$HAS_POCKETMINE_CHUNKUTILS \
+--enable-chunkutils2 \
+--enable-morton \
 --enable-mbstring \
 --disable-mbregex \
 --enable-calendar \
@@ -992,7 +978,7 @@ fi
 sed -i=".backup" 's/PHP_BINARIES. pharcmd$/PHP_BINARIES)/g' Makefile
 sed -i=".backup" 's/install-programs install-pharcmd$/install-programs/g' Makefile
 
-if [[ "$COMPILE_LEVELDB" == "yes" ]] && [[ "$DO_STATIC" == "yes" ]]; then
+if [[ "$DO_STATIC" == "yes" ]]; then
 	sed -i=".backup" 's/--mode=link $(CC)/--mode=link $(CXX)/g' Makefile
 fi
 
@@ -1108,4 +1094,3 @@ fi
 date >> "$DIR/install.log" 2>&1
 echo "[PocketMine] You should start the server now using \"./start.sh\"."
 echo "[PocketMine] If it doesn't work, please send the \"install.log\" file to the Bug Tracker."
-tar zcvf PHP-8.0-Linux-x86_64.tar.gz bin/
