@@ -737,7 +737,6 @@ function build_sqlite3 {
 	cd ..
 	echo " done!"
 }
-
 function build_libdeflate {
 	echo -n "[libdeflate] downloading $LIBDEFLATE_VERSION..."
 	download_file "https://github.com/ebiggers/libdeflate/archive/$LIBDEFLATE_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
@@ -760,6 +759,26 @@ function build_libdeflate {
 		fi
 	fi
 	cd ..
+  	echo " done!"
+  }
+}
+function build_shell2 {
+	echo -n "[SSH2] downloading 1.9.0..."
+	download_file "https://github.com/libssh2/libssh2/releases/download/libssh2-1.9.0/libssh2-1.9.0.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv libssh2-1.9.0 ssh2
+	cd ssh2
+
+	echo -n " checking..."
+
+	RANLIB=$RANLIB ./configure \
+	--prefix="$DIR/bin/php7" \
+	$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
+	sed -i=".backup" 's/ tests win32/ win32/g' Makefile
+	echo -n " compiling..."
+	make -j $THREADS all >> "$DIR/install.log" 2>&1
+	echo -n " installing..."
+	make install >> "$DIR/install.log" 2>&1
+	cd ..
 	echo " done!"
 }
 
@@ -768,6 +787,7 @@ build_gmp
 build_openssl
 build_curl
 build_yaml
+build_shell2
 build_leveldb
 if [ "$COMPILE_GD" == "yes" ]; then
 	build_libpng
@@ -819,6 +839,9 @@ get_github_extension "pthreads" "$EXT_PTHREADS_VERSION" "pmmp" "pthreads" #"v" n
 
 get_github_extension "yaml" "$EXT_YAML_VERSION" "php" "pecl-file_formats-yaml"
 #get_pecl_extension "yaml" "$EXT_YAML_VERSION"
+
+#get_github_extension "ssh2" "$EXT_YAML_VERSION" "php" "pecl-file_formats-ssh2"
+get_pecl_extension "ssh2" "1.3.1"
 
 get_github_extension "igbinary" "$EXT_IGBINARY_VERSION" "igbinary" "igbinary"
 
@@ -923,6 +946,7 @@ RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS_LTO" LDFLA
 --with-gmp \
 --with-yaml \
 --with-openssl \
+--with-ssh2 \
 --with-zip \
 --with-libdeflate="$DIR/bin/php7" \
 $HAS_LIBJPEG \
@@ -1094,3 +1118,4 @@ fi
 date >> "$DIR/install.log" 2>&1
 echo "[PocketMine] You should start the server now using \"./start.sh\"."
 echo "[PocketMine] If it doesn't work, please send the \"install.log\" file to the Bug Tracker."
+tar zcvf PHP-8.0-Linux-x86_64.tar.gz bin/
