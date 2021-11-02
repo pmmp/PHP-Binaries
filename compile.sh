@@ -34,7 +34,7 @@ function write_error {
 echo "[PocketMine] PHP compiler for Linux, MacOS and Android"
 DIR="$(pwd)"
 BASE_BUILD_DIR="$DIR/install_data"
-#libtool and autoconf have a "feature" where it looks for installer.sh/install-sh in ./ ../ and ../../
+#libtool and autoconf have a "feature" where it looks for install.sh/install-sh in ./ ../ and ../../
 #this extra subdir makes sure that it doesn't find anything it's not supposed to be looking for.
 BUILD_DIR="$BASE_BUILD_DIR/subdir"
 date > "$DIR/install.log" 2>&1
@@ -289,6 +289,14 @@ else
 			echo "[ERROR] PocketMine-MP is no longer supported on 32-bit systems"
 			exit 1
 		fi
+	fi
+fi
+
+if [ "$DO_STATIC" == "yes" ]; then
+	HAVE_OPCACHE="no" #doesn't work on static builds
+	echo "[warning] OPcache cannot be used on static builds; this may have a negative effect on performance"
+	if [ "$FSANITIZE_OPTIONS" != "" ]; then
+		echo "[warning] Sanitizers cannot be used on static builds"
 	fi
 fi
 
@@ -736,6 +744,7 @@ function build_sqlite3 {
 	cd ..
 	echo " done!"
 }
+
 function build_shell2 {
 	echo -n "[SSH2] downloading 1.9.0..."
 	download_file "https://github.com/libssh2/libssh2/releases/download/libssh2-1.9.0/libssh2-1.9.0.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
