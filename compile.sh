@@ -940,6 +940,10 @@ RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS_LTO" LDFLA
 --with-yaml \
 --with-openssl \
 --with-zip \
+--with-libbson="yes" \
+--with-libmongoc="yes" \
+--with-mongodb-system-libs="yes" \
+--with-mongodb-ssl="auto" \
 --with-libdeflate="$DIR/bin/php7" \
 $HAS_LIBJPEG \
 $HAS_GD \
