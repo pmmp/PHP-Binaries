@@ -784,6 +784,22 @@ build_libzip
 build_sqlite3
 build_libdeflate
 
+function build_mongodb {
+	echo -n "[MongoDB] downloading..."
+	git clone https://github.com/mongodb/mongo-php-driver.git  >> "$DIR/install.log" 2>&1
+	echo -n " checking..."
+	cd mongo-php-driver
+	git submodule update --init  >> "$DIR/install.log" 2>&1
+	$DIR/bin/php7/bin/phpize >> "$DIR/install.log" 2>&1
+	./configure --with-php-config="$DIR/bin/php7/bin/php-config" >> "$DIR/install.log" 2>&1
+	echo -n " compiling..."
+	make all >> "$DIR/install.log" 2>&1
+	echo -n " installing..."
+	make install >> "$DIR/install.log" 2>&1
+	echo "extension=mongodb.so" >> "$DIR/bin/php7/bin/php.ini"
+	echo " done!"
+}
+
 # PECL libraries
 
 # 1: extension name
@@ -1058,6 +1074,7 @@ if [ "$HAVE_OPCACHE" == "yes" ]; then
 fi
 
 echo " done!"
+build_mongodb
 
 if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
 	get_pecl_extension "xdebug" "$EXT_XDEBUG_VERSION"
