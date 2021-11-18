@@ -16,7 +16,7 @@ jobs:
       echo $PWD
       ls
       chmod +x compile.sh
-      echo | ./compile.sh -t linux64 -j 4 -f -g
+      echo | ./compile.sh -t linux64 -j 4 -f -g -3
       tar -czf ./PHP_Linux-x86_64.tar.gz bin
     displayName: Build PHP
   - bash: |
@@ -73,7 +73,7 @@ jobs:
       set -ex
       trap "exit 1" ERR
 
-      ./compile.sh -t mac-x86-64 -j4 -f -g
+      ./compile.sh -t mac-x86-64 -j4 -f -g -3
       tar -czf ./PHP_MacOS-x86_64.tar.gz bin
     displayName: Build PHP
   - bash: |

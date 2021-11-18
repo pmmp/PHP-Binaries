@@ -18,6 +18,7 @@ LIBDEFLATE_VERSION="047aa84e01b38d82f3612810e357bd40f14a3d39" #1.8
 EXT_PTHREADS_VERSION="4.0.0"
 EXT_YAML_VERSION="2.2.1"
 EXT_LEVELDB_VERSION="317fdcd8415e1566fc2835ce2bdb8e19b890f9f3"
+EXT_LEGACY_CHUNKUTILS_VERSION="0.1.0"
 EXT_CHUNKUTILS2_VERSION="0.3.1"
 EXT_XDEBUG_VERSION="3.1.1"
 EXT_IGBINARY_VERSION="3.2.6"
@@ -113,6 +114,7 @@ DO_CLEANUP="yes"
 COMPILE_DEBUG="no"
 HAVE_VALGRIND="--without-valgrind"
 HAVE_OPCACHE="yes"
+HAVE_LEGACY_CHUNKUTILS=""
 FSANITIZE_OPTIONS=""
 FLAGS_LTO=""
 
@@ -120,7 +122,7 @@ LD_PRELOAD=""
 
 COMPILE_GD="no"
 
-while getopts "::t:j:srdxff:gnva:" OPTION; do
+while getopts "::t:j:srdxff:gnva:3" OPTION; do
 
 	case $OPTION in
 		t)
@@ -168,6 +170,12 @@ while getopts "::t:j:srdxff:gnva:" OPTION; do
 			echo "[opt] Will pass -fsanitize=$OPTARG to compilers and linkers"
 			FSANITIZE_OPTIONS="$OPTARG"
 			;;
+		3)
+			echo "[opt] Including optional legacy chunkutils v1 for faster Anvil world loading on PM3"
+			echo "[note] This extension is unused on PM4 and will be dropped from the script in the future"
+			HAVE_LEGACY_CHUNKUTILS="--enable-pocketmine-chunkutils"
+			;;
+
 		\?)
 			echo "Invalid option: -$OPTION$OPTARG" >&2
 			exit 1
@@ -840,6 +848,10 @@ get_github_extension "libdeflate" "$EXT_LIBDEFLATE_VERSION" "pmmp" "ext-libdefla
 
 get_github_extension "morton" "$EXT_MORTON_VERSION" "pmmp" "ext-morton"
 
+if [ "$HAVE_LEGACY_CHUNKUTILS" != "" ]; then
+	get_github_extension "legacy-chunkutils" "$EXT_LEGACY_CHUNKUTILS_VERSION" "pmmp" "PocketMine-C-ChunkUtils"
+fi
+
 echo -n "[PHP]"
 
 if [ "$DO_OPTIMIZE" != "no" ]; then
@@ -970,6 +982,7 @@ $HAVE_MYSQLI \
 --with-crypto \
 --enable-recursionguard \
 $HAVE_VALGRIND \
+$HAVE_LEGACY_CHUNKUTILS \
 $CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
 echo -n " compiling..."
 if [ "$COMPILE_FOR_ANDROID" == "yes" ]; then
