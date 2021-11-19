@@ -1073,7 +1073,7 @@ make all >> "$DIR/install.log" 2>&1
 echo -n " installing..."
 make install >> "$DIR/install.log" 2>&1
 echo "extension=mongodb.so" >> "$DIR/bin/php7/bin/php.ini"
-echo" done!"
+echo " done!"
 
 
 
