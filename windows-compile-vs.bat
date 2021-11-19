@@ -381,6 +381,7 @@ if exist "C:\Program Files (x86)\Microsoft Visual Studio\%~1" (
 call :pm-echo " - %~1: downloading %~2..."
 call :get-zip https://github.com/%~3/%~4/archive/%~2.zip || exit /B 1
 move %~4-%~2 %~1 >>"%log_file%" 2>&1 || exit /B 1
+echo [PocketMine] %~4-%~2 %~1
 exit /B 0
 
 :get-extension-zip-from-pecl:
