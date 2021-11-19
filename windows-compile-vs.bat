@@ -381,19 +381,17 @@ if exist "C:\Program Files (x86)\Microsoft Visual Studio\%~1" (
 call :pm-echo " - %~1: downloading %~2..."
 call :get-zip https://github.com/%~3/%~4/archive/%~2.zip || exit /B 1
 move %~4-%~2 %~1 >>"%log_file%" 2>&1 || exit /B 1
-call :pm-echo "[debug] %~4-%~2 %~1"
 exit /B 0
 
 :get-extension-zip-from-pecl:
 call :pm-echo " - %~1: downloading %~2..."
 call :get-zip https://windows.php.net/downloads/pecl/releases/%~3/%~2/php_%~3-%~2-%PHP_MAJOR_VER%-nts-vs16-x64.zip || exit /B 1
-move "php_%~3.dll" php_%~1.dll >>"%log_file%" 2>&1 || exit /B 1
 exit /B 0
 
 
 :get-zip
 wget %~1 --no-check-certificate -q -O temp.zip || exit /B 1
-7z x -y temp.zip >nul || exit /B 1
+7z x "*.dll" -y temp.zip *.dll>nul || exit /B 1
 del /s /q temp.zip >nul || exit /B 1
 exit /B 0
 
