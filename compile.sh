@@ -241,7 +241,7 @@ else
 	fi
 	if [[ "$COMPILE_TARGET" == "linux" ]] || [[ "$COMPILE_TARGET" == "linux64" ]]; then
 		[ -z "$march" ] && march=x86-64;
-		[ -z "$mtune" ] && mtune=nocona;
+		[ -z "$mtune" ] && mtune=skylake;
 		CFLAGS="$CFLAGS -m64"
 		GMP_ABI="64"
 		OPENSSL_TARGET="linux-x86_64"
