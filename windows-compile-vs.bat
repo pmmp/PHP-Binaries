@@ -201,7 +201,7 @@ call :get-extension-zip-from-github "leveldb"               "%PHP_LEVELDB_VER%" 
 call :get-extension-zip-from-github "recursionguard"        "%PHP_RECURSIONGUARD_VER%"        "pmmp"     "ext-recursionguard"      || exit 1
 call :get-extension-zip-from-github "morton"                "%PHP_MORTON_VER%"                "pmmp"     "ext-morton"              || exit 1
 call :get-extension-zip-from-github "libdeflate"            "%PHP_LIBDEFLATE_VER%"            "pmmp"     "ext-libdeflate"          || exit 1
-call :get-extension-zip-from-pecl "mongodb"            "%PHP_LIBMONGODB_VER%"                 "mongodb"  "mongodb"                 || exit 1
+call :get-extension-zip-from-pecl "mongodb"                 "%PHP_LIBMONGODB_VER%"            "mongodb"  || exit 1
 
 call :pm-echo " - crypto: downloading %PHP_CRYPTO_VER%..."
 git clone https://github.com/bukka/php-crypto.git crypto >>"%log_file%" 2>&1 || exit 1
@@ -397,7 +397,7 @@ exit /B 0
 :get-extension-zip-from-pecl:
 call :pm-echo " - %~1: downloading %~2..."
 call :get-zip https://windows.php.net/downloads/pecl/releases/%~3/%~2/php_%~3-%~2-%PHP_MAJOR_VER%-nts-vs16-x64.zip || exit /B 1
-move %~4-%~2 %~1 >>"%log_file%" 2>&1 || exit /B 1
+move %~3-%~2 %~1 >>"%log_file%" 2>&1 || exit /B 1
 exit /B 0
 
 

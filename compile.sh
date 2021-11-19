@@ -119,9 +119,8 @@ FLAGS_LTO=""
 LD_PRELOAD=""
 
 COMPILE_GD="no"
-COMPILE_MONGODB="yes"
 
-while getopts "::t:j:srdxff:gnvam:" OPTION; do
+while getopts "::t:j:srdxff:gnva:" OPTION; do
 
 	case $OPTION in
 		t)
@@ -168,10 +167,6 @@ while getopts "::t:j:srdxff:gnvam:" OPTION; do
 		a)
 			echo "[opt] Will pass -fsanitize=$OPTARG to compilers and linkers"
 			FSANITIZE_OPTIONS="$OPTARG"
-			;;
-		m)
-			echo "[opt] Will enable MongoDB"
-			COMPILE_MONGODB="yes"
 			;;
 		\?)
 			echo "Invalid option: -$OPTION$OPTARG" >&2
@@ -788,13 +783,6 @@ build_libxml2
 build_libzip
 build_sqlite3
 build_libdeflate
-if ["$COMPILE_MONGODB" == "yes"]; then
-	HAS_LIBMONGODB_SYSTEMLIBS = "--with-mongodb-system-libs=\"yes\""
-	HAS_LIBMONGODB_SSL = "--with-mongodb-ssl"
-else
-	HAS_LIBMONGODB_SYSTEMLIBS = ""
-	HAS_LIBMONGODB_SSL = ""
-fi
 
 # PECL libraries
 
@@ -936,8 +924,8 @@ RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS_LTO" LDFLA
 --with-yaml \
 --with-openssl \
 --with-zip \
-$HAS_LIBMONGODB_SYSTEMLIBS \
-$HAS_LIBMONGODB_SSL \
+--with-mongodb-system-libs="yes" \
+--with-mongodb-ssl \
 --with-libdeflate="$DIR/bin/php7" \
 $HAS_LIBJPEG \
 $HAS_GD \
@@ -1073,21 +1061,20 @@ fi
 
 echo " done!"
 
-if ["$COMPILE_MONGODB" == "yes"]; then
-	echo -n "[MongoDB] downloading..."
-	git clone https://github.com/mongodb/mongo-php-driver.git  >> "$DIR/install.log" 2>&1
-	echo -n " checking..."
-	cd mongo-php-driver
-	git submodule update --init  >> "$DIR/install.log" 2>&1
-	$DIR/bin/php7/bin/phpize >> "$DIR/install.log" 2>&1
-	./configure --with-php-config="$DIR/bin/php7/bin/php-config" >> "$DIR/install.log" 2>&1
-	echo -n " compiling..."
-	make all >> "$DIR/install.log" 2>&1
-	echo -n " installing..."
-	make install >> "$DIR/install.log" 2>&1
-	echo "extension=mongodb.so" >> "$DIR/bin/php7/bin/php.ini"
-	echo" done!"
-fi
+echo -n "[MongoDB] downloading..."
+git clone https://github.com/mongodb/mongo-php-driver.git  >> "$DIR/install.log" 2>&1
+echo -n " checking..."
+cd mongo-php-driver
+git submodule update --init  >> "$DIR/install.log" 2>&1
+$DIR/bin/php7/bin/phpize >> "$DIR/install.log" 2>&1
+./configure --with-php-config="$DIR/bin/php7/bin/php-config" >> "$DIR/install.log" 2>&1
+echo -n " compiling..."
+make all >> "$DIR/install.log" 2>&1
+echo -n " installing..."
+make install >> "$DIR/install.log" 2>&1
+echo "extension=mongodb.so" >> "$DIR/bin/php7/bin/php.ini"
+echo" done!"
+
 
 
 if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
