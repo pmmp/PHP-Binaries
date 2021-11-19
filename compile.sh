@@ -1040,7 +1040,6 @@ echo "memory_limit=1024M" >> "$DIR/bin/php7/bin/php.ini"
 echo "date.timezone=$TIMEZONE" >> "$DIR/bin/php7/bin/php.ini"
 echo "short_open_tag=0" >> "$DIR/bin/php7/bin/php.ini"
 echo "asp_tags=0" >> "$DIR/bin/php7/bin/php.ini"
-echo "phar.readonly=0" >> "$DIR/bin/php7/bin/php.ini"
 echo "phar.require_hash=1" >> "$DIR/bin/php7/bin/php.ini"
 echo "igbinary.compact_strings=0" >> "$DIR/bin/php7/bin/php.ini"
 if [[ "$COMPILE_DEBUG" == "yes" ]]; then
