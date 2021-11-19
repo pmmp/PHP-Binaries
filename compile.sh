@@ -119,6 +119,7 @@ FLAGS_LTO=""
 LD_PRELOAD=""
 
 COMPILE_GD="no"
+COMPILE_MONGODB="no"
 
 while getopts "::t:j:srdxff:gnva:" OPTION; do
 
@@ -167,6 +168,10 @@ while getopts "::t:j:srdxff:gnva:" OPTION; do
 		a)
 			echo "[opt] Will pass -fsanitize=$OPTARG to compilers and linkers"
 			FSANITIZE_OPTIONS="$OPTARG"
+			;;
+		m)
+			echo "[opt] Will enable MongoDB"
+			COMPILE_MONGODB="yes"
 			;;
 		\?)
 			echo "Invalid option: -$OPTION$OPTARG" >&2
@@ -783,22 +788,13 @@ build_libxml2
 build_libzip
 build_sqlite3
 build_libdeflate
-
-function build_mongodb {
-	echo -n "[MongoDB] downloading..."
-	git clone https://github.com/mongodb/mongo-php-driver.git  >> "$DIR/install.log" 2>&1
-	echo -n " checking..."
-	cd mongo-php-driver
-	git submodule update --init  >> "$DIR/install.log" 2>&1
-	$DIR/bin/php7/bin/phpize >> "$DIR/install.log" 2>&1
-	./configure --with-php-config="$DIR/bin/php7/bin/php-config" >> "$DIR/install.log" 2>&1
-	echo -n " compiling..."
-	make all >> "$DIR/install.log" 2>&1
-	echo -n " installing..."
-	make install >> "$DIR/install.log" 2>&1
-	echo "extension=mongodb.so" >> "$DIR/bin/php7/bin/php.ini"
-	echo " done!"
-}
+if ["$COMPILE_MONGODB" == "yes"]; then
+	HAS_LIBMONGODB_SYSTEMLIBS = "--with-mongodb-system-libs=\"yes\""
+	HAS_LIBMONGODB_SSL = "--with-mongodb-ssl"
+else
+	HAS_LIBMONGODB_SYSTEMLIBS = ""
+	HAS_LIBMONGODB_SSL = ""
+fi
 
 # PECL libraries
 
@@ -940,10 +936,8 @@ RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS_LTO" LDFLA
 --with-yaml \
 --with-openssl \
 --with-zip \
---with-libbson="yes" \
---with-libmongoc="yes" \
---with-mongodb-system-libs="yes" \
---with-mongodb-ssl="auto" \
+$HAS_LIBMONGODB_SYSTEMLIBS \
+$HAS_LIBMONGODB_SSL \
 --with-libdeflate="$DIR/bin/php7" \
 $HAS_LIBJPEG \
 $HAS_GD \
@@ -1078,7 +1072,23 @@ if [ "$HAVE_OPCACHE" == "yes" ]; then
 fi
 
 echo " done!"
-build_mongodb
+
+if ["$COMPILE_MONGODB" == "yes"]; then
+	echo -n "[MongoDB] downloading..."
+	git clone https://github.com/mongodb/mongo-php-driver.git  >> "$DIR/install.log" 2>&1
+	echo -n " checking..."
+	cd mongo-php-driver
+	git submodule update --init  >> "$DIR/install.log" 2>&1
+	$DIR/bin/php7/bin/phpize >> "$DIR/install.log" 2>&1
+	./configure --with-php-config="$DIR/bin/php7/bin/php-config" >> "$DIR/install.log" 2>&1
+	echo -n " compiling..."
+	make all >> "$DIR/install.log" 2>&1
+	echo -n " installing..."
+	make install >> "$DIR/install.log" 2>&1
+	echo "extension=mongodb.so" >> "$DIR/bin/php7/bin/php.ini"
+	echo" done!"
+fi
+
 
 if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
 	get_pecl_extension "xdebug" "$EXT_XDEBUG_VERSION"
