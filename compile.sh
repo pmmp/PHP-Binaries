@@ -121,7 +121,7 @@ LD_PRELOAD=""
 COMPILE_GD="no"
 COMPILE_MONGODB="yes"
 
-while getopts "::t:j:m:srdxff:gnva:" OPTION; do
+while getopts "::t:j:srdxff:gnvam:" OPTION; do
 
 	case $OPTION in
 		t)
