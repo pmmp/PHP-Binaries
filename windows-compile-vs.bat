@@ -32,6 +32,7 @@ set PHP_CRYPTO_VER=0.3.2
 set PHP_RECURSIONGUARD_VER=0.1.0
 set PHP_MORTON_VER=0.1.2
 set PHP_LIBDEFLATE_VER=be5367c81c61c612271377cdae9ffacac0f6e53a
+set PHP_LIBMONGODB_VER=1.11.1
 
 set script_path=%~dp0
 set log_file=%script_path%compile.log
@@ -194,11 +195,13 @@ cd /D php-src\ext
 call :get-extension-zip-from-github "pthreads"              "%PHP_PTHREADS_VER%"              "pmmp"     "pthreads"                || exit 1
 call :get-extension-zip-from-github "yaml"                  "%PHP_YAML_VER%"                  "php"      "pecl-file_formats-yaml"  || exit 1
 call :get-extension-zip-from-github "chunkutils2"           "%PHP_CHUNKUTILS2_VER%"           "pmmp"     "ext-chunkutils2"         || exit 1
+call :get-extension-zip-from-github "chunkutils2"           "%PHP_CHUNKUTILS2_VER%"           "pmmp"     "ext-chunkutils2"         || exit 1
 call :get-extension-zip-from-github "igbinary"              "%PHP_IGBINARY_VER%"              "igbinary" "igbinary"                || exit 1
 call :get-extension-zip-from-github "leveldb"               "%PHP_LEVELDB_VER%"               "pmmp"     "php-leveldb"             || exit 1
 call :get-extension-zip-from-github "recursionguard"        "%PHP_RECURSIONGUARD_VER%"        "pmmp"     "ext-recursionguard"      || exit 1
 call :get-extension-zip-from-github "morton"                "%PHP_MORTON_VER%"                "pmmp"     "ext-morton"              || exit 1
 call :get-extension-zip-from-github "libdeflate"            "%PHP_LIBDEFLATE_VER%"            "pmmp"     "ext-libdeflate"          || exit 1
+call :get-extension-zip-from-pecl "mongodb"            "%PHP_LIBMONGODB_VER%"                 "mongodb"  "mongodb"                 || exit 1
 
 call :pm-echo " - crypto: downloading %PHP_CRYPTO_VER%..."
 git clone https://github.com/bukka/php-crypto.git crypto >>"%log_file%" 2>&1 || exit 1
@@ -221,6 +224,8 @@ call configure^
  --with-mp=auto^
  --with-prefix=pocketmine-php-bin^
  --%PHP_HAVE_DEBUG%^
+ --with-mongodb-system-libs="yes"^
+ --with-mongodb-ssl^
  --disable-all^
  --disable-cgi^
  --enable-cli^
@@ -326,6 +331,7 @@ call :pm-echo "Generating php.ini..."
 (echo extension=php_sqlite3.dll)>>"%php_ini%"
 (echo ;Optional extensions, supplied for debugging)>>"%php_ini%"
 (echo extension=php_recursionguard.dll)>>"%php_ini%"
+(echo extension=mongodb.dll)>> ">>%php_ini%" 
 (echo recursionguard.enabled=0 ;disabled due to minor performance impact, only enable this if you need it for debugging)>>"%php_ini%"
 (echo.)>>"%php_ini%"
 (echo ; ---- ! WARNING ! ----)>>"%php_ini%"
@@ -336,6 +342,17 @@ call :pm-echo "Generating php.ini..."
 REM TODO: more entries
 
 cd /D ..\..
+
+call :pm-echo " - mongodb: downloading %PHP_CRYPTO_VER%..."
+git clone https://github.com/bukka/php-crypto.git crypto >>"%log_file%" 2>&1 || exit 1
+cd /D crypto
+git checkout %PHP_CRYPTO_VER% >>"%log_file%" 2>&1 || exit 1
+git submodule update --init --recursive >>"%log_file%" 2>&1 || exit 1
+cd /D ..
+
+cd /D ..\..
+
+:skip
 
 REM this includes all the stuff necessary to run anything needing 2015, 2017 and 2019 in one package
 call :pm-echo "Downloading Microsoft Visual C++ Redistributable 2015-2019"
@@ -374,6 +391,12 @@ if exist "C:\Program Files (x86)\Microsoft Visual Studio\%~1" (
 :get-extension-zip-from-github:
 call :pm-echo " - %~1: downloading %~2..."
 call :get-zip https://github.com/%~3/%~4/archive/%~2.zip || exit /B 1
+move %~4-%~2 %~1 >>"%log_file%" 2>&1 || exit /B 1
+exit /B 0
+
+:get-extension-zip-from-pecl:
+call :pm-echo " - %~1: downloading %~2..."
+call :get-zip https://windows.php.net/downloads/pecl/releases/%~3/%~2/php_%~3-%~2-%PHP_MAJOR_VER%-nts-vs16-x64.zip || exit /B 1
 move %~4-%~2 %~1 >>"%log_file%" 2>&1 || exit /B 1
 exit /B 0
 
