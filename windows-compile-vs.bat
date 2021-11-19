@@ -331,7 +331,7 @@ call :pm-echo "Generating php.ini..."
 (echo extension=php_sqlite3.dll)>>"%php_ini%"
 (echo ;Optional extensions, supplied for debugging)>>"%php_ini%"
 (echo extension=php_recursionguard.dll)>>"%php_ini%"
-(echo extension=mongodb.dll)>> >>"%php_ini%" 
+(echo extension=mongodb.dll)>>"%php_ini%" 
 (echo recursionguard.enabled=0 ;disabled due to minor performance impact, only enable this if you need it for debugging)>>"%php_ini%"
 (echo.)>>"%php_ini%"
 (echo ; ---- ! WARNING ! ----)>>"%php_ini%"
@@ -342,17 +342,6 @@ call :pm-echo "Generating php.ini..."
 REM TODO: more entries
 
 cd /D ..\..
-
-call :pm-echo " - mongodb: downloading %PHP_CRYPTO_VER%..."
-git clone https://github.com/bukka/php-crypto.git crypto >>"%log_file%" 2>&1 || exit 1
-cd /D crypto
-git checkout %PHP_CRYPTO_VER% >>"%log_file%" 2>&1 || exit 1
-git submodule update --init --recursive >>"%log_file%" 2>&1 || exit 1
-cd /D ..
-
-cd /D ..\..
-
-:skip
 
 REM this includes all the stuff necessary to run anything needing 2015, 2017 and 2019 in one package
 call :pm-echo "Downloading Microsoft Visual C++ Redistributable 2015-2019"
