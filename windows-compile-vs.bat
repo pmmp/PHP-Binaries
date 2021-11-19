@@ -386,7 +386,7 @@ exit /B 0
 :get-extension-zip-from-pecl:
 call :pm-echo " - %~1: downloading %~2..."
 call :get-zip https://windows.php.net/downloads/pecl/releases/%~3/%~2/php_%~3-%~2-%PHP_MAJOR_VER%-nts-vs16-x64.zip || exit /B 1
-move %~3-%~2 %~1 >>"%log_file%" 2>&1 || exit /B 1
+move php_%~3-%~2-%PHP_MAJOR_VER%-nts-vs16-x64 %~1 >>"%log_file%" 2>&1 || exit /B 1
 exit /B 0
 
 
