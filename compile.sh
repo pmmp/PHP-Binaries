@@ -119,7 +119,7 @@ FLAGS_LTO=""
 LD_PRELOAD=""
 
 COMPILE_GD="no"
-COMPILE_MONGODB="no"
+COMPILE_MONGODB="yes"
 
 while getopts "::t:j:srdxff:gnva:" OPTION; do
 
