@@ -393,8 +393,7 @@ rm -r -f "$BASE_BUILD_DIR" >> "$DIR/install.log" 2>&1
 rm -r -f bin/ >> "$DIR/install.log" 2>&1
 mkdir -m 0755 "$BASE_BUILD_DIR" >> "$DIR/install.log" 2>&1
 mkdir -m 0755 "$BUILD_DIR" >> "$DIR/install.log" 2>&1
-mkdir -m 0755 bin >> "$DIR/install.log" 2>&1
-mkdir -m 0755 $INSTALL_DIR >> "$DIR/install.log" 2>&1
+mkdir -m 0755 -p $INSTALL_DIR >> "$DIR/install.log" 2>&1
 cd "$BUILD_DIR"
 set -e
 
