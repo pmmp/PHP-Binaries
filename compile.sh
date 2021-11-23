@@ -26,6 +26,7 @@ EXT_CRYPTO_VERSION="0.3.2"
 EXT_RECURSIONGUARD_VERSION="0.1.0"
 EXT_LIBDEFLATE_VERSION="be5367c81c61c612271377cdae9ffacac0f6e53a"
 EXT_MORTON_VERSION="0.1.2"
+EXT_XXHASH_VERSION="0.1.0"
 
 function write_out {
 	echo "[$1] $2"
@@ -849,6 +850,8 @@ get_github_extension "libdeflate" "$EXT_LIBDEFLATE_VERSION" "pmmp" "ext-libdefla
 
 get_github_extension "morton" "$EXT_MORTON_VERSION" "pmmp" "ext-morton"
 
+get_github_extension "xxhash" "$EXT_XXHASH_VERSION" "pmmp" "ext-xxhash"
+
 if [ "$HAVE_LEGACY_CHUNKUTILS" != "" ]; then
 	get_github_extension "legacy-chunkutils" "$EXT_LEGACY_CHUNKUTILS_VERSION" "pmmp" "PocketMine-C-ChunkUtils"
 fi
@@ -982,6 +985,7 @@ $HAVE_MYSQLI \
 --enable-igbinary \
 --with-crypto \
 --enable-recursionguard \
+--enable-xxhash \
 $HAVE_VALGRIND \
 $HAVE_LEGACY_CHUNKUTILS \
 $CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1

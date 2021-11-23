@@ -33,6 +33,7 @@ set PHP_CRYPTO_VER=0.3.2
 set PHP_RECURSIONGUARD_VER=0.1.0
 set PHP_MORTON_VER=0.1.2
 set PHP_LIBDEFLATE_VER=be5367c81c61c612271377cdae9ffacac0f6e53a
+set PHP_XXHASH_VER=0.1.0
 
 set script_path=%~dp0
 set log_file=%script_path%compile.log
@@ -201,6 +202,7 @@ call :get-extension-zip-from-github "leveldb"               "%PHP_LEVELDB_VER%" 
 call :get-extension-zip-from-github "recursionguard"        "%PHP_RECURSIONGUARD_VER%"        "pmmp"     "ext-recursionguard"      || exit 1
 call :get-extension-zip-from-github "morton"                "%PHP_MORTON_VER%"                "pmmp"     "ext-morton"              || exit 1
 call :get-extension-zip-from-github "libdeflate"            "%PHP_LIBDEFLATE_VER%"            "pmmp"     "ext-libdeflate"          || exit 1
+call :get-extension-zip-from-github "xxhash"                "%PHP_XXHASH_VER%"                "pmmp"     "ext-xxhash"              || exit 1
 
 call :pm-echo " - crypto: downloading %PHP_CRYPTO_VER%..."
 git clone https://github.com/bukka/php-crypto.git crypto >>"%log_file%" 2>&1 || exit 1
@@ -249,6 +251,7 @@ call configure^
  --enable-tokenizer^
  --enable-xmlreader^
  --enable-xmlwriter^
+ --enable-xxhash^
  --enable-zip^
  --enable-zlib^
  --with-bz2=shared^
