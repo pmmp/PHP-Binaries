@@ -180,7 +180,7 @@ while getopts "::t:j:srdxff:gnva:3" OPTION; do
 			;;
 
 		\?)
-			echo "Invalid option: -$OPTION$OPTARG" >&2
+			echo "Invalid option: -$OPTARG" >&2
 			exit 1
 			;;
 	esac
