@@ -354,7 +354,7 @@ bin\php\php.exe -m >>"%log_file%" 2>&1
 
 call :pm-echo "Packaging build..."
 set package_filename=php-%PHP_DISPLAY_VER%-%VC_VER%-%ARCH%.zip
-if exist %package_filename% rm %package_filename%
+if exist %package_filename% del /s /q %package_filename%
 7z a -bd %package_filename% bin vc_redist.x64.exe >nul || call :pm-fatal-error "Failed to package the build"
 
 call :pm-echo "Created build package %package_filename%"
