@@ -63,7 +63,7 @@ jobs:
     condition: succeededOrFailed()
 - job: MacOS
   pool:
-    vmImage: 'macOS-10.14'
+    vmImage: 'macOS-10.15'
   steps:
   - bash: |
       brew install libtool autoconf automake pkg-config bison re2c
