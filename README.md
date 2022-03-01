@@ -28,7 +28,6 @@ Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have
 | -t           | Set target                                                                            |
 | -v           | Enable Valgrind support in PHP                                                        |
 | -x           | Specifies we are doing cross-compile                                                  |
-| -3           | Include extensions used by PM 3.x (**deprecated**, will be removed in the future)     |
 
 ### Example:
 

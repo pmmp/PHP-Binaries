@@ -25,7 +25,6 @@ set LIBDEFLATE_VER=6c095314d0c49061f41e1e40be2625dfc2253afa
 
 set PHP_PTHREADS_VER=4.0.0
 set PHP_YAML_VER=2.2.2
-set PHP_LEGACY_CHUNKUTILS_VER=0.1.0
 set PHP_CHUNKUTILS2_VER=0.3.1
 set PHP_IGBINARY_VER=3.2.7
 set PHP_LEVELDB_VER=317fdcd8415e1566fc2835ce2bdb8e19b890f9f3
@@ -196,7 +195,6 @@ cd /D php-src\ext
 call :get-extension-zip-from-github "pthreads"              "%PHP_PTHREADS_VER%"              "pmmp"     "pthreads"                || exit 1
 call :get-extension-zip-from-github "yaml"                  "%PHP_YAML_VER%"                  "php"      "pecl-file_formats-yaml"  || exit 1
 call :get-extension-zip-from-github "chunkutils2"           "%PHP_CHUNKUTILS2_VER%"           "pmmp"     "ext-chunkutils2"         || exit 1
-call :get-extension-zip-from-github "legacy-chunkutils"     "%PHP_LEGACY_CHUNKUTILS_VER%"     "pmmp"     "PocketMine-C-ChunkUtils" || exit 1
 call :get-extension-zip-from-github "igbinary"              "%PHP_IGBINARY_VER%"              "igbinary" "igbinary"                || exit 1
 call :get-extension-zip-from-github "leveldb"               "%PHP_LEVELDB_VER%"               "pmmp"     "php-leveldb"             || exit 1
 call :get-extension-zip-from-github "recursionguard"        "%PHP_RECURSIONGUARD_VER%"        "pmmp"     "ext-recursionguard"      || exit 1
@@ -245,7 +243,6 @@ call configure^
  --enable-opcache^
  --enable-opcache-jit^
  --enable-phar^
- --enable-pocketmine-chunkutils=shared^
  --enable-recursionguard=shared^
  --enable-sockets^
  --enable-tokenizer^
@@ -325,7 +322,6 @@ call :pm-echo "Generating php.ini..."
 (echo opcache.optimization_level=0x7FFEBFFF)>>"%php_ini%"
 (echo opcache.cache_id=PHP_BINARY ;prevent sharing SHM between different binaries - they won't work because of ASLR)>>"%php_ini%"
 (echo ;Optional extensions, supplied for PM3 use)>>"%php_ini%"
-(echo extension=php_pocketmine_chunkutils.dll)>>"%php_ini%"
 (echo ;Optional extensions, supplied for plugin use)>>"%php_ini%"
 (echo extension=php_fileinfo.dll)>>"%php_ini%"
 (echo extension=php_gd.dll)>>"%php_ini%"
