@@ -28,7 +28,7 @@ jobs:
       - name: Create tarball
         run: tar -czf ./PHP_Linux-x86_64.tar.gz bin
         
-      - name: Upload tarball
+      - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           name: Linux
@@ -45,9 +45,7 @@ jobs:
       - uses: actions/checkout@v2
       
       - name: Install tools and dependencies
-        run: |
-          brew install libtool autoconf automake pkg-config bison re2c
-          echo 
+        run: brew install libtool autoconf automake pkg-config bison re2c
         
       - name: Compile PHP
         run: |
