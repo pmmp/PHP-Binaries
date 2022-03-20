@@ -267,6 +267,7 @@ call configure^
  --with-pcre-jit^
  --with-pthreads=shared^
  --with-simplexml^
+ --with-ffi^
  --with-sodium^
  --with-sqlite3=shared^
  --with-xml^
@@ -310,6 +311,7 @@ call :pm-echo "Generating php.ini..."
 (echo extension=php_igbinary.dll)>>"%php_ini%"
 (echo extension=php_leveldb.dll)>>"%php_ini%"
 (echo extension=php_crypto.dll)>>"%php_ini%"
+(echo extension=php_ffi.dll)>>"%php_ini%"
 (echo extension=php_libdeflate.dll)>>"%php_ini%
 (echo igbinary.compact_strings=0)>>"%php_ini%"
 (echo zend_extension=php_opcache.dll)>>"%php_ini%"
