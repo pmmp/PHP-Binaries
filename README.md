@@ -23,6 +23,7 @@ Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have
 | -d           | Will compile with debug and the xdebug PHP extension                                  |
 | -f           | Enabling abusive optimizations...                                                     |
 | -g           | Will compile GD2                                                                      |
+| -F           | Will enable FFI                                                                       |
 | -j           | Set make threads to #                                                                 |
 | -n           | Don't remove sources after completing compilation                                     |
 | -s           | Will compile everything statically                                                    |
