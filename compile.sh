@@ -527,6 +527,7 @@ function build_curl {
 	--without-nghttp2 \
 	--without-zstd \
 	--with-zlib="$INSTALL_DIR" \
+	--with-ffi \
 	--with-ssl="$INSTALL_DIR" \
 	--enable-threaded-resolver \
 	--prefix="$INSTALL_DIR" \
