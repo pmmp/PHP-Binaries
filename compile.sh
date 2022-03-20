@@ -122,8 +122,9 @@ FLAGS_LTO=""
 LD_PRELOAD=""
 
 COMPILE_GD="no"
+WITH_FFI=""
 
-while getopts "::t:j:srdxff:gnva:" OPTION; do
+while getopts "::t:j:srdFxff:gnva:" OPTION; do
 
 	case $OPTION in
 		t)
@@ -154,6 +155,10 @@ while getopts "::t:j:srdxff:gnva:" OPTION; do
 			echo "[opt] Enabling abusive optimizations..."
 			DO_OPTIMIZE="yes"
 			OPTIMIZE_TARGET="$OPTARG"
+			;;
+		F)
+			echo "[opt] Will enable FFI"
+			WITH_FFI="--with-ffi"
 			;;
 		g)
 			echo "[opt] Will enable GD2"
@@ -527,7 +532,6 @@ function build_curl {
 	--without-nghttp2 \
 	--without-zstd \
 	--with-zlib="$INSTALL_DIR" \
-	--with-ffi \
 	--with-ssl="$INSTALL_DIR" \
 	--enable-threaded-resolver \
 	--prefix="$INSTALL_DIR" \
@@ -956,6 +960,7 @@ $HAS_DEBUG \
 --with-pdo-sqlite \
 --with-pdo-mysql \
 --with-pic \
+$WITH_FFI \
 --enable-phar \
 --enable-ctype \
 --enable-sockets \
