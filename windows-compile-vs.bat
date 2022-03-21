@@ -3,7 +3,7 @@
 REM For future users: This file MUST have CRLF line endings. If it doesn't, lots of inexplicable undesirable strange behaviour will result.
 REM Also: Don't modify this version with sed, or it will screw up your line endings.
 set PHP_MAJOR_VER=8.0
-set PHP_VER=%PHP_MAJOR_VER%.12
+set PHP_VER=%PHP_MAJOR_VER%.17
 set PHP_GIT_REV=php-%PHP_VER%
 set PHP_DISPLAY_VER=%PHP_VER%
 set PHP_SDK_VER=2.2.0
@@ -21,14 +21,18 @@ set MSBUILD_CONFIGURATION=RelWithDebInfo
 set LIBYAML_VER=0.2.5
 set PTHREAD_W32_VER=3.0.0
 set LEVELDB_MCPE_VER=1c7564468b41610da4f498430e795ca4de0931ff
+set LIBDEFLATE_VER=6c095314d0c49061f41e1e40be2625dfc2253afa
 
 set PHP_PTHREADS_VER=4.0.0
-set PHP_YAML_VER=2.2.1
-set PHP_POCKETMINE_CHUNKUTILS_VER=0.1.0
-set PHP_IGBINARY_VER=3.2.6
+set PHP_YAML_VER=2.2.2
+set PHP_CHUNKUTILS2_VER=0.3.1
+set PHP_IGBINARY_VER=3.2.7
 set PHP_LEVELDB_VER=317fdcd8415e1566fc2835ce2bdb8e19b890f9f3
 set PHP_CRYPTO_VER=0.3.2
 set PHP_RECURSIONGUARD_VER=0.1.0
+set PHP_MORTON_VER=0.1.2
+set PHP_LIBDEFLATE_VER=0.1.0
+set PHP_XXHASH_VER=0.1.1
 
 set script_path=%~dp0
 set log_file=%script_path%compile.log
@@ -169,6 +173,20 @@ copy %MSBUILD_CONFIGURATION%\leveldb.pdb "%DEPS_DIR%\bin\leveldb.pdb" >>"%log_fi
 
 cd /D "%DEPS_DIR%"
 
+call :pm-echo "Downloading libdeflate version %LIBDEFLATE_VER%..."
+call :get-zip https://github.com/ebiggers/libdeflate/archive/%LIBDEFLATE_VER%.zip || exit 1
+move libdeflate-%LIBDEFLATE_VER% libdeflate >>"%log_file%" 2>&1
+cd /D libdeflate
+
+call :pm-echo "Compiling..."
+nmake /f Makefile.msc >>"%log_file%" 2>&1 || exit 1
+call :pm-echo "Copying files..."
+copy libdeflate.dll "%DEPS_DIR%\bin\libdeflate.dll" >>"%log_file%" 2>&1 || exit 1
+copy libdeflate.lib "%DEPS_DIR%\lib\libdeflate.lib" >>"%log_file%" 2>&1 || exit 1
+copy libdeflate.h "%DEPS_DIR%\include\libdeflate.h" >>"%log_file%" 2>&1 || exit 1
+
+cd /D "%DEPS_DIR%"
+
 cd /D ..
 
 call :pm-echo "Getting additional PHP extensions..."
@@ -176,10 +194,13 @@ cd /D php-src\ext
 
 call :get-extension-zip-from-github "pthreads"              "%PHP_PTHREADS_VER%"              "pmmp"     "pthreads"                || exit 1
 call :get-extension-zip-from-github "yaml"                  "%PHP_YAML_VER%"                  "php"      "pecl-file_formats-yaml"  || exit 1
-call :get-extension-zip-from-github "pocketmine_chunkutils" "%PHP_POCKETMINE_CHUNKUTILS_VER%" "dktapps"  "PocketMine-C-ChunkUtils" || exit 1
+call :get-extension-zip-from-github "chunkutils2"           "%PHP_CHUNKUTILS2_VER%"           "pmmp"     "ext-chunkutils2"         || exit 1
 call :get-extension-zip-from-github "igbinary"              "%PHP_IGBINARY_VER%"              "igbinary" "igbinary"                || exit 1
 call :get-extension-zip-from-github "leveldb"               "%PHP_LEVELDB_VER%"               "pmmp"     "php-leveldb"             || exit 1
 call :get-extension-zip-from-github "recursionguard"        "%PHP_RECURSIONGUARD_VER%"        "pmmp"     "ext-recursionguard"      || exit 1
+call :get-extension-zip-from-github "morton"                "%PHP_MORTON_VER%"                "pmmp"     "ext-morton"              || exit 1
+call :get-extension-zip-from-github "libdeflate"            "%PHP_LIBDEFLATE_VER%"            "pmmp"     "ext-libdeflate"          || exit 1
+call :get-extension-zip-from-github "xxhash"                "%PHP_XXHASH_VER%"                "pmmp"     "ext-xxhash"              || exit 1
 
 call :pm-echo " - crypto: downloading %PHP_CRYPTO_VER%..."
 git clone https://github.com/bukka/php-crypto.git crypto >>"%log_file%" 2>&1 || exit 1
@@ -209,6 +230,7 @@ call configure^
  --enable-pdo^
  --enable-bcmath^
  --enable-calendar^
+ --enable-chunkutils2=shared^
  --enable-com-dotnet^
  --enable-ctype^
  --enable-fileinfo=shared^
@@ -217,15 +239,16 @@ call configure^
  --enable-igbinary=shared^
  --enable-json^
  --enable-mbstring^
+ --enable-morton^
  --enable-opcache^
  --enable-opcache-jit^
  --enable-phar^
- --enable-pocketmine-chunkutils=shared^
  --enable-recursionguard=shared^
  --enable-sockets^
  --enable-tokenizer^
  --enable-xmlreader^
  --enable-xmlwriter^
+ --enable-xxhash^
  --enable-zip^
  --enable-zlib^
  --with-bz2=shared^
@@ -236,6 +259,7 @@ call configure^
  --with-gmp^
  --with-iconv^
  --with-leveldb=shared^
+ --with-libdeflate=shared^
  --with-libxml^
  --with-mysqli=shared^
  --with-mysqlnd^
@@ -279,14 +303,14 @@ call :pm-echo "Generating php.ini..."
 (echo display_startup_errors=1)>>"%php_ini%"
 (echo error_reporting=-1)>>"%php_ini%"
 (echo zend.assertions=-1)>>"%php_ini%"
-(echo phar.readonly=0)>>"%php_ini%"
 (echo extension_dir=ext)>>"%php_ini%"
 (echo extension=php_pthreads.dll)>>"%php_ini%"
 (echo extension=php_openssl.dll)>>"%php_ini%"
-(echo extension=php_pocketmine_chunkutils.dll)>>"%php_ini%"
+(echo extension=php_chunkutils2.dll)>>"%php_ini%"
 (echo extension=php_igbinary.dll)>>"%php_ini%"
 (echo extension=php_leveldb.dll)>>"%php_ini%"
 (echo extension=php_crypto.dll)>>"%php_ini%"
+(echo extension=php_libdeflate.dll)>>"%php_ini%
 (echo igbinary.compact_strings=0)>>"%php_ini%"
 (echo zend_extension=php_opcache.dll)>>"%php_ini%"
 (echo opcache.enable=1)>>"%php_ini%"
@@ -297,6 +321,7 @@ call :pm-echo "Generating php.ini..."
 (echo opcache.file_update_protection=0)>>"%php_ini%"
 (echo opcache.optimization_level=0x7FFEBFFF)>>"%php_ini%"
 (echo opcache.cache_id=PHP_BINARY ;prevent sharing SHM between different binaries - they won't work because of ASLR)>>"%php_ini%"
+(echo ;Optional extensions, supplied for PM3 use)>>"%php_ini%"
 (echo ;Optional extensions, supplied for plugin use)>>"%php_ini%"
 (echo extension=php_fileinfo.dll)>>"%php_ini%"
 (echo extension=php_gd.dll)>>"%php_ini%"
@@ -325,7 +350,7 @@ bin\php\php.exe -m >>"%log_file%" 2>&1
 
 call :pm-echo "Packaging build..."
 set package_filename=php-%PHP_DISPLAY_VER%-%VC_VER%-%ARCH%.zip
-if exist %package_filename% rm %package_filename%
+if exist %package_filename% del /s /q %package_filename%
 7z a -bd %package_filename% bin vc_redist.x64.exe >nul || call :pm-fatal-error "Failed to package the build"
 
 call :pm-echo "Created build package %package_filename%"

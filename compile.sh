@@ -1,30 +1,31 @@
 #!/bin/bash
-[ -z "$PHP_VERSION" ] && PHP_VERSION="8.0.12"
+[ -z "$PHP_VERSION" ] && PHP_VERSION="8.0.17"
 
 ZLIB_VERSION="1.2.11"
 GMP_VERSION="6.2.1"
-CURL_VERSION="curl-7_79_1"
+CURL_VERSION="curl-7_81_0"
 YAML_VERSION="0.2.5"
 LEVELDB_VERSION="1c7564468b41610da4f498430e795ca4de0931ff"
 LIBXML_VERSION="2.9.12"
 LIBPNG_VERSION="1.6.37"
-LIBJPEG_VERSION="9d"
-OPENSSL_VERSION="1.1.1l"
+LIBJPEG_VERSION="9e"
+OPENSSL_VERSION="1.1.1m"
 LIBZIP_VERSION="1.8.0"
-SQLITE3_YEAR="2021"
-SQLITE3_VERSION="3360000" #3.36.0
-LIBDEFLATE_VERSION="047aa84e01b38d82f3612810e357bd40f14a3d39" #1.8
+SQLITE3_YEAR="2022"
+SQLITE3_VERSION="3370200" #3.37.2
+LIBDEFLATE_VERSION="6c095314d0c49061f41e1e40be2625dfc2253afa" #1.9
 
 EXT_PTHREADS_VERSION="4.0.0"
-EXT_YAML_VERSION="2.2.1"
+EXT_YAML_VERSION="2.2.2"
 EXT_LEVELDB_VERSION="317fdcd8415e1566fc2835ce2bdb8e19b890f9f3"
 EXT_CHUNKUTILS2_VERSION="0.3.1"
-EXT_XDEBUG_VERSION="3.1.1"
-EXT_IGBINARY_VERSION="3.2.6"
+EXT_XDEBUG_VERSION="3.1.2"
+EXT_IGBINARY_VERSION="3.2.7"
 EXT_CRYPTO_VERSION="0.3.2"
 EXT_RECURSIONGUARD_VERSION="0.1.0"
-EXT_LIBDEFLATE_VERSION="be5367c81c61c612271377cdae9ffacac0f6e53a"
+EXT_LIBDEFLATE_VERSION="0.1.0"
 EXT_MORTON_VERSION="0.1.2"
+EXT_XXHASH_VERSION="0.1.1"
 
 function write_out {
 	echo "[$1] $2"
@@ -40,6 +41,8 @@ BASE_BUILD_DIR="$DIR/install_data"
 #libtool and autoconf have a "feature" where it looks for install.sh/install-sh in ./ ../ and ../../
 #this extra subdir makes sure that it doesn't find anything it's not supposed to be looking for.
 BUILD_DIR="$BASE_BUILD_DIR/subdir"
+INSTALL_DIR="$DIR/bin/php7"
+
 date > "$DIR/install.log" 2>&1
 
 uname -a >> "$DIR/install.log" 2>&1
@@ -169,7 +172,7 @@ while getopts "::t:j:srdxff:gnva:" OPTION; do
 			FSANITIZE_OPTIONS="$OPTARG"
 			;;
 		\?)
-			echo "Invalid option: -$OPTION$OPTARG" >&2
+			echo "Invalid option: -$OPTARG" >&2
 			exit 1
 			;;
 	esac
@@ -233,7 +236,7 @@ else
 	fi
 	if [[ "$COMPILE_TARGET" == "linux" ]] || [[ "$COMPILE_TARGET" == "linux64" ]]; then
 		[ -z "$march" ] && march=x86-64;
-		[ -z "$mtune" ] && mtune=nocona;
+		[ -z "$mtune" ] && mtune=skylake;
 		CFLAGS="$CFLAGS -m64"
 		GMP_ABI="64"
 		OPENSSL_TARGET="linux-x86_64"
@@ -372,8 +375,8 @@ export CFLAGS="-O2 -fPIC $CFLAGS"
 export CXXFLAGS="$CFLAGS $CXXFLAGS"
 export LDFLAGS="$LDFLAGS"
 export CPPFLAGS="$CPPFLAGS"
-export LIBRARY_PATH="$DIR/bin/php7/lib:$LIBRARY_PATH"
-export PKG_CONFIG_PATH="$DIR/bin/php7/lib/pkgconfig"
+export LIBRARY_PATH="$INSTALL_DIR/lib:$LIBRARY_PATH"
+export PKG_CONFIG_PATH="$INSTALL_DIR/lib/pkgconfig"
 
 #some stuff (like curl) makes assumptions about library paths that break due to different behaviour in pkgconf vs pkg-config
 export PKG_CONFIG_ALLOW_SYSTEM_LIBS="yes"
@@ -383,8 +386,7 @@ rm -r -f "$BASE_BUILD_DIR" >> "$DIR/install.log" 2>&1
 rm -r -f bin/ >> "$DIR/install.log" 2>&1
 mkdir -m 0755 "$BASE_BUILD_DIR" >> "$DIR/install.log" 2>&1
 mkdir -m 0755 "$BUILD_DIR" >> "$DIR/install.log" 2>&1
-mkdir -m 0755 bin >> "$DIR/install.log" 2>&1
-mkdir -m 0755 bin/php7 >> "$DIR/install.log" 2>&1
+mkdir -m 0755 -p $INSTALL_DIR >> "$DIR/install.log" 2>&1
 cd "$BUILD_DIR"
 set -e
 
@@ -408,7 +410,7 @@ function build_zlib {
 	mv zlib-$ZLIB_VERSION zlib
 	echo -n " checking..."
 	cd zlib
-	RANLIB=$RANLIB ./configure --prefix="$DIR/bin/php7" \
+	RANLIB=$RANLIB ./configure --prefix="$INSTALL_DIR" \
 	$EXTRA_FLAGS >> "$DIR/install.log" 2>&1
 	echo -n " compiling..."
 	make -j $THREADS >> "$DIR/install.log" 2>&1
@@ -416,7 +418,7 @@ function build_zlib {
 	make install >> "$DIR/install.log" 2>&1
 	cd ..
 		if [ "$DO_STATIC" != "yes" ]; then
-			rm -f "$DIR/bin/php7/lib/libz.a"
+			rm -f "$INSTALL_DIR/lib/libz.a"
 		fi
 	echo " done!"
 }
@@ -439,7 +441,7 @@ function build_gmp {
 	mv gmp-$GMP_VERSION gmp
 	echo -n " checking..."
 	cd gmp
-	RANLIB=$RANLIB ./configure --prefix="$DIR/bin/php7" \
+	RANLIB=$RANLIB ./configure --prefix="$INSTALL_DIR" \
 	$EXTRA_FLAGS \
 	--disable-posix-threads \
 	--enable-static \
@@ -465,7 +467,7 @@ function build_openssl {
 		local EXTRA_FLAGS="shared"
 	fi
 
-	WITH_OPENSSL="--with-openssl=$DIR/bin/php7"
+	WITH_OPENSSL="--with-openssl=$INSTALL_DIR"
 	echo -n "[OpenSSL] downloading $OPENSSL_VERSION..."
 	download_file "http://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 	mv openssl-$OPENSSL_VERSION openssl
@@ -473,8 +475,8 @@ function build_openssl {
 	echo -n " checking..."
 	cd openssl
 	RANLIB=$RANLIB $OPENSSL_CMD \
-	--prefix="$DIR/bin/php7" \
-	--openssldir="$DIR/bin/php7" \
+	--prefix="$INSTALL_DIR" \
+	--openssldir="$INSTALL_DIR" \
 	no-asm \
 	no-hw \
 	no-engine \
@@ -524,10 +526,10 @@ function build_curl {
 	--without-brotli \
 	--without-nghttp2 \
 	--without-zstd \
-	--with-zlib="$DIR/bin/php7" \
-	--with-ssl="$DIR/bin/php7" \
+	--with-zlib="$INSTALL_DIR" \
+	--with-ssl="$INSTALL_DIR" \
 	--enable-threaded-resolver \
-	--prefix="$DIR/bin/php7" \
+	--prefix="$INSTALL_DIR" \
 	$EXTRA_FLAGS \
 	$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
 	echo -n " compiling..."
@@ -553,7 +555,7 @@ function build_yaml {
 	echo -n " checking..."
 
 	RANLIB=$RANLIB ./configure \
-	--prefix="$DIR/bin/php7" \
+	--prefix="$INSTALL_DIR" \
 	$EXTRA_FLAGS \
 	$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
 	sed -i=".backup" 's/ tests win32/ win32/g' Makefile
@@ -578,8 +580,8 @@ function build_leveldb {
 		local EXTRA_FLAGS=""
 	fi
 	cmake . \
-		-DCMAKE_INSTALL_PREFIX="$DIR/bin/php7" \
-		-DCMAKE_PREFIX_PATH="$DIR/bin/php7" \
+		-DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
+		-DCMAKE_PREFIX_PATH="$INSTALL_DIR" \
 		-DCMAKE_INSTALL_LIBDIR=lib \
 		-DLEVELDB_BUILD_TESTS=OFF \
 		-DLEVELDB_BUILD_BENCHMARKS=OFF \
@@ -610,8 +612,8 @@ function build_libpng {
 	mv libpng-$LIBPNG_VERSION libpng
 	echo -n " checking..."
 	cd libpng
-	LDFLAGS="$LDFLAGS -L${DIR}/bin/php7/lib" CPPFLAGS="$CPPFLAGS -I${DIR}/bin/php7/include" RANLIB=$RANLIB ./configure \
-	--prefix="$DIR/bin/php7" \
+	LDFLAGS="$LDFLAGS -L${INSTALL_DIR}/lib" CPPFLAGS="$CPPFLAGS -I${INSTALL_DIR}/include" RANLIB=$RANLIB ./configure \
+	--prefix="$INSTALL_DIR" \
 	$EXTRA_FLAGS \
 	$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
 	echo -n " compiling..."
@@ -634,8 +636,8 @@ function build_libjpeg {
 	mv jpeg-$LIBJPEG_VERSION libjpeg
 	echo -n " checking..."
 	cd libjpeg
-	LDFLAGS="$LDFLAGS -L${DIR}/bin/php7/lib" CPPFLAGS="$CPPFLAGS -I${DIR}/bin/php7/include" RANLIB=$RANLIB ./configure \
-	--prefix="$DIR/bin/php7" \
+	LDFLAGS="$LDFLAGS -L${INSTALL_DIR}/lib" CPPFLAGS="$CPPFLAGS -I${INSTALL_DIR}/include" RANLIB=$RANLIB ./configure \
+	--prefix="$INSTALL_DIR" \
 	$EXTRA_FLAGS \
 	$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
 	echo -n " compiling..."
@@ -660,11 +662,11 @@ function build_libxml2 {
 		local EXTRA_FLAGS="--enable-shared=yes --enable-static=no"
 	fi
 	sed -i.bak 's{libtoolize --version{"$LIBTOOLIZE" --version{' autogen.sh #needed for glibtool on macos
-	./autogen.sh --prefix="$DIR/bin/php7" \
+	./autogen.sh --prefix="$INSTALL_DIR" \
 		--without-iconv \
 		--without-python \
 		--without-lzma \
-		--with-zlib="$DIR/bin/php7" \
+		--with-zlib="$INSTALL_DIR" \
 		--config-cache \
 		$EXTRA_FLAGS \
 		$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
@@ -689,8 +691,8 @@ function build_libzip {
 
 	#we're using OpenSSL for crypto
 	cmake . \
-		-DCMAKE_PREFIX_PATH="$DIR/bin/php7" \
-		-DCMAKE_INSTALL_PREFIX="$DIR/bin/php7" \
+		-DCMAKE_PREFIX_PATH="$INSTALL_DIR" \
+		-DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
 		-DCMAKE_INSTALL_LIBDIR=lib \
 		$CMAKE_LIBZIP_EXTRA_FLAGS \
 		$CMAKE_GLOBAL_EXTRA_FLAGS \
@@ -724,8 +726,8 @@ function build_sqlite3 {
 	mv sqlite-autoconf-$SQLITE3_VERSION sqlite3 >> "$DIR/install.log" 2>&1
 	echo -n " checking..."
 	cd sqlite3
-	LDFLAGS="$LDFLAGS -L${DIR}/bin/php7/lib" CPPFLAGS="$CPPFLAGS -I${DIR}/bin/php7/include" RANLIB=$RANLIB ./configure \
-	--prefix="$DIR/bin/php7" \
+	LDFLAGS="$LDFLAGS -L${INSTALL_DIR}/lib" CPPFLAGS="$CPPFLAGS -I${INSTALL_DIR}/include" RANLIB=$RANLIB ./configure \
+	--prefix="$INSTALL_DIR" \
 	--disable-dependency-tracking \
 	--enable-static-shell=no \
 	$EXTRA_FLAGS \
@@ -782,11 +784,37 @@ function build_shell2 {
 	echo " done!"
 }
 
+function build_libdeflate {
+	echo -n "[libdeflate] downloading $LIBDEFLATE_VERSION..."
+	download_file "https://github.com/ebiggers/libdeflate/archive/$LIBDEFLATE_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv libdeflate-$LIBDEFLATE_VERSION libdeflate >> "$DIR/install.log" 2>&1
+	cd libdeflate
+	if [ "$DO_STATIC" == "yes" ]; then
+		echo -n " compiling..."
+		make -j $THREADS libdeflate.a >> "$DIR/install.log" 2>&1
+		echo -n " manually copying installation files for static build..."
+		cp ./libdeflate.a "$INSTALL_DIR/lib"
+		cp ./libdeflate.h "$INSTALL_DIR/include"
+	else
+		echo -n " compiling..."
+		PREFIX="$INSTALL_DIR" make -j $THREADS install >> "$DIR/install.log" 2>&1
+		echo -n " cleaning..."
+		rm "$INSTALL_DIR/lib/libdeflate.a"
+		if [ "$(uname -s)" == "Darwin" ]; then
+			#libdeflate makefile doesn't set this correctly
+			install_name_tool -id "$INSTALL_DIR/lib/libdeflate.0.dylib" "$INSTALL_DIR/lib/libdeflate.0.dylib"
+		fi
+	fi
+	cd ..
+	echo " done!"
+}
+
 build_zlib
 build_gmp
 build_openssl
 build_curl
 build_yaml
+
 build_shell2
 build_leveldb
 if [ "$COMPILE_GD" == "yes" ]; then
@@ -863,6 +891,8 @@ get_github_extension "libdeflate" "$EXT_LIBDEFLATE_VERSION" "pmmp" "ext-libdefla
 
 get_github_extension "morton" "$EXT_MORTON_VERSION" "pmmp" "ext-morton"
 
+get_github_extension "xxhash" "$EXT_XXHASH_VERSION" "pmmp" "ext-xxhash"
+
 echo -n "[PHP]"
 
 if [ "$DO_OPTIMIZE" != "no" ]; then
@@ -938,8 +968,8 @@ if [ "$FSANITIZE_OPTIONS" != "" ]; then
 	LDFLAGS="-fsanitize=$FSANITIZE_OPTIONS $LDFLAGS"
 fi
 
-RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS_LTO" LDFLAGS="$LDFLAGS $FLAGS_LTO" ./configure $PHP_OPTIMIZATION --prefix="$DIR/bin/php7" \
---exec-prefix="$DIR/bin/php7" \
+RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS_LTO" LDFLAGS="$LDFLAGS $FLAGS_LTO" ./configure $PHP_OPTIMIZATION --prefix="$INSTALL_DIR" \
+--exec-prefix="$INSTALL_DIR" \
 --with-curl \
 --with-zlib \
 --with-zlib \
@@ -948,10 +978,10 @@ RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS_LTO" LDFLA
 --with-openssl \
 --with-ssh2 \
 --with-zip \
---with-libdeflate="$DIR/bin/php7" \
+--with-libdeflate="$INSTALL_DIR" \
 $HAS_LIBJPEG \
 $HAS_GD \
---with-leveldb="$DIR/bin/php7" \
+--with-leveldb="$INSTALL_DIR" \
 --without-readline \
 $HAS_DEBUG \
 --enable-chunkutils2 \
@@ -993,6 +1023,7 @@ $HAVE_MYSQLI \
 --enable-igbinary \
 --with-crypto \
 --enable-recursionguard \
+--enable-xxhash \
 $HAVE_VALGRIND \
 $CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
 echo -n " compiling..."
@@ -1016,8 +1047,8 @@ function relativize_macos_library_paths {
 	for (( i=0; i<${#OTOOL_OUTPUT[@]}; i++ ))
 		do
 		CURRENT_DYLIB_NAME=$(echo ${OTOOL_OUTPUT[$i]} | sed 's# (compatibility version .*##' | xargs)
-		if [[ "$CURRENT_DYLIB_NAME" == "$DIR/bin/php7/"* ]]; then
-			NEW_DYLIB_NAME=$(echo "$CURRENT_DYLIB_NAME" | sed "s{$DIR/bin/php7{@loader_path/..{" | xargs)
+		if [[ "$CURRENT_DYLIB_NAME" == "$INSTALL_DIR/"* ]]; then
+			NEW_DYLIB_NAME=$(echo "$CURRENT_DYLIB_NAME" | sed "s{$INSTALL_DIR{@loader_path/..{" | xargs)
 			install_name_tool -change "$CURRENT_DYLIB_NAME" "$NEW_DYLIB_NAME" "$1" >> "$DIR/install.log" 2>&1
 		elif [[ "$CURRENT_DYLIB_NAME" != "/usr/lib/"* ]] && [[ "$CURRENT_DYLIB_NAME" != "/System/"* ]] && [[ "$CURRENT_DYLIB_NAME" != "@loader_path"* ]] && [[ "$CURRENT_DYLIB_NAME" != "@rpath"* ]]; then
 			echo "[ERROR] Detected linkage to non-local non-system library $CURRENT_DYLIB_NAME by $1"
@@ -1028,7 +1059,7 @@ function relativize_macos_library_paths {
 
 function relativize_macos_all_libraries_paths {
 	set +e
-	for _library in $(ls "$DIR/bin/php7/lib/"*".dylib"); do
+	for _library in $(ls "$INSTALL_DIR/lib/"*".dylib"); do
 		relativize_macos_library_paths "$_library"
 	done
 	set -e
@@ -1036,9 +1067,9 @@ function relativize_macos_all_libraries_paths {
 
 if [[ "$(uname -s)" == "Darwin" ]] && [[ "$IS_CROSSCOMPILE" != "yes" ]]; then
 	set +e
-	install_name_tool -delete_rpath "$DIR/bin/php7/lib" "$DIR/bin/php7/bin/php" >> "$DIR/install.log" 2>&1
+	install_name_tool -delete_rpath "$INSTALL_DIR/lib" "$INSTALL_DIR/bin/php" >> "$DIR/install.log" 2>&1
 
-	relativize_macos_library_paths "$DIR/bin/php7/bin/php"
+	relativize_macos_library_paths "$INSTALL_DIR/bin/php"
 
 	relativize_macos_all_libraries_paths
 	set -e
@@ -1047,38 +1078,37 @@ fi
 echo -n " generating php.ini..."
 trap - DEBUG
 TIMEZONE=$(date +%Z)
-echo "memory_limit=1024M" >> "$DIR/bin/php7/bin/php.ini"
-echo "date.timezone=$TIMEZONE" >> "$DIR/bin/php7/bin/php.ini"
-echo "short_open_tag=0" >> "$DIR/bin/php7/bin/php.ini"
-echo "asp_tags=0" >> "$DIR/bin/php7/bin/php.ini"
-echo "phar.readonly=0" >> "$DIR/bin/php7/bin/php.ini"
-echo "phar.require_hash=1" >> "$DIR/bin/php7/bin/php.ini"
-echo "igbinary.compact_strings=0" >> "$DIR/bin/php7/bin/php.ini"
+echo "memory_limit=1024M" >> "$INSTALL_DIR/bin/php.ini"
+echo "date.timezone=$TIMEZONE" >> "$INSTALL_DIR/bin/php.ini"
+echo "short_open_tag=0" >> "$INSTALL_DIR/bin/php.ini"
+echo "asp_tags=0" >> "$INSTALL_DIR/bin/php.ini"
+echo "phar.require_hash=1" >> "$INSTALL_DIR/bin/php.ini"
+echo "igbinary.compact_strings=0" >> "$INSTALL_DIR/bin/php.ini"
 if [[ "$COMPILE_DEBUG" == "yes" ]]; then
-	echo "zend.assertions=1" >> "$DIR/bin/php7/bin/php.ini"
+	echo "zend.assertions=1" >> "$INSTALL_DIR/bin/php.ini"
 else
-	echo "zend.assertions=-1" >> "$DIR/bin/php7/bin/php.ini"
+	echo "zend.assertions=-1" >> "$INSTALL_DIR/bin/php.ini"
 fi
-echo "error_reporting=-1" >> "$DIR/bin/php7/bin/php.ini"
-echo "display_errors=1" >> "$DIR/bin/php7/bin/php.ini"
-echo "display_startup_errors=1" >> "$DIR/bin/php7/bin/php.ini"
-echo "recursionguard.enabled=0 ;disabled due to minor performance impact, only enable this if you need it for debugging" >> "$DIR/bin/php7/bin/php.ini"
+echo "error_reporting=-1" >> "$INSTALL_DIR/bin/php.ini"
+echo "display_errors=1" >> "$INSTALL_DIR/bin/php.ini"
+echo "display_startup_errors=1" >> "$INSTALL_DIR/bin/php.ini"
+echo "recursionguard.enabled=0 ;disabled due to minor performance impact, only enable this if you need it for debugging" >> "$INSTALL_DIR/bin/php.ini"
 
 if [ "$HAVE_OPCACHE" == "yes" ]; then
-	echo "zend_extension=opcache.so" >> "$DIR/bin/php7/bin/php.ini"
-	echo "opcache.enable=1" >> "$DIR/bin/php7/bin/php.ini"
-	echo "opcache.enable_cli=1" >> "$DIR/bin/php7/bin/php.ini"
-	echo "opcache.save_comments=1" >> "$DIR/bin/php7/bin/php.ini"
-	echo "opcache.validate_timestamps=1" >> "$DIR/bin/php7/bin/php.ini"
-	echo "opcache.revalidate_freq=0" >> "$DIR/bin/php7/bin/php.ini"
-	echo "opcache.file_update_protection=0" >> "$DIR/bin/php7/bin/php.ini"
-	echo "opcache.optimization_level=0x7FFEBFFF ;https://github.com/php/php-src/blob/53c1b485741f31a17b24f4db2b39afeb9f4c8aba/ext/opcache/Optimizer/zend_optimizer.h" >> "$DIR/bin/php7/bin/php.ini"
-	echo "" >> "$DIR/bin/php7/bin/php.ini"
-	echo "; ---- ! WARNING ! ----" >> "$DIR/bin/php7/bin/php.ini"
-	echo "; JIT can provide big performance improvements, but as of PHP 8.0.8 it is still unstable. For this reason, it is disabled by default." >> "$DIR/bin/php7/bin/php.ini"
-	echo "; Enable it at your own risk. See https://www.php.net/manual/en/opcache.configuration.php#ini.opcache.jit for possible options." >> "$DIR/bin/php7/bin/php.ini"
-	echo "opcache.jit=off" >> "$DIR/bin/php7/bin/php.ini"
-	echo "opcache.jit_buffer_size=128M" >> "$DIR/bin/php7/bin/php.ini"
+	echo "zend_extension=opcache.so" >> "$INSTALL_DIR/bin/php.ini"
+	echo "opcache.enable=1" >> "$INSTALL_DIR/bin/php.ini"
+	echo "opcache.enable_cli=1" >> "$INSTALL_DIR/bin/php.ini"
+	echo "opcache.save_comments=1" >> "$INSTALL_DIR/bin/php.ini"
+	echo "opcache.validate_timestamps=1" >> "$INSTALL_DIR/bin/php.ini"
+	echo "opcache.revalidate_freq=0" >> "$INSTALL_DIR/bin/php.ini"
+	echo "opcache.file_update_protection=0" >> "$INSTALL_DIR/bin/php.ini"
+	echo "opcache.optimization_level=0x7FFEBFFF ;https://github.com/php/php-src/blob/53c1b485741f31a17b24f4db2b39afeb9f4c8aba/ext/opcache/Optimizer/zend_optimizer.h" >> "$INSTALL_DIR/bin/php.ini"
+	echo "" >> "$INSTALL_DIR/bin/php.ini"
+	echo "; ---- ! WARNING ! ----" >> "$INSTALL_DIR/bin/php.ini"
+	echo "; JIT can provide big performance improvements, but as of PHP 8.0.8 it is still unstable. For this reason, it is disabled by default." >> "$INSTALL_DIR/bin/php.ini"
+	echo "; Enable it at your own risk. See https://www.php.net/manual/en/opcache.configuration.php#ini.opcache.jit for possible options." >> "$INSTALL_DIR/bin/php.ini"
+	echo "opcache.jit=off" >> "$INSTALL_DIR/bin/php.ini"
+	echo "opcache.jit_buffer_size=128M" >> "$INSTALL_DIR/bin/php.ini"
 fi
 
 echo " done!"
@@ -1087,13 +1117,13 @@ if [[ "$DO_STATIC" != "yes" ]] && [[ "$COMPILE_DEBUG" == "yes" ]]; then
 	get_pecl_extension "xdebug" "$EXT_XDEBUG_VERSION"
 	echo -n "[xdebug] checking..."
 	cd "$BUILD_DIR/php/ext/xdebug"
-	$DIR/bin/php7/bin/phpize >> "$DIR/install.log" 2>&1
-	./configure --with-php-config="$DIR/bin/php7/bin/php-config" >> "$DIR/install.log" 2>&1
+	"$INSTALL_DIR/bin/phpize" >> "$DIR/install.log" 2>&1
+	./configure --with-php-config="$INSTALL_DIR/bin/php-config" >> "$DIR/install.log" 2>&1
 	echo -n " compiling..."
 	make -j4 >> "$DIR/install.log" 2>&1
 	echo -n " installing..."
 	make install >> "$DIR/install.log" 2>&1
-	echo "zend_extension=xdebug.so" >> "$DIR/bin/php7/bin/php.ini"
+	echo "zend_extension=xdebug.so" >> "$INSTALL_DIR/bin/php.ini"
 	echo " done!"
 fi
 
@@ -1101,17 +1131,17 @@ cd "$DIR"
 if [ "$DO_CLEANUP" == "yes" ]; then
 	echo -n "[INFO] Cleaning up..."
 	rm -r -f "$BUILD_DIR" >> "$DIR/install.log" 2>&1
-	rm -f bin/php7/bin/curl* >> "$DIR/install.log" 2>&1
-	rm -f bin/php7/bin/curl-config* >> "$DIR/install.log" 2>&1
-	rm -f bin/php7/bin/c_rehash* >> "$DIR/install.log" 2>&1
-	rm -f bin/php7/bin/openssl* >> "$DIR/install.log" 2>&1
-	rm -r -f bin/php7/man >> "$DIR/install.log" 2>&1
-	rm -r -f bin/php7/share/man >> "$DIR/install.log" 2>&1
-	rm -r -f bin/php7/php >> "$DIR/install.log" 2>&1
-	rm -r -f bin/php7/misc >> "$DIR/install.log" 2>&1
-	rm -r -f bin/php7/lib/*.a >> "$DIR/install.log" 2>&1
-	rm -r -f bin/php7/lib/*.la >> "$DIR/install.log" 2>&1
-	rm -r -f bin/php7/include >> "$DIR/install.log" 2>&1
+	rm -f "$INSTALL_DIR/bin/curl"* >> "$DIR/install.log" 2>&1
+	rm -f "$INSTALL_DIR/bin/curl-config"* >> "$DIR/install.log" 2>&1
+	rm -f "$INSTALL_DIR/bin/c_rehash"* >> "$DIR/install.log" 2>&1
+	rm -f "$INSTALL_DIR/bin/openssl"* >> "$DIR/install.log" 2>&1
+	rm -r -f "$INSTALL_DIR/man" >> "$DIR/install.log" 2>&1
+	rm -r -f "$INSTALL_DIR/share/man" >> "$DIR/install.log" 2>&1
+	rm -r -f "$INSTALL_DIR/php" >> "$DIR/install.log" 2>&1
+	rm -r -f "$INSTALL_DIR/misc" >> "$DIR/install.log" 2>&1
+	rm -r -f "$INSTALL_DIR/lib/"*.a >> "$DIR/install.log" 2>&1
+	rm -r -f "$INSTALL_DIR/lib/"*.la >> "$DIR/install.log" 2>&1
+	rm -r -f "$INSTALL_DIR/include" >> "$DIR/install.log" 2>&1
 	echo " done!"
 fi
 
