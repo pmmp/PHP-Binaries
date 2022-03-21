@@ -11,6 +11,7 @@ LIBPNG_VERSION="1.6.37"
 LIBJPEG_VERSION="9e"
 OPENSSL_VERSION="1.1.1m"
 LIBZIP_VERSION="1.8.0"
+LIBFFI_VERSION="3.4.2"
 SQLITE3_YEAR="2022"
 SQLITE3_VERSION="3370200" #3.37.2
 LIBDEFLATE_VERSION="6c095314d0c49061f41e1e40be2625dfc2253afa" #1.9
@@ -572,6 +573,22 @@ function build_yaml {
 	echo " done!"
 }
 
+function build_libffi {
+     echo -n "[libffi] downloading $LIBFFI_VERSION..."
+     download_file "https://github.com/libffi/libffi/releases/download/v$LIBFFI_VERSION/libffi-$LIBFFI_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+     mv libffi-$LIBFFI_VERSION libffi >> "$DIR/install.log" 2>&1
+     echo -n " checking..."
+     cd libffi
+     RANLIB=$RANLIB ./configure --prefix="$DIR/bin/php7" \
+     $EXTRA_FLAGS >> "$DIR/install.log" 2>&1
+     echo -n " compiling..."
+     make -j $THREADS >> "$DIR/install.log" 2>&1
+     echo -n " installing..."
+     make install >> "$DIR/install.log" 2>&1
+     cd ..
+     echo " done!"
+}
+
 function build_leveldb {
 	echo -n "[LevelDB] downloading $LEVELDB_VERSION..."
 	download_file "https://github.com/pmmp/leveldb/archive/$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
@@ -770,6 +787,9 @@ function build_libdeflate {
 	echo " done!"
 }
 
+if [ "$WITH_FFI" != "" ]; then
+  build_libffi
+fi
 build_zlib
 build_gmp
 build_openssl
