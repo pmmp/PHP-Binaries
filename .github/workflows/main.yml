@@ -30,6 +30,7 @@ jobs:
         
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
+        if: always()
         with:
           name: Linux
           path: |
@@ -59,6 +60,7 @@ jobs:
         
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
+        if: always()
         with:
           name: MacOS
           path: |
@@ -84,6 +86,7 @@ jobs:
           
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
+        if: always()
         with:
           name: Windows
           path: |
