@@ -39,6 +39,7 @@ jobs:
           if-no-files-found: error
 
       - name: Prepare workspace for upload
+        if: failure()
         run: tar -czf workspace.tar.gz install_data
 
       - name: Upload workspace
@@ -81,6 +82,7 @@ jobs:
           if-no-files-found: error
 
       - name: Prepare workspace for upload
+        if: failure()
         run: tar -czf workspace.tar.gz install_data
 
       - name: Upload workspace
