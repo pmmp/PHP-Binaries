@@ -37,14 +37,17 @@ jobs:
             ./PHP_Linux-x86_64.tar.gz
             install.log
           if-no-files-found: error
-      
+
+      - name: Prepare workspace for upload
+        run: tar -czf workspace.tar.gz install_data
+
       - name: Upload workspace
         uses: actions/upload-artifact@v2
         if: failure()
         with:
           name: Linux-workspace
           path: |
-            install_data
+            workspace.tar.gz
           if-no-files-found: error
 
   macos:
@@ -77,13 +80,16 @@ jobs:
             install.log
           if-no-files-found: error
 
+      - name: Prepare workspace for upload
+        run: tar -czf workspace.tar.gz install_data
+
       - name: Upload workspace
         uses: actions/upload-artifact@v2
         if: failure()
         with:
           name: MacOS-workspace
           path: |
-            install_data
+            workspace.tar.gz
           if-no-files-found: error
 
   windows:
