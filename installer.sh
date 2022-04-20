@@ -307,7 +307,7 @@ else
 		if [ $logical_cpu_count -gt 0 ];
 		then
 			echo "Starting $logical_cpu_count thread compile"
-			compile_command="./compile.sh -j $((logical_cpu_count))"
+			compile_command="./compile.sh -j $logical_cpu_count"
 			exec $compile_command
 		else
 			echo "Starting single thread compile"
