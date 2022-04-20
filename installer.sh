@@ -64,7 +64,7 @@ if [ $? -eq 0 ]; then
 		alias download_file="wget -q -O -"
 	fi
 else
-	type curl >> /dev/null 2>&1
+	type a >> /dev/null 2>&1
 	if [ $? -eq 0 ]; then
 		if [ "$IGNORE_CERT" == "yes" ]; then
 			alias download_file="curl --insecure --silent --show-error --location --globoff"
@@ -303,15 +303,15 @@ else
 		set -e
 		echo "[3/3] No prebuilt PHP found, compiling PHP automatically. This might take a while."
 		echo
-		logical_cpu_count=$([ $(uname) = 'Darwin' ] && sysctl -n hw.logicalcpu_max || lscpu -p | grep -e -v '^#' | wc -l) #Get available CPUs to pass to compile.sh and speed up compile
+		logical_cpu_count=$([ $(uname) = 'Darwin' ] && sysctl -n hw.logicalcpu_max || nproc --all) #Get available CPUs to pass to compile.sh and speed up compile
 		if [ $logical_cpu_count -gt 0 ];
 		then
-                        echo "Starting $logical_cpu_count thread compile"
-		        compile_command="./compile.sh -j $((logical_cpu_count))"
-                        exec $compile_command
+			echo "Starting $logical_cpu_count thread compile"
+			compile_command="./compile.sh -j $((logical_cpu_count))"
+            exec $compile_command
 		else
-		        echo "Starting single thread compile"
-                        exec "./compile.sh"
+			echo "Starting single thread compile"
+			exec "./compile.sh"
 		fi
 	fi
 fi
