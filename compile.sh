@@ -1,7 +1,7 @@
 #!/bin/bash
 [ -z "$PHP_VERSION" ] && PHP_VERSION="8.0.18"
 
-ZLIB_VERSION="1.2.12"
+ZLIB_VERSION="1.2.11" #1.2.12 breaks on macOS and probably cross-compile too due to ignoring $CC
 GMP_VERSION="6.2.1"
 CURL_VERSION="curl-7_82_0"
 YAML_VERSION="0.2.5"
