@@ -56,7 +56,7 @@ Script to install PocketMine-MP and PHP binaries on Unix platforms.
 ## windows-compile-vs.bat
 
 Batch script utilizing Visual Studio on Windows to compile PHP binaries from sources.
-Ensure you have Visual Studio 2017, `git`, `7z` and `wget` installed in your PATH.
+Ensure you have Visual Studio 2019, `git`, `7z` and `wget` installed in your PATH.
 
 This script doesn't accept parameters, but the following environment variables are influential:
 
