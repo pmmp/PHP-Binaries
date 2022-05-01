@@ -42,17 +42,6 @@ Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have
 - If used, the `-t` option (target) MUST be specified BEFORE the `-f` option (optimizations)
 - Avoid using the script in directory trees containing spaces. Some libraries don't like trying to be built in directory trees containing spaces, e.g. `/home/user/my folder/pocketmine-mp/` might experience problems.
 
-## installer.sh
-
-Script to install PocketMine-MP and PHP binaries on Unix platforms.
-
-| Flag   | Description                         |
-| ------ | ----------------------------------- |
-| -u     | Update PocketMine-MP                |
-| -d     | Install directory                   |
-| -v     | Channel (stable or development)     |
-
-
 ## windows-compile-vs.bat
 
 Batch script utilizing Visual Studio on Windows to compile PHP binaries from sources.
