@@ -1087,7 +1087,7 @@ if [[ "$HAVE_XDEBUG" == "yes" ]]; then
 	echo "xdebug.gc_stats_output_name=gcstats.%s.%p.%r" >> "$INSTALL_DIR/bin/php.ini" 2>&1
 	echo "xdebug.trace_output_name=trace.%s.%p.%r" >> "$INSTALL_DIR/bin/php.ini" 2>&1
 	echo " done!"
-	write_out "[INFO] Xdebug is included, but disabled by default. To enable it, change 'xdebug.mode' in your php.ini file."
+	write_out INFO "Xdebug is included, but disabled by default. To enable it, change 'xdebug.mode' in your php.ini file."
 fi
 
 cd "$DIR"
