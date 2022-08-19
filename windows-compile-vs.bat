@@ -33,6 +33,7 @@ set PHP_RECURSIONGUARD_VER=0.1.0
 set PHP_MORTON_VER=0.1.2
 set PHP_LIBDEFLATE_VER=0.1.0
 set PHP_XXHASH_VER=0.1.1
+set PHP_XDEBUG_VER=3.1.5
 
 set script_path=%~dp0
 set log_file=%script_path%compile.log
@@ -201,6 +202,7 @@ call :get-extension-zip-from-github "recursionguard"        "%PHP_RECURSIONGUARD
 call :get-extension-zip-from-github "morton"                "%PHP_MORTON_VER%"                "pmmp"     "ext-morton"              || exit 1
 call :get-extension-zip-from-github "libdeflate"            "%PHP_LIBDEFLATE_VER%"            "pmmp"     "ext-libdeflate"          || exit 1
 call :get-extension-zip-from-github "xxhash"                "%PHP_XXHASH_VER%"                "pmmp"     "ext-xxhash"              || exit 1
+call :get-extension-zip-from-github "xdebug"                "%PHP_XDEBUG_VER%"                "xdebug"   "xdebug"                  || exit 1
 
 call :pm-echo " - crypto: downloading %PHP_CRYPTO_VER%..."
 git clone https://github.com/bukka/php-crypto.git crypto >>"%log_file%" 2>&1 || exit 1
@@ -269,6 +271,8 @@ call configure^
  --with-simplexml^
  --with-sodium^
  --with-sqlite3=shared^
+ --with-xdebug=shared^
+ --with-xdebug-compression^
  --with-xml^
  --with-yaml^
  --with-pdo-mysql^
@@ -336,6 +340,17 @@ call :pm-echo "Generating php.ini..."
 (echo ; Enable it at your own risk. See https://www.php.net/manual/en/opcache.configuration.php#ini.opcache.jit for possible options.)>>"%php_ini%"
 (echo opcache.jit=off)>>"%php_ini%"
 (echo opcache.jit_buffer_size=128M)>>"%php_ini%"
+(echo.)>>"%php_ini%"
+(echo zend_extension=php_xdebug.dll)>>"%php_ini%"
+(echo ;https://xdebug.org/docs/all_settings#mode)>>"%php_ini%"
+(echo xdebug.mode=off)>>"%php_ini%"
+(echo ;The following overrides allow profiler, gc stats and traces to work correctly in ZTS)>>"%php_ini%"
+(echo xdebug.profiler_output_name=cachegrind.%%s.%%p.%%r)>>"%php_ini%"
+(echo xdebug.gc_stats_output_name=gcstats.%%s.%%p.%%r)>>"%php_ini%"
+(echo xdebug.trace_output_name=trace.%%s.%%p.%%r)>>"%php_ini%"
+
+call :pm-echo "Xdebug is included, but disabled by default. To enable it, change 'xdebug.mode' in your php.ini file."
+
 REM TODO: more entries
 
 cd /D ..\..
