@@ -295,7 +295,7 @@ if [ "$DO_STATIC" == "yes" ]; then
 	if [ "$FSANITIZE_OPTIONS" != "" ]; then
 		echo "[warning] Sanitizers cannot be used on static builds"
 	fi
-	if [ "$HAVE_XDEBUG" == "yes"]; then
+	if [ "$HAVE_XDEBUG" == "yes" ]; then
 	  write_out "warning" "Xdebug cannot be built in static mode"
 	  HAVE_XDEBUG="no"
 	fi
