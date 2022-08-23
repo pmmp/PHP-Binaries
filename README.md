@@ -34,8 +34,8 @@ Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have
 
 | Target          | Arguments                        |
 | --------------- | -------------------------------- |
-| linux64         | ``-t linux64 -l -j4 -f x86_64``  |
-| mac64           | ``-t mac64 -l -j4 -f``           |
+| linux64         | ``-t linux64 -j4 -f x86_64``  |
+| mac64           | ``-t mac64 -j4 -f``           |
 | android-aarch64 | ``-t android-aarch64 -x -j4 -f`` |
 
 ### Common pitfalls
