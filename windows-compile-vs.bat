@@ -23,7 +23,7 @@ set PTHREAD_W32_VER=3.0.0
 set LEVELDB_MCPE_VER=1c7564468b41610da4f498430e795ca4de0931ff
 set LIBDEFLATE_VER=b01537448e8eaf0803e38bdba5acef1d1c8effba
 
-set PHP_PTHREADS_VER=4.1.3
+set PHP_PTHREADS_VER=4.1.4
 set PHP_YAML_VER=2.2.2
 set PHP_CHUNKUTILS2_VER=0.3.3
 set PHP_IGBINARY_VER=3.2.7
@@ -344,6 +344,7 @@ call :pm-echo "Generating php.ini..."
 (echo zend_extension=php_xdebug.dll)>>"%php_ini%"
 (echo ;https://xdebug.org/docs/all_settings#mode)>>"%php_ini%"
 (echo xdebug.mode=off)>>"%php_ini%"
+(echo xdebug.start_with_request=yes)>>"%php_ini%"
 (echo ;The following overrides allow profiler, gc stats and traces to work correctly in ZTS)>>"%php_ini%"
 (echo xdebug.profiler_output_name=cachegrind.%%s.%%p.%%r)>>"%php_ini%"
 (echo xdebug.gc_stats_output_name=gcstats.%%s.%%p.%%r)>>"%php_ini%"

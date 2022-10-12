@@ -15,7 +15,7 @@ SQLITE3_YEAR="2022"
 SQLITE3_VERSION="3390200" #3.39.2
 LIBDEFLATE_VERSION="6b5b57116c5b1672a2407aa68f3a49c72f877cb3" #1.12
 
-EXT_PTHREADS_VERSION="4.1.3"
+EXT_PTHREADS_VERSION="4.1.4"
 EXT_YAML_VERSION="2.2.2"
 EXT_LEVELDB_VERSION="317fdcd8415e1566fc2835ce2bdb8e19b890f9f3"
 EXT_CHUNKUTILS2_VERSION="0.3.3"
@@ -295,7 +295,7 @@ if [ "$DO_STATIC" == "yes" ]; then
 	if [ "$FSANITIZE_OPTIONS" != "" ]; then
 		echo "[warning] Sanitizers cannot be used on static builds"
 	fi
-	if [ "$HAVE_XDEBUG" == "yes"]; then
+	if [ "$HAVE_XDEBUG" == "yes" ]; then
 	  write_out "warning" "Xdebug cannot be built in static mode"
 	  HAVE_XDEBUG="no"
 	fi
@@ -1082,6 +1082,7 @@ if [[ "$HAVE_XDEBUG" == "yes" ]]; then
 	echo "zend_extension=xdebug.so" >> "$INSTALL_DIR/bin/php.ini" 2>&1
 	echo ";https://xdebug.org/docs/all_settings#mode" >> "$INSTALL_DIR/bin/php.ini" 2>&1
 	echo "xdebug.mode=off" >> "$INSTALL_DIR/bin/php.ini" 2>&1
+	echo "xdebug.start_with_request=yes" >> "$INSTALL_DIR/bin/php.ini" 2>&1
 	echo ";The following overrides allow profiler, gc stats and traces to work correctly in ZTS" >> "$INSTALL_DIR/bin/php.ini" 2>&1
 	echo "xdebug.profiler_output_name=cachegrind.%s.%p.%r" >> "$INSTALL_DIR/bin/php.ini" 2>&1
 	echo "xdebug.gc_stats_output_name=gcstats.%s.%p.%r" >> "$INSTALL_DIR/bin/php.ini" 2>&1
