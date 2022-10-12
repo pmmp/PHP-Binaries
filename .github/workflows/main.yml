@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Install tools and dependencies
         run: |
@@ -57,7 +57,7 @@ jobs:
     runs-on: macos-11.0
     
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       
       - name: Install tools and dependencies
         run: brew install libtool autoconf automake pkg-config bison re2c
@@ -101,7 +101,7 @@ jobs:
     runs-on: windows-2019
     
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       
       - name: Install tools and dependencies
         run: choco install wget --no-progress
