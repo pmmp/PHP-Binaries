@@ -29,7 +29,7 @@ jobs:
         run: tar -czf ./PHP_Linux-x86_64.tar.gz bin
         
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: always()
         with:
           name: Linux
@@ -44,7 +44,7 @@ jobs:
         run: tar -czf workspace.tar.gz install_data
 
       - name: Upload workspace
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: Linux-workspace
@@ -73,7 +73,7 @@ jobs:
         run: tar -czf ./PHP_MacOS-x86_64.tar.gz bin
         
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: always()
         with:
           name: MacOS
@@ -88,7 +88,7 @@ jobs:
         run: tar -czf workspace.tar.gz install_data
 
       - name: Upload workspace
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: MacOS-workspace
@@ -113,7 +113,7 @@ jobs:
           SOURCES_PATH: ${{ github.workspace }}\pocketmine-php-sdk
           
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: always()
         with:
           name: Windows
