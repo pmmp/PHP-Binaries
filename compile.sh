@@ -1065,6 +1065,12 @@ if [ "$HAVE_OPCACHE" == "yes" ]; then
 	echo "opcache.jit=off" >> "$INSTALL_DIR/bin/php.ini"
 	echo "opcache.jit_buffer_size=128M" >> "$INSTALL_DIR/bin/php.ini"
 fi
+if [ "$COMPILE_TARGET" == "mac-"* ]; then
+	#we don't have permission to allocate executable memory on macOS due to not being codesigned
+	#workaround this for now by disabling PCRE JIT
+	echo "" >> "$INSTALL_DIR/bin/php.ini"
+	echo "pcre.jit=off" >> "$INSTALL_DIR/bin/php.ini"
+fi
 
 echo " done!"
 
