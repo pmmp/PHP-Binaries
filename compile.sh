@@ -1,26 +1,26 @@
 #!/bin/bash
 [ -z "$PHP_VERSION" ] && PHP_VERSION="8.1.11"
 
-ZLIB_VERSION="1.2.11" #1.2.12 breaks on macOS and probably cross-compile too due to ignoring $CC
+ZLIB_VERSION="1.2.13"
 GMP_VERSION="6.2.1"
-CURL_VERSION="curl-7_85_0"
+CURL_VERSION="curl-7_86_0"
 YAML_VERSION="0.2.5"
 LEVELDB_VERSION="1c7564468b41610da4f498430e795ca4de0931ff"
 LIBXML_VERSION="2.10.1" #2.10.2 requires automake 1.16.3, which isn't easily available on Ubuntu 20.04
 LIBPNG_VERSION="1.6.38"
 LIBJPEG_VERSION="9e"
-OPENSSL_VERSION="1.1.1p" #1.1.1q breaks on macOS (https://github.com/openssl/openssl/issues/18720)
+OPENSSL_VERSION="1.1.1s"
 LIBZIP_VERSION="1.9.2"
 SQLITE3_YEAR="2022"
-SQLITE3_VERSION="3390400" #3.39.4
+SQLITE3_VERSION="3400000" #3.40.0
 LIBDEFLATE_VERSION="0d1779a071bcc636e5156ddb7538434da7acad22" #1.14
 
 EXT_PTHREADS_VERSION="4.1.4"
 EXT_YAML_VERSION="2.2.2"
 EXT_LEVELDB_VERSION="317fdcd8415e1566fc2835ce2bdb8e19b890f9f3"
 EXT_CHUNKUTILS2_VERSION="0.3.3"
-EXT_XDEBUG_VERSION="3.1.5"
-EXT_IGBINARY_VERSION="3.2.7"
+EXT_XDEBUG_VERSION="3.1.6"
+EXT_IGBINARY_VERSION="3.2.12"
 EXT_CRYPTO_VERSION="0.3.2"
 EXT_RECURSIONGUARD_VERSION="0.1.0"
 EXT_LIBDEFLATE_VERSION="0.1.0"
@@ -1064,6 +1064,12 @@ if [ "$HAVE_OPCACHE" == "yes" ]; then
 	echo "; Enable it at your own risk. See https://www.php.net/manual/en/opcache.configuration.php#ini.opcache.jit for possible options." >> "$INSTALL_DIR/bin/php.ini"
 	echo "opcache.jit=off" >> "$INSTALL_DIR/bin/php.ini"
 	echo "opcache.jit_buffer_size=128M" >> "$INSTALL_DIR/bin/php.ini"
+fi
+if [ "$COMPILE_TARGET" == "mac-"* ]; then
+	#we don't have permission to allocate executable memory on macOS due to not being codesigned
+	#workaround this for now by disabling PCRE JIT
+	echo "" >> "$INSTALL_DIR/bin/php.ini"
+	echo "pcre.jit=off" >> "$INSTALL_DIR/bin/php.ini"
 fi
 
 echo " done!"
