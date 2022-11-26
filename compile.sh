@@ -46,7 +46,7 @@ INSTALL_DIR="$DIR/bin/php7"
 date > "$DIR/install.log" 2>&1
 
 uname -a >> "$DIR/install.log" 2>&1
-echo "[INFO] Checking dependencies"
+write_out INFO "Checking dependencies"
 
 COMPILE_SH_DEPENDENCIES=( make autoconf automake m4 getconf gzip bzip2 bison g++ git cmake pkg-config re2c)
 ERRORS=0
@@ -335,7 +335,10 @@ echo "}" >> test.c
 
 type $CC >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"$CC\""; exit 1; }
 
-[ -z "$THREADS" ] && THREADS=1;
+if [ -z "$THREADS" ]; then
+	write_out "WARNING" "Threads is not set, please set it with -j option to build faster"	
+	THREADS=1;
+fi
 [ -z "$march" ] && march=native;
 [ -z "$mtune" ] && mtune=native;
 [ -z "$CFLAGS" ] && CFLAGS="";
