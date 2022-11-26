@@ -46,7 +46,7 @@ INSTALL_DIR="$DIR/bin/php7"
 date > "$DIR/install.log" 2>&1
 
 uname -a >> "$DIR/install.log" 2>&1
-write_out INFO "Checking dependencies"
+echo "[INFO] Checking dependencies"
 
 COMPILE_SH_DEPENDENCIES=( make autoconf automake m4 getconf gzip bzip2 bison g++ git cmake pkg-config re2c)
 ERRORS=0
