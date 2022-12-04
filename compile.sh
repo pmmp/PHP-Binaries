@@ -908,6 +908,9 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 	if [ "$IS_WINDOWS" != "yes" ]; then
 		if [ "$COMPILE_FOR_ANDROID" == "no" ]; then
 			export LIBS="$LIBS -lpthread -ldl -lresolv"
+			if [ "$(uname -s)" == "Darwin" ]; then
+				sed -i=".backup" "s/have_shm_mmap_anon=no/have_shm_mmap_anon=yes/" ./configure
+			fi
 		else
 			export LIBS="$LIBS -lpthread -lresolv"
 		fi
