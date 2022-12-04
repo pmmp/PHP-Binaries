@@ -225,7 +225,7 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		OPENSSL_TARGET="mingw64"
 		GMP_ABI="64"
 		echo "[INFO] Cross-compiling for Windows 64-bit"
-	elif [ "$COMPILE_TARGET" == "mac" ]; then
+	elif [ "$COMPILE_TARGET" == "mac-x86-64" ]; then
 		[ -z "$march" ] && march=prescott;
 		[ -z "$mtune" ] && mtune=generic;
 		CFLAGS="$CFLAGS -fomit-frame-pointer";
@@ -238,7 +238,7 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		OPENSSL_TARGET="darwin64-x86_64-cc"
 		GMP_ABI="32"
 		echo "[INFO] Cross-compiling for Intel MacOS"
-	elif [ "$COMPILE_TARGET" == "mac-arm64"]; then
+	elif [ "$COMPILE_TARGET" == "mac-arm64" ]; then
 		if [ "$(uname -s)" != "Darwin" ]; then
 			write_error "Cross-compiling for Apple Silicon is only supported on macOS"
 			exit 1
