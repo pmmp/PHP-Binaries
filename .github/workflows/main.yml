@@ -52,8 +52,8 @@ jobs:
             workspace.tar.gz
           if-no-files-found: error
 
-  macos:
-    name: MacOS
+  macos-intel:
+    name: MacOS (x86_64)
     runs-on: macos-11.0
     
     steps:
@@ -76,7 +76,7 @@ jobs:
         uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: MacOS
+          name: MacOS-x86_64
           path: |
             ./PHP_MacOS-x86_64.tar.gz
             install.log
@@ -91,7 +91,51 @@ jobs:
         uses: actions/upload-artifact@v3
         if: failure()
         with:
-          name: MacOS-workspace
+          name: MacOS-x86_64-workspace
+          path: |
+            workspace.tar.gz
+          if-no-files-found: error
+
+  macos-apple-silicon:
+    name: MacOS (arm64)
+    runs-on: macos-11.0
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install tools and dependencies
+        run: brew install libtool autoconf automake pkg-config bison re2c
+
+      - name: Compile PHP
+        run: |
+          export PATH="/usr/local/opt/bison/bin:$PATH"
+          set -ex
+          trap "exit 1" ERR
+          ./compile.sh -x -t mac-arm64 -j4 -f -g
+
+      - name: Create tarball
+        run: tar -czf ./PHP_MacOS-arm64.tar.gz bin
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: MacOS-arm64
+          path: |
+            ./PHP_MacOS-arm64.tar.gz
+            install.log
+            compile.sh
+          if-no-files-found: error
+
+      - name: Prepare workspace for upload
+        if: failure()
+        run: tar -czf workspace.tar.gz install_data
+
+      - name: Upload workspace
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: MacOS-arm64-workspace
           path: |
             workspace.tar.gz
           if-no-files-found: error
