@@ -244,6 +244,7 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 			exit 1
 		fi
 		macos_m1_common
+		CFLAGS="-target arm64-apple-macos11 $CFLAGS"
 		echo "[INFO] Cross-compiling for MacOS M1"
 	elif [ "$COMPILE_TARGET" == "android-aarch64" ]; then
 		COMPILE_FOR_ANDROID=yes
