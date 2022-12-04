@@ -184,6 +184,35 @@ TOOLCHAIN_PREFIX=""
 OPENSSL_TARGET=""
 CMAKE_GLOBAL_EXTRA_FLAGS=""
 
+function macos_intel_common() {
+	[ -z "$MACOSX_DEPLOYMENT_TARGET" ] && export MACOSX_DEPLOYMENT_TARGET=10.9;
+	CFLAGS="$CFLAGS -m64 -arch x86_64 -fomit-frame-pointer -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET"
+	LDFLAGS="$LDFLAGS -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET"
+	if [ "$DO_STATIC" == "no" ]; then
+		LDFLAGS="$LDFLAGS -Wl,-rpath,@loader_path/../lib"
+		export DYLD_LIBRARY_PATH="@loader_path/../lib"
+	fi
+	CFLAGS="$CFLAGS -Qunused-arguments -Wno-error=unused-command-line-argument-hard-error-in-future"
+	ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
+	GMP_ABI="64"
+	OPENSSL_TARGET="darwin64-x86_64-cc"
+	CMAKE_GLOBAL_EXTRA_FLAGS="-DCMAKE_OSX_ARCHITECTURES=x86_64"
+}
+
+function macos_m1_common() {
+	[ -z "$MACOSX_DEPLOYMENT_TARGET" ] && export MACOSX_DEPLOYMENT_TARGET=11.0;
+	CFLAGS="$CFLAGS -arch arm64 -fomit-frame-pointer -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET"
+	LDFLAGS="$LDFLAGS -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET"
+	if [ "$DO_STATIC" == "no" ]; then
+		LDFLAGS="$LDFLAGS -Wl,-rpath,@loader_path/../lib";
+		export DYLD_LIBRARY_PATH="@loader_path/../lib"
+	fi
+	CFLAGS="$CFLAGS -Qunused-arguments"
+	GMP_ABI="64"
+	OPENSSL_TARGET="darwin64-arm64-cc"
+	CMAKE_GLOBAL_EXTRA_FLAGS="-DCMAKE_OSX_ARCHITECTURES=arm64"
+}
+
 if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 	export CROSS_COMPILER="$PATH"
 	if [[ "$COMPILE_TARGET" == "win" ]] || [[ "$COMPILE_TARGET" == "win64" ]]; then
@@ -209,6 +238,13 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		OPENSSL_TARGET="darwin64-x86_64-cc"
 		GMP_ABI="32"
 		echo "[INFO] Cross-compiling for Intel MacOS"
+	elif [ "$COMPILE_TARGET" == "mac-arm64"]; then
+		if [ "$(uname -s)" != "Darwin" ]; then
+			write_error "Cross-compiling for Apple Silicon is only supported on macOS"
+			exit 1
+		fi
+		macos_m1_common
+		echo "[INFO] Cross-compiling for MacOS M1"
 	elif [ "$COMPILE_TARGET" == "android-aarch64" ]; then
 		COMPILE_FOR_ANDROID=yes
 		[ -z "$march" ] && march="armv8-a";
@@ -245,32 +281,11 @@ else
 	elif [[ "$COMPILE_TARGET" == "mac-x86-64" ]]; then
 		[ -z "$march" ] && march=core2;
 		[ -z "$mtune" ] && mtune=generic;
-		[ -z "$MACOSX_DEPLOYMENT_TARGET" ] && export MACOSX_DEPLOYMENT_TARGET=10.9;
-		CFLAGS="$CFLAGS -m64 -arch x86_64 -fomit-frame-pointer -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET"
-		LDFLAGS="$LDFLAGS -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET"
-		if [ "$DO_STATIC" == "no" ]; then
-			LDFLAGS="$LDFLAGS -Wl,-rpath,@loader_path/../lib";
-			export DYLD_LIBRARY_PATH="@loader_path/../lib"
-		fi
-		CFLAGS="$CFLAGS -Qunused-arguments -Wno-error=unused-command-line-argument-hard-error-in-future"
-		ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
-		GMP_ABI="64"
-		OPENSSL_TARGET="darwin64-x86_64-cc"
-		CMAKE_GLOBAL_EXTRA_FLAGS="-DCMAKE_OSX_ARCHITECTURES=x86_64"
+		macos_intel_common
 		echo "[INFO] Compiling for MacOS x86_64"
 	#TODO: add aarch64 platforms (ios, android, rpi)
 	elif [[ "$COMPILE_TARGET" == "mac-arm64" ]]; then
-		[ -z "$MACOSX_DEPLOYMENT_TARGET" ] && export MACOSX_DEPLOYMENT_TARGET=11.0;
-		CFLAGS="$CFLAGS -arch arm64 -fomit-frame-pointer -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET"
-		LDFLAGS="$LDFLAGS -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET"
-		if [ "$DO_STATIC" == "no" ]; then
-			LDFLAGS="$LDFLAGS -Wl,-rpath,@loader_path/../lib";
-			export DYLD_LIBRARY_PATH="@loader_path/../lib"
-		fi
-		CFLAGS="$CFLAGS -Qunused-arguments"
-		GMP_ABI="64"
-		OPENSSL_TARGET="darwin64-arm64-cc"
-		CMAKE_GLOBAL_EXTRA_FLAGS="-DCMAKE_OSX_ARCHITECTURES=arm64"
+		macos_m1_common
 		echo "[INFO] Compiling for MacOS M1"
 	elif [[ "$COMPILE_TARGET" != "" ]]; then
 		echo "Please supply a proper platform [mac-arm64 mac-x86-64 linux linux64] to compile for"
