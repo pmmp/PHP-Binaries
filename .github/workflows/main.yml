@@ -68,7 +68,7 @@ jobs:
           set -ex
           trap "exit 1" ERR
           ./compile.sh -t mac-x86-64 -j4 -f -g
-          
+
       - name: Create tarball
         run: tar -czf ./PHP_MacOS-x86_64.tar.gz bin
         
