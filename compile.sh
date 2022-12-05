@@ -1045,7 +1045,7 @@ function relativize_macos_all_libraries_paths {
 	set -e
 }
 
-if [[ "$(uname -s)" == "Darwin" ]] && [[ "$IS_CROSSCOMPILE" != "yes" ]]; then
+if [[ "$(uname -s)" == "Darwin" ]] && [[ "$COMPILE_TARGET" == "mac-"* ]]; then
 	set +e
 	install_name_tool -delete_rpath "$INSTALL_DIR/lib" "$INSTALL_DIR/bin/php" >> "$DIR/install.log" 2>&1
 
