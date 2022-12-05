@@ -111,7 +111,7 @@ jobs:
           export PATH="/usr/local/opt/bison/bin:$PATH"
           set -ex
           trap "exit 1" ERR
-          ./compile.sh -x -t mac-arm64 -j4 -f -g
+          ./compile.sh -x -t mac-arm64 -j4 -d -g
 
       - name: Create tarball
         run: tar -czf ./PHP_MacOS-arm64.tar.gz bin
