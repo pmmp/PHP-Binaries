@@ -1104,7 +1104,7 @@ if [[ "$HAVE_XDEBUG" == "yes" ]]; then
 	echo -n "[xdebug] checking..."
 	cd "$BUILD_DIR/php/ext/xdebug"
 	"$INSTALL_DIR/bin/phpize" >> "$DIR/install.log" 2>&1
-	./configure --with-php-config="$INSTALL_DIR/bin/php-config" >> "$DIR/install.log" 2>&1
+	./configure --with-php-config="$INSTALL_DIR/bin/php-config" $CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
 	echo -n " compiling..."
 	make -j4 >> "$DIR/install.log" 2>&1
 	echo -n " installing..."
