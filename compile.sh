@@ -9,6 +9,7 @@ LEVELDB_VERSION="1c7564468b41610da4f498430e795ca4de0931ff"
 LIBXML_VERSION="2.10.1" #2.10.2 requires automake 1.16.3, which isn't easily available on Ubuntu 20.04
 LIBPNG_VERSION="1.6.38"
 LIBJPEG_VERSION="9e"
+LIBMONGOC_VERSION="1.23.2"
 OPENSSL_VERSION="1.1.1s"
 LIBZIP_VERSION="1.9.2"
 SQLITE3_YEAR="2022"
@@ -24,6 +25,7 @@ EXT_IGBINARY_VERSION="3.2.12"
 EXT_CRYPTO_VERSION="0.3.2"
 EXT_RECURSIONGUARD_VERSION="0.1.0"
 EXT_LIBDEFLATE_VERSION="0.1.0"
+EXT_MONGODB_VERSION="1.15.0"
 EXT_MORTON_VERSION="0.1.2"
 EXT_XXHASH_VERSION="0.1.1"
 
@@ -657,6 +659,31 @@ function build_libjpeg {
 }
 
 
+function build_libmongoc {
+	if [ "$DO_STATIC" == "yes" ]; then
+		local EXTRA_FLAGS="--enable-shared=no --enable-static=yes"
+	else
+		local EXTRA_FLAGS="--enable-shared=yes --enable-static=no"
+	fi
+	#libpng
+	echo -n "[libmongoc] downloading $LIBMONGOC_VERSION..."
+	download_file "https://github.com/mongodb/mongo-c-driver/releases/download/$LIBMONGOC_VERSION/mongo-c-driver-$LIBMONGOC_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	mv mongo-c-driver-$LIBMONGOC_VERSION libmongoc
+	echo -n " checking..."
+	cd libmongoc
+	cmake . \
+		-DENABLE_AUTOMATIC_INIT_AND_CLEANUP=OFF \
+		-DCMAKE_PREFIX_PATH="$INSTALL_DIR" \
+		-DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
+		-DCMAKE_INSTALL_LIBDIR=lib >> "$DIR/install.log" 2>&1
+	echo -n " compiling..."
+	make -j $THREADS >> "$DIR/install.log" 2>&1
+	echo -n " installing..."
+	make install >> "$DIR/install.log" 2>&1
+	cd ..
+	echo " done!"
+}
+
 function build_libxml2 {
 	#libxml2
 	echo -n "[libxml] downloading $LIBXML_VERSION... "
@@ -789,6 +816,7 @@ else
 	HAS_LIBJPEG=""
 fi
 
+build_libmongoc
 build_libxml2
 build_libzip
 build_sqlite3
@@ -847,6 +875,8 @@ get_github_extension "leveldb" "$EXT_LEVELDB_VERSION" "pmmp" "php-leveldb"
 get_github_extension "chunkutils2" "$EXT_CHUNKUTILS2_VERSION" "pmmp" "ext-chunkutils2"
 
 get_github_extension "libdeflate" "$EXT_LIBDEFLATE_VERSION" "pmmp" "ext-libdeflate"
+
+get_pecl_extension "mongodb" "$EXT_MONGODB_VERSION"
 
 get_github_extension "morton" "$EXT_MORTON_VERSION" "pmmp" "ext-morton"
 
@@ -937,6 +967,7 @@ RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS_LTO" LDFLA
 --with-openssl \
 --with-zip \
 --with-libdeflate="$INSTALL_DIR" \
+--enable-mongodb \
 $HAS_LIBJPEG \
 $HAS_GD \
 --with-leveldb="$INSTALL_DIR" \
