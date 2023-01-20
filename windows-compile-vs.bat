@@ -33,7 +33,7 @@ set PHP_RECURSIONGUARD_VER=0.1.0
 set PHP_MORTON_VER=0.1.2
 set PHP_LIBDEFLATE_VER=0.1.0
 set PHP_XXHASH_VER=0.1.1
-set PHP_XDEBUG_VER=3.1.6
+set PHP_XDEBUG_VER=3.2.0
 
 set script_path=%~dp0
 set log_file=%script_path%compile.log
