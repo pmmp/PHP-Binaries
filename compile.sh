@@ -15,7 +15,9 @@ SQLITE3_YEAR="2022"
 SQLITE3_VERSION="3400000" #3.40.0
 LIBDEFLATE_VERSION="0d1779a071bcc636e5156ddb7538434da7acad22" #1.14
 
-EXT_PTHREADS_VERSION="4.2.0"
+EXT_PTHREADS_VERSION_PM4="4.2.0"
+EXT_PTHREADS_VERSION_PM5="5.1.1"
+EXT_PTHREADS_VERSION="$EXT_PTHREADS_VERSION_PM4"
 EXT_YAML_VERSION="2.2.2"
 EXT_LEVELDB_VERSION="317fdcd8415e1566fc2835ce2bdb8e19b890f9f3"
 EXT_CHUNKUTILS2_VERSION="0.3.3"
@@ -124,7 +126,9 @@ LD_PRELOAD=""
 
 COMPILE_GD="no"
 
-while getopts "::t:j:srdxff:gnva:" OPTION; do
+PM_VERSION_MAJOR="4"
+
+while getopts "::t:j:srdxff:gnva:P:" OPTION; do
 
 	case $OPTION in
 		t)
@@ -172,12 +176,22 @@ while getopts "::t:j:srdxff:gnva:" OPTION; do
 			echo "[opt] Will pass -fsanitize=$OPTARG to compilers and linkers"
 			FSANITIZE_OPTIONS="$OPTARG"
 			;;
+		P)
+			PM_VERSION_MAJOR="$OPTARG"
+			;;
 		\?)
 			echo "Invalid option: -$OPTARG" >&2
 			exit 1
 			;;
 	esac
 done
+
+if [ "$PM_VERSION_MAJOR" -ge 5 ]; then
+	EXT_PTHREADS_VERSION="$EXT_PTHREADS_VERSION_PM5"
+else
+	EXT_PTHREADS_VERSION="$EXT_PTHREADS_VERSION_PM4"
+fi
+write_out "opt" "Compiling with configuration for PocketMine-MP $PM_VERSION_MAJOR"
 
 GMP_ABI=""
 TOOLCHAIN_PREFIX=""

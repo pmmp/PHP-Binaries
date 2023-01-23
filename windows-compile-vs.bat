@@ -23,7 +23,9 @@ set PTHREAD_W32_VER=3.0.0
 set LEVELDB_MCPE_VER=1c7564468b41610da4f498430e795ca4de0931ff
 set LIBDEFLATE_VER=0d1779a071bcc636e5156ddb7538434da7acad22
 
-set PHP_PTHREADS_VER=4.2.0
+set PHP_PTHREADS_VER_PM4=4.2.0
+set PHP_PTHREADS_VER_PM5=5.1.1
+set PHP_PTHREADS_VER=
 set PHP_YAML_VER=2.2.2
 set PHP_CHUNKUTILS2_VER=0.3.3
 set PHP_IGBINARY_VER=3.2.12
@@ -60,6 +62,18 @@ if "%PHP_DEBUG_BUILD%"=="0" (
 	set MSBUILD_CONFIGURATION=Debug
 	call :pm-echo "Building debug binaries"
 )
+
+if "%PM_VERSION_MAJOR%"=="" (
+    set PM_VERSION_MAJOR=4
+)
+
+if "%PM_VERSION_MAJOR%" geq "5" (
+    set PHP_PTHREADS_VER=%PHP_PTHREADS_VER_PM5%
+) else (
+    set PHP_PTHREADS_VER=%PHP_PTHREADS_VER_PM4%
+)
+
+call :pm-echo "Compiling with configuration for PocketMine-MP %PM_VERSION_MAJOR%"
 
 if "%SOURCES_PATH%"=="" (
 	if "%PHP_DEBUG_BUILD%"=="0" (
