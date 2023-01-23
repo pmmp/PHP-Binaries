@@ -26,7 +26,7 @@ jobs:
           # Used "set -ex" instead of hashbang since script isn't executed with hashbang
           set -ex
           trap "exit 1" ERR
-          ./compile.sh -t linux64 -j 4 -f -g -${{ matrix.pm-version-major }}
+          ./compile.sh -t linux64 -j 4 -f -g -P ${{ matrix.pm-version-major }}
 
       - name: Create tarball
         run: tar -czf ./PHP_Linux-x86_64.tar.gz bin
@@ -73,7 +73,7 @@ jobs:
           export PATH="/usr/local/opt/bison/bin:$PATH"
           set -ex
           trap "exit 1" ERR
-          ./compile.sh -t mac-x86-64 -j4 -f -g -${{ matrix.pm-version-major }}
+          ./compile.sh -t mac-x86-64 -j4 -f -g -P ${{ matrix.pm-version-major }}
           
       - name: Create tarball
         run: tar -czf ./PHP_MacOS-x86_64.tar.gz bin

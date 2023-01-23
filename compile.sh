@@ -128,7 +128,7 @@ COMPILE_GD="no"
 
 PM_VERSION_MAJOR="4"
 
-while getopts "::t:j:srdxff:gnva:45" OPTION; do
+while getopts "::t:j:srdxff:gnva:P" OPTION; do
 
 	case $OPTION in
 		t)
@@ -176,13 +176,9 @@ while getopts "::t:j:srdxff:gnva:45" OPTION; do
 			echo "[opt] Will pass -fsanitize=$OPTARG to compilers and linkers"
 			FSANITIZE_OPTIONS="$OPTARG"
 			;;
-	  5)
-			PM_VERSION_MAJOR="5"
-			EXT_PTHREADS_VERSION="$EXT_PTHREADS_VERSION_PM5"
-			;;
-	  4)
-			PM_VERSION_MAJOR="4"
-			EXT_PTHREADS_VERSION="$EXT_PTHREADS_VERSION_PM4"
+	  P)
+			write_out "opt" "Compiling with configuration for PocketMine-MP $PM_VERSION_MAJOR"
+			PM_VERSION_MAJOR="$OPTARG"
 			;;
 		\?)
 			echo "Invalid option: -$OPTARG" >&2
@@ -191,7 +187,11 @@ while getopts "::t:j:srdxff:gnva:45" OPTION; do
 	esac
 done
 
-write_out "[opt]" "Compiling with configuration for PocketMine-MP $PM_VERSION_MAJOR"
+if [ "$PM_VERSION_MAJOR" -ge 5 ]; then
+	EXT_PTHREADS_VERSION="$EXT_PTHREADS_VERSION_PM5"
+else
+	EXT_PTHREADS_VERSION="$EXT_PTHREADS_VERSION_PM4"
+fi
 
 GMP_ABI=""
 TOOLCHAIN_PREFIX=""
