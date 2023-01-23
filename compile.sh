@@ -176,7 +176,7 @@ while getopts "::t:j:srdxff:gnva:P:" OPTION; do
 			echo "[opt] Will pass -fsanitize=$OPTARG to compilers and linkers"
 			FSANITIZE_OPTIONS="$OPTARG"
 			;;
-	  P)
+		P)
 			PM_VERSION_MAJOR="$OPTARG"
 			;;
 		\?)
