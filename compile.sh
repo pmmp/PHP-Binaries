@@ -128,7 +128,7 @@ COMPILE_GD="no"
 
 PM_VERSION_MAJOR="4"
 
-while getopts "::t:j:srdxff:gnva:P" OPTION; do
+while getopts "::t:j:srdxff:gnva:P:" OPTION; do
 
 	case $OPTION in
 		t)
