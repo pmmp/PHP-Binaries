@@ -7,8 +7,11 @@ on:
 
 jobs:
   linux:
-    name: Linux
+    name: Linux (PM ${{ matrix.pm-version-major }})
     runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        pm-version-major: [4, 5]
 
     steps:
       - uses: actions/checkout@v3
@@ -23,7 +26,7 @@ jobs:
           # Used "set -ex" instead of hashbang since script isn't executed with hashbang
           set -ex
           trap "exit 1" ERR
-          ./compile.sh -t linux64 -j 4 -f -g
+          ./compile.sh -t linux64 -j 4 -f -g -${{ matrix.pm-version-major }}
 
       - name: Create tarball
         run: tar -czf ./PHP_Linux-x86_64.tar.gz bin
@@ -32,7 +35,7 @@ jobs:
         uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: Linux
+          name: Linux-PM${{ matrix.pm-version-major }}
           path: |
             ./PHP_Linux-x86_64.tar.gz
             install.log
@@ -47,15 +50,18 @@ jobs:
         uses: actions/upload-artifact@v3
         if: failure()
         with:
-          name: Linux-workspace
+          name: Linux-workspace-PM${{ matrix.pm-version-major }}
           path: |
             workspace.tar.gz
           if-no-files-found: error
 
   macos:
-    name: MacOS
+    name: MacOS (PM ${{ matrix.pm-version-major }})
     runs-on: macos-11.0
-    
+    strategy:
+      matrix:
+        pm-version-major: [ 4, 5 ]
+
     steps:
       - uses: actions/checkout@v3
       
@@ -67,7 +73,7 @@ jobs:
           export PATH="/usr/local/opt/bison/bin:$PATH"
           set -ex
           trap "exit 1" ERR
-          ./compile.sh -t mac-x86-64 -j4 -f -g
+          ./compile.sh -t mac-x86-64 -j4 -f -g -${{ matrix.pm-version-major }}
           
       - name: Create tarball
         run: tar -czf ./PHP_MacOS-x86_64.tar.gz bin
@@ -76,7 +82,7 @@ jobs:
         uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: MacOS
+          name: MacOS-PM${{ matrix.pm-version-major }}
           path: |
             ./PHP_MacOS-x86_64.tar.gz
             install.log
@@ -91,15 +97,18 @@ jobs:
         uses: actions/upload-artifact@v3
         if: failure()
         with:
-          name: MacOS-workspace
+          name: MacOS-workspace-PM${{ matrix.pm-version-major }}
           path: |
             workspace.tar.gz
           if-no-files-found: error
 
   windows:
-    name: Windows
+    name: Windows (PM ${{ matrix.pm-version-major }})
     runs-on: windows-2019
-    
+    strategy:
+      matrix:
+        pm-version-major: [ 4, 5 ]
+
     steps:
       - uses: actions/checkout@v3
       
@@ -111,12 +120,13 @@ jobs:
         env:
           VS_EDITION: Enterprise
           SOURCES_PATH: ${{ github.workspace }}\pocketmine-php-sdk
+          PM_VERSION_MAJOR: ${{ matrix.pm-version-major }}
           
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: Windows
+          name: Windows-PM${{ matrix.pm-version-major }}
           path: |
             php-*.zip
             compile.log
