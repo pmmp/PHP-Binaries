@@ -177,7 +177,6 @@ while getopts "::t:j:srdxff:gnva:P:" OPTION; do
 			FSANITIZE_OPTIONS="$OPTARG"
 			;;
 	  P)
-			write_out "opt" "Compiling with configuration for PocketMine-MP $PM_VERSION_MAJOR"
 			PM_VERSION_MAJOR="$OPTARG"
 			;;
 		\?)
@@ -192,6 +191,7 @@ if [ "$PM_VERSION_MAJOR" -ge 5 ]; then
 else
 	EXT_PTHREADS_VERSION="$EXT_PTHREADS_VERSION_PM4"
 fi
+write_out "opt" "Compiling with configuration for PocketMine-MP $PM_VERSION_MAJOR"
 
 GMP_ABI=""
 TOOLCHAIN_PREFIX=""
