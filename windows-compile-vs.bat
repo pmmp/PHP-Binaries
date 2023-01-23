@@ -67,10 +67,10 @@ if "%PM_VERSION_MAJOR%"=="" (
     set PM_VERSION_MAJOR=4
 )
 
-if "%PM_VERSION_MAJOR%"=="4" (
-    set PHP_PTHREADS_VER=%PHP_PTHREADS_VER_PM4%
-) else (
+if "%PM_VERSION_MAJOR%" geq "5" (
     set PHP_PTHREADS_VER=%PHP_PTHREADS_VER_PM5%
+) else (
+    set PHP_PTHREADS_VER=%PHP_PTHREADS_VER_PM4%
 )
 
 call :pm-echo "Compiling with configuration for PocketMine-MP %PM_VERSION_MAJOR%"
