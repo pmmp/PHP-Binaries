@@ -838,8 +838,8 @@ function get_pecl_extension {
 
 echo "[PHP] Downloading additional extensions..."
 
-get_github_extension "pthreads" "$EXT_PTHREADS_VERSION_PM4" "pmmp" "pthreads" #"v" needed for release tags because github removes the "v"
-#get_pecl_extension "pthreads" "$EXT_PTHREADS_VERSION_PM4"
+get_github_extension "pthreads" "$EXT_PTHREADS_VERSION" "pmmp" "pthreads" #"v" needed for release tags because github removes the "v"
+#get_pecl_extension "pthreads" "$EXT_PTHREADS_VERSION"
 
 get_github_extension "yaml" "$EXT_YAML_VERSION" "php" "pecl-file_formats-yaml"
 #get_pecl_extension "yaml" "$EXT_YAML_VERSION"
