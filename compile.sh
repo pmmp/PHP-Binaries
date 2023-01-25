@@ -16,7 +16,7 @@ SQLITE3_VERSION="3400000" #3.40.0
 LIBDEFLATE_VERSION="0d1779a071bcc636e5156ddb7538434da7acad22" #1.14
 
 EXT_PTHREADS_VERSION_PM4="4.2.0"
-EXT_PTHREADS_VERSION_PM5="5.1.1"
+EXT_PTHREADS_VERSION_PM5="5.1.2"
 EXT_PTHREADS_VERSION="$EXT_PTHREADS_VERSION_PM4"
 EXT_YAML_VERSION="2.2.2"
 EXT_LEVELDB_VERSION="317fdcd8415e1566fc2835ce2bdb8e19b890f9f3"
@@ -1102,7 +1102,8 @@ if [[ "$HAVE_XDEBUG" == "yes" ]]; then
 	echo -n " installing..."
 	make install >> "$DIR/install.log" 2>&1
 	echo "" >> "$INSTALL_DIR/bin/php.ini" 2>&1
-	echo "zend_extension=xdebug.so" >> "$INSTALL_DIR/bin/php.ini" 2>&1
+	echo ";WARNING: When loaded, xdebug 3.2.0 will cause segfaults whenever an uncaught error is thrown, even if xdebug.mode=off. Load it at your own risk." >> "$INSTALL_DIR/bin/php.ini" 2>&1
+	echo ";zend_extension=xdebug.so" >> "$INSTALL_DIR/bin/php.ini" 2>&1
 	echo ";https://xdebug.org/docs/all_settings#mode" >> "$INSTALL_DIR/bin/php.ini" 2>&1
 	echo "xdebug.mode=off" >> "$INSTALL_DIR/bin/php.ini" 2>&1
 	echo "xdebug.start_with_request=yes" >> "$INSTALL_DIR/bin/php.ini" 2>&1

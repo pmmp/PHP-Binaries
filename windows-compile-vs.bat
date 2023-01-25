@@ -24,7 +24,7 @@ set LEVELDB_MCPE_VER=1c7564468b41610da4f498430e795ca4de0931ff
 set LIBDEFLATE_VER=0d1779a071bcc636e5156ddb7538434da7acad22
 
 set PHP_PTHREADS_VER_PM4=4.2.0
-set PHP_PTHREADS_VER_PM5=5.1.1
+set PHP_PTHREADS_VER_PM5=5.1.2
 set PHP_PTHREADS_VER=
 set PHP_YAML_VER=2.2.2
 set PHP_CHUNKUTILS2_VER=0.3.3
@@ -355,7 +355,8 @@ call :pm-echo "Generating php.ini..."
 (echo opcache.jit=off)>>"%php_ini%"
 (echo opcache.jit_buffer_size=128M)>>"%php_ini%"
 (echo.)>>"%php_ini%"
-(echo zend_extension=php_xdebug.dll)>>"%php_ini%"
+(echo ;WARNING: When loaded, xdebug 3.2.0 will cause segfaults whenever an uncaught error is thrown, even if xdebug.mode=off. Load it at your own risk.)>>"%php_ini%"
+(echo ;zend_extension=php_xdebug.dll)>>"%php_ini%"
 (echo ;https://xdebug.org/docs/all_settings#mode)>>"%php_ini%"
 (echo xdebug.mode=off)>>"%php_ini%"
 (echo xdebug.start_with_request=yes)>>"%php_ini%"
