@@ -132,3 +132,29 @@ jobs:
             compile.log
             windows-compile-vs.bat
           if-no-files-found: error
+
+  publish:
+    name: Publish binaries
+    needs: [linux, macos, windows]
+    runs-on: ubuntu-20.04
+    if: ${{ github.ref_name == 'stable' && github.ref_type == 'branch' }}
+    
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: ${{ github.workspace }}
+          
+      - name: Publish release
+        uses: ncipollo/release-action@v1.12.0
+        with:
+          artifacts:
+            ${{ github.workspace }}/Linux-PM*/*.tar.gz
+            ${{ github.workspace }}/MacOS-PM*/*.tar.gz
+            ${{ github.workspace }}/Windows-PM*/*.zip
+          name: PHP (${{ github.ref_name }})
+          tag: php-${{ github.ref_name }}-${{ github.run_number }}
+          draft: true
+
+
+      
