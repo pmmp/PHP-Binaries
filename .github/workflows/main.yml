@@ -127,6 +127,7 @@ jobs:
           mkdir temp
           move php-debug-pack-*.zip temp/PHP-Windows-x64-debug-pack-PM${{ matrix.pm-version-major }}.zip
           move php-*.zip temp/PHP-Windows-x64-PM${{ matrix.pm-version-major }}.zip
+          move temp\*.zip .
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -134,7 +135,7 @@ jobs:
         with:
           name: Windows-PM${{ matrix.pm-version-major }}
           path: |
-            temp/*.zip
+            *.zip
             compile.log
             windows-compile-vs.bat
           if-no-files-found: error
