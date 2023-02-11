@@ -3,7 +3,7 @@ name: Build PHP binaries
 on:
   push:
     tags-ignore:
-      - "php-*"
+      - "php-**"
   pull_request:
   workflow_dispatch:
 
@@ -177,7 +177,6 @@ jobs:
           name: PHP ${{ steps.version.outputs.PHP_VERSION }} (Latest)
           tag: php-${{ steps.version.outputs.PHP_VERSION }}-latest
           allowUpdates: true
-          draft: true
           body: "Built by: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
       - name: Publish unique release
@@ -190,6 +189,5 @@ jobs:
           makeLatest: false
           name: PHP ${{ steps.version.outputs.PHP_VERSION }} (Build ${{ github.run_number }})
           tag: php-${{ steps.version.outputs.PHP_VERSION }}-build-${{ github.run_number }}
-          draft: true
           body: "Built by: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
    
