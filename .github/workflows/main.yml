@@ -144,7 +144,10 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           path: ${{ github.workspace }}
-          
+      
+      - name: Show available files
+        run: ls -R
+
       - name: Publish release
         uses: ncipollo/release-action@v1.12.0
         with:
