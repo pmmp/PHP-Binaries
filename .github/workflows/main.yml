@@ -29,7 +29,7 @@ jobs:
           ./compile.sh -t linux64 -j 4 -f -g -P ${{ matrix.pm-version-major }}
 
       - name: Create tarball
-        run: tar -czf ./PHP_Linux-x86_64.tar.gz bin
+        run: tar -czf ./PHP-Linux-x86-64-PM${{ matrix.pm-version-major }}.tar.gz bin
         
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -37,7 +37,7 @@ jobs:
         with:
           name: Linux-PM${{ matrix.pm-version-major }}
           path: |
-            ./PHP_Linux-x86_64.tar.gz
+            ./PHP-Linux-x86_64-PM${{ matrix.pm-version-major }}.tar.gz
             install.log
             compile.sh
           if-no-files-found: error
@@ -76,7 +76,7 @@ jobs:
           ./compile.sh -t mac-x86-64 -j4 -f -g -P ${{ matrix.pm-version-major }}
           
       - name: Create tarball
-        run: tar -czf ./PHP_MacOS-x86_64.tar.gz bin
+        run: tar -czf ./PHP-MacOS-x86_64-PM${{ matrix.pm-version-major }}.tar.gz bin
         
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -84,7 +84,7 @@ jobs:
         with:
           name: MacOS-PM${{ matrix.pm-version-major }}
           path: |
-            ./PHP_MacOS-x86_64.tar.gz
+            ./PHP-MacOS-x86-64-PM${{ matrix.pm-version-major }}.tar.gz
             install.log
             compile.sh
           if-no-files-found: error
@@ -121,14 +121,20 @@ jobs:
           VS_EDITION: Enterprise
           SOURCES_PATH: ${{ github.workspace }}\pocketmine-php-sdk
           PM_VERSION_MAJOR: ${{ matrix.pm-version-major }}
-          
+
+      - name: Rename artifacts
+        run: |
+          mkdir temp
+          move php-debug-pack-*.zip temp/PHP-Windows-x64-debug-pack-PM${{ matrix.pm-version-major }}.zip
+          move php-*.zip temp/PHP-Windows-x64-PM${{ matrix.pm-version-major }}.zip
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         if: always()
         with:
           name: Windows-PM${{ matrix.pm-version-major }}
           path: |
-            php-*.zip
+            temp/*.zip
             compile.log
             windows-compile-vs.bat
           if-no-files-found: error
@@ -143,7 +149,7 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
-          path: ${{ github.workspace }}
+          path: ${{ github.workspace }}/binaries
       
       - name: Show available files
         run: ls -R
