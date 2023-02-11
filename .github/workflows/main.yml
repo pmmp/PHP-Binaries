@@ -135,7 +135,7 @@ jobs:
         with:
           name: Windows-PM${{ matrix.pm-version-major }}
           path: |
-            *.zip
+            PHP-Windows-x64*.zip
             compile.log
             windows-compile-vs.bat
           if-no-files-found: error
@@ -144,16 +144,21 @@ jobs:
     name: Publish binaries
     needs: [linux, macos, windows]
     runs-on: ubuntu-20.04
-    if: ${{ github.ref_name == 'stable' && github.ref_type == 'branch' }}
-    
+    if: ${{ startsWith(github.ref_name, 'php/') && github.ref_type == 'branch' }}
+
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
           path: ${{ github.workspace }}
-      
+
       - name: Show available files
         run: ls -R
+
+      - name: Set version information
+        id: version
+        run: |
+          echo PHP_VERSION=$(echo ${{ github.ref_name }} | cut -d / -f1) >> $GITHUB_OUTPUT
 
       - name: Publish release
         uses: ncipollo/release-action@v1.12.0
@@ -162,8 +167,9 @@ jobs:
             ${{ github.workspace }}/Linux-PM*/*.tar.gz
             ${{ github.workspace }}/MacOS-PM*/*.tar.gz
             ${{ github.workspace }}/Windows-PM*/*.zip
-          name: PHP (${{ github.ref_name }})
-          tag: php-${{ github.ref_name }}-${{ github.run_number }}
+          makeLatest: ${{ github.ref_name == github.event.repository.default_branch }}
+          name: PHP ${{ steps.version.outputs.PHP_VERSION }} (Build ${{ github.run_number }})
+          tag: php-${{ steps.version.outputs.PHP_VERSION }}-build-${{ github.run_number }}
           draft: true
 
 
