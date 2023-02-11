@@ -29,7 +29,7 @@ jobs:
           ./compile.sh -t linux64 -j 4 -f -g -P ${{ matrix.pm-version-major }}
 
       - name: Create tarball
-        run: tar -czf ./PHP-Linux-x86-64-PM${{ matrix.pm-version-major }}.tar.gz bin
+        run: tar -czf ./PHP-Linux-x86_64-PM${{ matrix.pm-version-major }}.tar.gz bin
         
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -84,7 +84,7 @@ jobs:
         with:
           name: MacOS-PM${{ matrix.pm-version-major }}
           path: |
-            ./PHP-MacOS-x86-64-PM${{ matrix.pm-version-major }}.tar.gz
+            ./PHP-MacOS-x86_64-PM${{ matrix.pm-version-major }}.tar.gz
             install.log
             compile.sh
           if-no-files-found: error
@@ -176,6 +176,7 @@ jobs:
           tag: php-${{ steps.version.outputs.PHP_VERSION }}-latest
           allowUpdates: true
           draft: true
+          body: "Built by: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
       - name: Publish unique release
         uses: ncipollo/release-action@v1.12.0
@@ -188,4 +189,5 @@ jobs:
           name: PHP ${{ steps.version.outputs.PHP_VERSION }} (Build ${{ github.run_number }})
           tag: php-${{ steps.version.outputs.PHP_VERSION }}-build-${{ github.run_number }}
           draft: true
+          body: "Built by: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
    
