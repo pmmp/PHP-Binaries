@@ -1,7 +1,7 @@
 # Custom PHP build scripts for PocketMine-MP
 [![Build status](https://github.com/pmmp/php-build-scripts/actions/workflows/main.yml/badge.svg)](https://github.com/pmmp/php-build-scripts/actions/workflows/main.yml)
 
-## Looking for prebuilt binaries? Head over to our [Jenkins build server](https://jenkins.pmmp.io/job/PHP-8.0-Aggregate)
+## Looking for prebuilt binaries? Head over to [releases](https://github.com/pmmp/PHP-Binaries/releases/latest)
 
 ## compile.sh
 
