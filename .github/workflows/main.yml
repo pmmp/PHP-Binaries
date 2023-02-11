@@ -149,7 +149,7 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
-          path: ${{ github.workspace }}/binaries
+          path: ${{ github.workspace }}
       
       - name: Show available files
         run: ls -R
