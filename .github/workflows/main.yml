@@ -2,8 +2,8 @@ name: Build PHP binaries
 
 on:
   push:
-    tags-ignore:
-      - "php-**"
+    branches: "**"
+    tags-ignore: "php-**"
   pull_request:
   workflow_dispatch:
 
