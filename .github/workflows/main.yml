@@ -152,7 +152,7 @@ jobs:
       - name: Set version information
         id: version
         run: |
-          echo PHP_VERSION=$(echo ${{ github.ref_name }} | cut -d / -f1) >> $GITHUB_OUTPUT
+          echo PHP_VERSION=$(echo ${{ github.ref_name }} | cut -d / -f2) >> $GITHUB_OUTPUT
           
       - name: Update latest tag target
         run: |
