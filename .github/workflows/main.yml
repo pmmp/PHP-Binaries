@@ -147,20 +147,24 @@ jobs:
     if: ${{ startsWith(github.ref_name, 'php/') && github.ref_type == 'branch' }}
 
     steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set version information
+        id: version
+        run: |
+          echo PHP_VERSION=$(echo ${{ github.ref_name }} | cut -d / -f1) >> $GITHUB_OUTPUT
+          
+      - name: Update latest tag target
+        run: |
+          git tag -f php-${{ steps.version.outputs.PHP_VERSION }}-latest
+          git push -f origin php-${{ steps.version.outputs.PHP_VERSION }}-latest
+
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
           path: ${{ github.workspace }}
 
-      - name: Show available files
-        run: ls -R
-
-      - name: Set version information
-        id: version
-        run: |
-          echo PHP_VERSION=$(echo ${{ github.ref_name }} | cut -d / -f1) >> $GITHUB_OUTPUT
-
-      - name: Publish release
+      - name: Update latest branch release
         uses: ncipollo/release-action@v1.12.0
         with:
           artifacts: |
@@ -168,9 +172,20 @@ jobs:
             ${{ github.workspace }}/MacOS-PM*/*.tar.gz
             ${{ github.workspace }}/Windows-PM*/*.zip
           makeLatest: ${{ github.ref_name == github.event.repository.default_branch }}
+          name: PHP ${{ steps.version.outputs.PHP_VERSION }} (Latest)
+          tag: php-${{ steps.version.outputs.PHP_VERSION }}-latest
+          allowUpdates: true
+          draft: true
+
+      - name: Publish unique release
+        uses: ncipollo/release-action@v1.12.0
+        with:
+          artifacts: |
+            ${{ github.workspace }}/Linux-PM*/*.tar.gz
+            ${{ github.workspace }}/MacOS-PM*/*.tar.gz
+            ${{ github.workspace }}/Windows-PM*/*.zip
+          makeLatest: false
           name: PHP ${{ steps.version.outputs.PHP_VERSION }} (Build ${{ github.run_number }})
           tag: php-${{ steps.version.outputs.PHP_VERSION }}-build-${{ github.run_number }}
           draft: true
-
-
-      
+   
