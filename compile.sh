@@ -89,8 +89,28 @@ else
 	fi
 fi
 
+DOWNLOAD_CACHE=""
+
 function download_file {
-	_download_file "$1" 2>> "$DIR/install.log"
+	local url="$1"
+	local prefix="$2"
+	local cached_filename="$prefix-${url##*/}"
+
+	if [[ "$DOWNLOAD_CACHE" != "" ]]; then
+		if [[ ! -d "$DOWNLOAD_CACHE" ]]; then
+			mkdir "$DOWNLOAD_CACHE" >> "$DIR/install.log" 2>&1
+		fi
+		if [[ -f "$DOWNLOAD_CACHE/$cached_filename" ]]; then
+			echo "Cache hit for URL: $url" >> "$DIR/install.log"
+		else
+			echo "Downloading file to cache: $url" >> "$DIR/install.log"
+			_download_file "$1" > "$DOWNLOAD_CACHE/$cached_filename" 2>> "$DIR/install.log"
+		fi
+		cat "$DOWNLOAD_CACHE/$cached_filename" 2>> "$DIR/install.log"
+	else
+		echo "Downloading non-cached file: $url" >> "$DIR/install.log"
+		_download_file "$1" 2>> "$DIR/install.log"
+	fi
 }
 
 #if type llvm-gcc >/dev/null 2>&1; then
@@ -128,9 +148,14 @@ COMPILE_GD="no"
 
 PM_VERSION_MAJOR="4"
 
-while getopts "::t:j:srdxff:gnva:P:" OPTION; do
+while getopts "::t:j:srdxff:gnva:P:c:" OPTION; do
 
 	case $OPTION in
+		c)
+			mkdir "$OPTARG" 2> /dev/null
+			DOWNLOAD_CACHE="$(cd $OPTARG; pwd)"
+			write_out opt "Caching downloaded files in $DOWNLOAD_CACHE and reusing if available"
+			;;
 		t)
 			echo "[opt] Set target to $OPTARG"
 			COMPILE_TARGET="$OPTARG"
@@ -415,7 +440,7 @@ set -e
 #PHP 7
 echo -n "[PHP] downloading $PHP_VERSION..."
 
-download_file "https://github.com/php/php-src/archive/php-$PHP_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+download_file "https://github.com/php/php-src/archive/php-$PHP_VERSION.tar.gz" "php" | tar -zx >> "$DIR/install.log" 2>&1
 mv php-src-php-$PHP_VERSION php
 echo " done!"
 
@@ -428,7 +453,7 @@ function build_zlib {
 
 	#zlib
 	echo -n "[zlib] downloading $ZLIB_VERSION..."
-	download_file "https://github.com/madler/zlib/archive/v$ZLIB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	download_file "https://github.com/madler/zlib/archive/v$ZLIB_VERSION.tar.gz" "zlib" | tar -zx >> "$DIR/install.log" 2>&1
 	mv zlib-$ZLIB_VERSION zlib
 	echo -n " checking..."
 	cd zlib
@@ -459,7 +484,7 @@ function build_gmp {
 
 	#GMP
 	echo -n "[GMP] downloading $GMP_VERSION..."
-	download_file "https://gmplib.org/download/gmp/gmp-$GMP_VERSION.tar.bz2" | tar -jx >> "$DIR/install.log" 2>&1
+	download_file "https://gmplib.org/download/gmp/gmp-$GMP_VERSION.tar.bz2" "gmp" | tar -jx >> "$DIR/install.log" 2>&1
 	mv gmp-$GMP_VERSION gmp
 	echo -n " checking..."
 	cd gmp
@@ -491,7 +516,7 @@ function build_openssl {
 
 	WITH_OPENSSL="--with-openssl=$INSTALL_DIR"
 	echo -n "[OpenSSL] downloading $OPENSSL_VERSION..."
-	download_file "http://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	download_file "http://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" "openssl" | tar -zx >> "$DIR/install.log" 2>&1
 	mv openssl-$OPENSSL_VERSION openssl
 
 	echo -n " checking..."
@@ -521,7 +546,7 @@ function build_curl {
 
 	#curl
 	echo -n "[cURL] downloading $CURL_VERSION..."
-	download_file "https://github.com/curl/curl/archive/$CURL_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	download_file "https://github.com/curl/curl/archive/$CURL_VERSION.tar.gz" "curl" | tar -zx >> "$DIR/install.log" 2>&1
 	mv curl-$CURL_VERSION curl
 	echo -n " checking..."
 	cd curl
@@ -569,7 +594,7 @@ function build_yaml {
 		local EXTRA_FLAGS="--enable-shared --disable-static"
 	fi
 	echo -n "[YAML] downloading $YAML_VERSION..."
-	download_file "https://github.com/yaml/libyaml/archive/$YAML_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	download_file "https://github.com/yaml/libyaml/archive/$YAML_VERSION.tar.gz" "yaml" | tar -zx >> "$DIR/install.log" 2>&1
 	mv libyaml-$YAML_VERSION yaml
 	cd yaml
 	./bootstrap >> "$DIR/install.log" 2>&1
@@ -591,7 +616,7 @@ function build_yaml {
 
 function build_leveldb {
 	echo -n "[LevelDB] downloading $LEVELDB_VERSION..."
-	download_file "https://github.com/pmmp/leveldb/archive/$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	download_file "https://github.com/pmmp/leveldb/archive/$LEVELDB_VERSION.tar.gz" "leveldb" | tar -zx >> "$DIR/install.log" 2>&1
 	#download_file "https://github.com/Mojang/leveldb-mcpe/archive/$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 	mv leveldb-$LEVELDB_VERSION leveldb
 	echo -n " checking..."
@@ -630,7 +655,7 @@ function build_libpng {
 	fi
 	#libpng
 	echo -n "[libpng] downloading $LIBPNG_VERSION..."
-	download_file "https://sourceforge.net/projects/libpng/files/libpng16/$LIBPNG_VERSION/libpng-$LIBPNG_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	download_file "https://sourceforge.net/projects/libpng/files/libpng16/$LIBPNG_VERSION/libpng-$LIBPNG_VERSION.tar.gz" "libpng" | tar -zx >> "$DIR/install.log" 2>&1
 	mv libpng-$LIBPNG_VERSION libpng
 	echo -n " checking..."
 	cd libpng
@@ -654,7 +679,7 @@ function build_libjpeg {
 	fi
 	#libjpeg
 	echo -n "[libjpeg] downloading $LIBJPEG_VERSION..."
-	download_file "http://ijg.org/files/jpegsrc.v$LIBJPEG_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	download_file "http://ijg.org/files/jpegsrc.v$LIBJPEG_VERSION.tar.gz" "libjpeg" | tar -zx >> "$DIR/install.log" 2>&1
 	mv jpeg-$LIBJPEG_VERSION libjpeg
 	echo -n " checking..."
 	cd libjpeg
@@ -674,7 +699,7 @@ function build_libjpeg {
 function build_libxml2 {
 	#libxml2
 	echo -n "[libxml] downloading $LIBXML_VERSION... "
-	download_file "https://gitlab.gnome.org/GNOME/libxml2/-/archive/v$LIBXML_VERSION/libxml2-v$LIBXML_VERSION.tar.gz" | tar -xz >> "$DIR/install.log" 2>&1
+	download_file "https://gitlab.gnome.org/GNOME/libxml2/-/archive/v$LIBXML_VERSION/libxml2-v$LIBXML_VERSION.tar.gz" "libxml2" | tar -xz >> "$DIR/install.log" 2>&1
 	mv libxml2-v$LIBXML_VERSION libxml2
 	echo -n "checking... "
 	cd libxml2
@@ -706,7 +731,7 @@ function build_libzip {
 		local CMAKE_LIBZIP_EXTRA_FLAGS="-DBUILD_SHARED_LIBS=OFF"
 	fi
 	echo -n "[libzip] downloading $LIBZIP_VERSION..."
-	download_file "https://libzip.org/download/libzip-$LIBZIP_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	download_file "https://libzip.org/download/libzip-$LIBZIP_VERSION.tar.gz" "libzip" | tar -zx >> "$DIR/install.log" 2>&1
 	mv libzip-$LIBZIP_VERSION libzip >> "$DIR/install.log" 2>&1
 	echo -n " checking..."
 	cd libzip
@@ -744,7 +769,7 @@ function build_sqlite3 {
 	fi
 	#sqlite3
 	echo -n "[sqlite3] downloading $SQLITE3_VERSION..."
-	download_file "https://www.sqlite.org/$SQLITE3_YEAR/sqlite-autoconf-$SQLITE3_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	download_file "https://www.sqlite.org/$SQLITE3_YEAR/sqlite-autoconf-$SQLITE3_VERSION.tar.gz" "sqlite3" | tar -zx >> "$DIR/install.log" 2>&1
 	mv sqlite-autoconf-$SQLITE3_VERSION sqlite3 >> "$DIR/install.log" 2>&1
 	echo -n " checking..."
 	cd sqlite3
@@ -764,7 +789,7 @@ function build_sqlite3 {
 
 function build_libdeflate {
 	echo -n "[libdeflate] downloading $LIBDEFLATE_VERSION..."
-	download_file "https://github.com/ebiggers/libdeflate/archive/$LIBDEFLATE_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+	download_file "https://github.com/ebiggers/libdeflate/archive/$LIBDEFLATE_VERSION.tar.gz" "libdeflate" | tar -zx >> "$DIR/install.log" 2>&1
 	mv libdeflate-$LIBDEFLATE_VERSION libdeflate >> "$DIR/install.log" 2>&1
 	cd libdeflate
 	if [ "$DO_STATIC" == "yes" ]; then
@@ -816,7 +841,7 @@ build_libdeflate
 # 4: Name of extracted directory to move
 function get_extension_tar_gz {
 	echo -n "  $1: downloading $2..."
-	download_file "$3" | tar -zx >> "$DIR/install.log" 2>&1
+	download_file "$3" "php-ext-$1" | tar -zx >> "$DIR/install.log" 2>&1
 	mv "$4" "$BUILD_DIR/php/ext/$1"
 	echo " done!"
 }
