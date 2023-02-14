@@ -27,12 +27,20 @@ jobs:
           sudo apt-get update
           sudo apt-get install make autoconf automake libtool libtool-bin m4 wget libc-bin gzip bzip2 bison g++ git re2c
 
+      - name: Prepare compile.sh download cache
+        id: download-cache
+        uses: actions/cache@v3
+        with:
+          path: ./download_cache
+          key: compile-sh-cache-${{ hashFiles("compile.sh") }}
+          restore-keys: compile-sh-cache-
+
       - name: Compile PHP
         run: |
           # Used "set -ex" instead of hashbang since script isn't executed with hashbang
           set -ex
           trap "exit 1" ERR
-          ./compile.sh -t linux64 -j 4 -f -g -P ${{ matrix.pm-version-major }}
+          ./compile.sh -t linux64 -j 4 -f -g -P ${{ matrix.pm-version-major }} -c ./download_cache
 
       - name: Create tarball
         run: tar -czf ./PHP-Linux-x86_64-PM${{ matrix.pm-version-major }}.tar.gz bin
@@ -74,12 +82,20 @@ jobs:
       - name: Install tools and dependencies
         run: brew install libtool autoconf automake pkg-config bison re2c
         
+      - name: Prepare compile.sh download cache
+        id: download-cache
+        uses: actions/cache@v3
+        with:
+          path: ./download_cache
+          key: compile-sh-cache-${{ hashFiles("compile.sh") }}
+          restore-keys: compile-sh-cache-
+
       - name: Compile PHP
         run: |
           export PATH="/usr/local/opt/bison/bin:$PATH"
           set -ex
           trap "exit 1" ERR
-          ./compile.sh -t mac-x86-64 -j4 -f -g -P ${{ matrix.pm-version-major }}
+          ./compile.sh -t mac-x86-64 -j4 -f -g -P ${{ matrix.pm-version-major }} -c ./download_cache
           
       - name: Create tarball
         run: tar -czf ./PHP-MacOS-x86_64-PM${{ matrix.pm-version-major }}.tar.gz bin
