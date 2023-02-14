@@ -32,7 +32,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ./download_cache
-          key: compile-sh-cache-${{ hashFiles("compile.sh") }}
+          key: compile-sh-cache-${{ hashFiles('./compile.sh') }}
           restore-keys: compile-sh-cache-
 
       - name: Compile PHP
@@ -87,7 +87,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ./download_cache
-          key: compile-sh-cache-${{ hashFiles("compile.sh") }}
+          key: compile-sh-cache-${{ hashFiles('./compile.sh') }}
           restore-keys: compile-sh-cache-
 
       - name: Compile PHP
