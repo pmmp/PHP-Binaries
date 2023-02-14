@@ -170,6 +170,15 @@ jobs:
         with:
           path: ${{ github.workspace }}
 
+      - name: Generate release notes
+        run: |
+          echo "Built by: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" > changelog.md
+          if [[ "${{ github.ref_name }}" != "${{ github.event.repository.default_branch }}" ]]; then
+            echo -e "\n\n\n" >> changelog.md
+            echo ":warning: **This isn't the currently recommended version for PocketMine-MP.**" >> changelog.md
+            echo "Consider using the [recommended release](${{ github.server_url }}/${{ github.repository }}/releases/latest) instead." >> changelog.md
+          fi
+
       - name: Update latest branch release
         uses: ncipollo/release-action@v1.12.0
         with:
@@ -181,7 +190,7 @@ jobs:
           name: PHP ${{ steps.version.outputs.PHP_VERSION }} (Latest)
           tag: php-${{ steps.version.outputs.PHP_VERSION }}-latest
           allowUpdates: true
-          body: "Built by: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          bodyFile: ${{ github.workspace }}/changelog.md
 
       - name: Publish unique release
         uses: ncipollo/release-action@v1.12.0
@@ -193,5 +202,5 @@ jobs:
           makeLatest: false
           name: PHP ${{ steps.version.outputs.PHP_VERSION }} (Build ${{ github.run_number }})
           tag: php-${{ steps.version.outputs.PHP_VERSION }}-build-${{ github.run_number }}
-          body: "Built by: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          bodyFile: ${{ github.workspace }}/changelog.md
    
