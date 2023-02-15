@@ -7,6 +7,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   linux:
     name: Linux (PM ${{ matrix.pm-version-major }})
@@ -23,12 +27,20 @@ jobs:
           sudo apt-get update
           sudo apt-get install make autoconf automake libtool libtool-bin m4 wget libc-bin gzip bzip2 bison g++ git re2c
 
+      - name: Prepare compile.sh download cache
+        id: download-cache
+        uses: actions/cache@v3
+        with:
+          path: ./download_cache
+          key: compile-sh-cache-${{ hashFiles('./compile.sh') }}
+          restore-keys: compile-sh-cache-
+
       - name: Compile PHP
         run: |
           # Used "set -ex" instead of hashbang since script isn't executed with hashbang
           set -ex
           trap "exit 1" ERR
-          ./compile.sh -t linux64 -j 4 -f -g -P ${{ matrix.pm-version-major }}
+          ./compile.sh -t linux64 -j 4 -f -g -P ${{ matrix.pm-version-major }} -c ./download_cache
 
       - name: Create tarball
         run: tar -czf ./PHP-Linux-x86_64-PM${{ matrix.pm-version-major }}.tar.gz bin
@@ -70,12 +82,20 @@ jobs:
       - name: Install tools and dependencies
         run: brew install libtool autoconf automake pkg-config bison re2c
         
+      - name: Prepare compile.sh download cache
+        id: download-cache
+        uses: actions/cache@v3
+        with:
+          path: ./download_cache
+          key: compile-sh-cache-${{ hashFiles('./compile.sh') }}
+          restore-keys: compile-sh-cache-
+
       - name: Compile PHP
         run: |
           export PATH="/usr/local/opt/bison/bin:$PATH"
           set -ex
           trap "exit 1" ERR
-          ./compile.sh -t mac-x86-64 -j4 -f -g -P ${{ matrix.pm-version-major }}
+          ./compile.sh -t mac-x86-64 -j4 -f -g -P ${{ matrix.pm-version-major }} -c ./download_cache
           
       - name: Create tarball
         run: tar -czf ./PHP-MacOS-x86_64-PM${{ matrix.pm-version-major }}.tar.gz bin
@@ -166,6 +186,15 @@ jobs:
         with:
           path: ${{ github.workspace }}
 
+      - name: Generate release notes
+        run: |
+          echo "Built by: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" > changelog.md
+          if [[ "${{ github.ref_name }}" != "${{ github.event.repository.default_branch }}" ]]; then
+            echo -e "\n\n\n" >> changelog.md
+            echo ":warning: **This isn't the currently recommended version for PocketMine-MP.**" >> changelog.md
+            echo "Consider using the [recommended release](${{ github.server_url }}/${{ github.repository }}/releases/latest) instead." >> changelog.md
+          fi
+
       - name: Update latest branch release
         uses: ncipollo/release-action@v1.12.0
         with:
@@ -176,8 +205,9 @@ jobs:
           makeLatest: ${{ github.ref_name == github.event.repository.default_branch }}
           name: PHP ${{ steps.version.outputs.PHP_VERSION }} (Latest)
           tag: php-${{ steps.version.outputs.PHP_VERSION }}-latest
+          commit: ${{ github.sha }}
           allowUpdates: true
-          body: "Built by: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          bodyFile: ${{ github.workspace }}/changelog.md
 
       - name: Publish unique release
         uses: ncipollo/release-action@v1.12.0
@@ -189,5 +219,6 @@ jobs:
           makeLatest: false
           name: PHP ${{ steps.version.outputs.PHP_VERSION }} (Build ${{ github.run_number }})
           tag: php-${{ steps.version.outputs.PHP_VERSION }}-build-${{ github.run_number }}
-          body: "Built by: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          commit: ${{ github.sha }}
+          bodyFile: ${{ github.workspace }}/changelog.md
    

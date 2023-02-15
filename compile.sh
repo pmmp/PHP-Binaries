@@ -3,13 +3,13 @@
 
 ZLIB_VERSION="1.2.13"
 GMP_VERSION="6.2.1"
-CURL_VERSION="curl-7_87_0"
+CURL_VERSION="curl-7_88_0"
 YAML_VERSION="0.2.5"
 LEVELDB_VERSION="1c7564468b41610da4f498430e795ca4de0931ff"
 LIBXML_VERSION="2.10.1" #2.10.2 requires automake 1.16.3, which isn't easily available on Ubuntu 20.04
 LIBPNG_VERSION="1.6.39"
 LIBJPEG_VERSION="9e"
-OPENSSL_VERSION="1.1.1s"
+OPENSSL_VERSION="1.1.1t"
 LIBZIP_VERSION="1.9.2"
 SQLITE3_YEAR="2022"
 SQLITE3_VERSION="3400100" #3.40.0
@@ -37,12 +37,48 @@ function write_error {
 	write_out ERROR "$1" >&2
 }
 
+function write_status {
+	echo -n " $1..."
+}
+
+function write_library {
+  echo -n "[$1 $2]"
+}
+
+function write_caching {
+  write_status "using cache"
+}
+
+function write_download {
+	write_status "downloading"
+}
+function write_compile {
+	write_status "compiling"
+}
+function write_install {
+	write_status "installing"
+}
+function write_done {
+	echo -n " done!"
+}
+function cant_use_cache {
+	if [ -f "$1/.compile.sh.cache" ]; then
+		return 1
+	else
+		return 0
+	fi
+}
+function mark_cache {
+	touch "./.compile.sh.cache"
+}
+
 echo "[PocketMine] PHP compiler for Linux, MacOS and Android"
 DIR="$(pwd)"
 BASE_BUILD_DIR="$DIR/install_data"
 #libtool and autoconf have a "feature" where it looks for install.sh/install-sh in ./ ../ and ../../
 #this extra subdir makes sure that it doesn't find anything it's not supposed to be looking for.
 BUILD_DIR="$BASE_BUILD_DIR/subdir"
+LIB_BUILD_DIR="$BUILD_DIR/lib"
 INSTALL_DIR="$DIR/bin/php7"
 
 date > "$DIR/install.log" 2>&1
@@ -63,6 +99,7 @@ if [ "$(uname -s)" == "Darwin" ]; then
 	type glibtool >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install GNU libtool"; ((ERRORS++)); }
 	export LIBTOOL=glibtool
 	export LIBTOOLIZE=glibtoolize
+	export PATH="/opt/homebrew/opt/bison/bin:$PATH"
 	[[ $(bison --version) == "bison (GNU Bison) 3."* ]] || { echo >&2 "[ERROR] MacOS bundled bison is too old. Install bison using Homebrew and update your PATH variable according to its instructions before running this script."; ((ERRORS++)); }
 else
 	type libtool >> "$DIR/install.log" 2>&1 || { echo >&2 "[ERROR] Please install \"libtool\" or \"libtool-bin\""; ((ERRORS++)); }
@@ -89,8 +126,28 @@ else
 	fi
 fi
 
+DOWNLOAD_CACHE=""
+
 function download_file {
-	_download_file "$1" 2>> "$DIR/install.log"
+	local url="$1"
+	local prefix="$2"
+	local cached_filename="$prefix-${url##*/}"
+
+	if [[ "$DOWNLOAD_CACHE" != "" ]]; then
+		if [[ ! -d "$DOWNLOAD_CACHE" ]]; then
+			mkdir "$DOWNLOAD_CACHE" >> "$DIR/install.log" 2>&1
+		fi
+		if [[ -f "$DOWNLOAD_CACHE/$cached_filename" ]]; then
+			echo "Cache hit for URL: $url" >> "$DIR/install.log"
+		else
+			echo "Downloading file to cache: $url" >> "$DIR/install.log"
+			_download_file "$1" > "$DOWNLOAD_CACHE/$cached_filename" 2>> "$DIR/install.log"
+		fi
+		cat "$DOWNLOAD_CACHE/$cached_filename" 2>> "$DIR/install.log"
+	else
+		echo "Downloading non-cached file: $url" >> "$DIR/install.log"
+		_download_file "$1" 2>> "$DIR/install.log"
+	fi
 }
 
 #if type llvm-gcc >/dev/null 2>&1; then
@@ -128,9 +185,20 @@ COMPILE_GD="no"
 
 PM_VERSION_MAJOR="4"
 
-while getopts "::t:j:srdxff:gnva:P:" OPTION; do
+while getopts "::t:j:srdxff:gnva:P:c:l:" OPTION; do
 
 	case $OPTION in
+		l)
+			mkdir "$OPTARG" 2> /dev/null
+			LIB_BUILD_DIR="$(cd $OPTARG; pwd)"
+			write_out opt "Reusing previously built libraries in $LIB_BUILD_DIR if found"
+			write_out WARNING "Reusing previously built libraries may break if different args were used!"
+			;;
+		c)
+			mkdir "$OPTARG" 2> /dev/null
+			DOWNLOAD_CACHE="$(cd $OPTARG; pwd)"
+			write_out opt "Caching downloaded files in $DOWNLOAD_CACHE and reusing if available"
+			;;
 		t)
 			echo "[opt] Set target to $OPTARG"
 			COMPILE_TARGET="$OPTARG"
@@ -409,13 +477,14 @@ rm -r -f bin/ >> "$DIR/install.log" 2>&1
 mkdir -m 0755 "$BASE_BUILD_DIR" >> "$DIR/install.log" 2>&1
 mkdir -m 0755 "$BUILD_DIR" >> "$DIR/install.log" 2>&1
 mkdir -m 0755 -p $INSTALL_DIR >> "$DIR/install.log" 2>&1
+mkdir -m 0755 -p "$LIB_BUILD_DIR" >> "$DIR/install.log" 2>&1
 cd "$BUILD_DIR"
 set -e
 
 #PHP 7
 echo -n "[PHP] downloading $PHP_VERSION..."
 
-download_file "https://github.com/php/php-src/archive/php-$PHP_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+download_file "https://github.com/php/php-src/archive/php-$PHP_VERSION.tar.gz" "php" | tar -zx >> "$DIR/install.log" 2>&1
 mv php-src-php-$PHP_VERSION php
 echo " done!"
 
@@ -426,22 +495,29 @@ function build_zlib {
 		local EXTRA_FLAGS="--shared"
 	fi
 
-	#zlib
-	echo -n "[zlib] downloading $ZLIB_VERSION..."
-	download_file "https://github.com/madler/zlib/archive/v$ZLIB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv zlib-$ZLIB_VERSION zlib
-	echo -n " checking..."
-	cd zlib
-	RANLIB=$RANLIB ./configure --prefix="$INSTALL_DIR" \
-	$EXTRA_FLAGS >> "$DIR/install.log" 2>&1
-	echo -n " compiling..."
-	make -j $THREADS >> "$DIR/install.log" 2>&1
+	write_library zlib "$ZLIB_VERSION"
+	local zlib_dir="./zlib-$ZLIB_VERSION"
+
+	if cant_use_cache "$zlib_dir"; then
+		rm -rf "$zlib_dir"
+		write_download
+		download_file "https://github.com/madler/zlib/archive/v$ZLIB_VERSION.tar.gz" "zlib" | tar -zx >> "$DIR/install.log" 2>&1
+		echo -n " checking..."
+		cd "$zlib_dir"
+		RANLIB=$RANLIB ./configure --prefix="$INSTALL_DIR" \
+		$EXTRA_FLAGS >> "$DIR/install.log" 2>&1
+		echo -n " compiling..."
+		make -j $THREADS >> "$DIR/install.log" 2>&1 && mark_cache
+	else
+		write_caching
+		cd "$zlib_dir"
+	fi
 	echo -n " installing..."
 	make install >> "$DIR/install.log" 2>&1
 	cd ..
-		if [ "$DO_STATIC" != "yes" ]; then
-			rm -f "$INSTALL_DIR/lib/libz.a"
-		fi
+	if [ "$DO_STATIC" != "yes" ]; then
+		rm -f "$INSTALL_DIR/lib/libz.a"
+	fi
 	echo " done!"
 }
 
@@ -457,20 +533,27 @@ function build_gmp {
 		local EXTRA_FLAGS="--disable-assembly"
 	fi
 
-	#GMP
-	echo -n "[GMP] downloading $GMP_VERSION..."
-	download_file "https://gmplib.org/download/gmp/gmp-$GMP_VERSION.tar.bz2" | tar -jx >> "$DIR/install.log" 2>&1
-	mv gmp-$GMP_VERSION gmp
-	echo -n " checking..."
-	cd gmp
-	RANLIB=$RANLIB ./configure --prefix="$INSTALL_DIR" \
-	$EXTRA_FLAGS \
-	--disable-posix-threads \
-	--enable-static \
-	--disable-shared \
-	$CONFIGURE_FLAGS ABI="$GMP_ABI" >> "$DIR/install.log" 2>&1
-	echo -n " compiling..."
-	make -j $THREADS >> "$DIR/install.log" 2>&1
+	write_library gmp "$GMP_VERSION"
+	local gmp_dir="./gmp-$GMP_VERSION"
+
+	if cant_use_cache "$gmp_dir"; then
+		rm -rf "$gmp_dir"
+		write_download
+		download_file "https://gmplib.org/download/gmp/gmp-$GMP_VERSION.tar.bz2" "gmp" | tar -jx >> "$DIR/install.log" 2>&1
+		echo -n " checking..."
+		cd "$gmp_dir"
+		RANLIB=$RANLIB ./configure --prefix="$INSTALL_DIR" \
+		$EXTRA_FLAGS \
+		--disable-posix-threads \
+		--enable-static \
+		--disable-shared \
+		$CONFIGURE_FLAGS ABI="$GMP_ABI" >> "$DIR/install.log" 2>&1
+		echo -n " compiling..."
+		make -j $THREADS >> "$DIR/install.log" 2>&1 && mark_cache
+	else
+		write_caching
+		cd "$gmp_dir"
+	fi
 	echo -n " installing..."
 	make install >> "$DIR/install.log" 2>&1
 	cd ..
@@ -490,22 +573,31 @@ function build_openssl {
 	fi
 
 	WITH_OPENSSL="--with-openssl=$INSTALL_DIR"
-	echo -n "[OpenSSL] downloading $OPENSSL_VERSION..."
-	download_file "http://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv openssl-$OPENSSL_VERSION openssl
 
-	echo -n " checking..."
-	cd openssl
-	RANLIB=$RANLIB $OPENSSL_CMD \
-	--prefix="$INSTALL_DIR" \
-	--openssldir="$INSTALL_DIR" \
-	no-asm \
-	no-hw \
-	no-engine \
-	$EXTRA_FLAGS >> "$DIR/install.log" 2>&1
+	write_library openssl "$OPENSSL_VERSION"
+	local openssl_dir="./openssl-$OPENSSL_VERSION"
 
-	echo -n " compiling..."
-	make -j $THREADS >> "$DIR/install.log" 2>&1
+	if cant_use_cache "$openssl_dir"; then
+		rm -rf "$openssl_dir"
+		write_download
+		download_file "http://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" "openssl" | tar -zx >> "$DIR/install.log" 2>&1
+
+		echo -n " checking..."
+		cd "$openssl_dir"
+		RANLIB=$RANLIB $OPENSSL_CMD \
+		--prefix="$INSTALL_DIR" \
+		--openssldir="$INSTALL_DIR" \
+		no-asm \
+		no-hw \
+		no-engine \
+		$EXTRA_FLAGS >> "$DIR/install.log" 2>&1
+
+		echo -n " compiling..."
+		make -j $THREADS >> "$DIR/install.log" 2>&1 && mark_cache
+	else
+		write_caching
+		cd "$openssl_dir"
+	fi
 	echo -n " installing..."
 	make install_sw >> "$DIR/install.log" 2>&1
 	cd ..
@@ -519,43 +611,50 @@ function build_curl {
 		local EXTRA_FLAGS="--disable-static --enable-shared"
 	fi
 
-	#curl
-	echo -n "[cURL] downloading $CURL_VERSION..."
-	download_file "https://github.com/curl/curl/archive/$CURL_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv curl-$CURL_VERSION curl
-	echo -n " checking..."
-	cd curl
-	./buildconf --force >> "$DIR/install.log" 2>&1
-	RANLIB=$RANLIB ./configure --disable-dependency-tracking \
-	--enable-ipv6 \
-	--enable-optimize \
-	--enable-http \
-	--enable-ftp \
-	--disable-dict \
-	--enable-file \
-	--without-librtmp \
-	--disable-gopher \
-	--disable-imap \
-	--disable-pop3 \
-	--disable-rtsp \
-	--disable-smtp \
-	--disable-telnet \
-	--disable-tftp \
-	--disable-ldap \
-	--disable-ldaps \
-	--without-libidn \
-	--without-libidn2 \
-	--without-brotli \
-	--without-nghttp2 \
-	--without-zstd \
-	--with-zlib="$INSTALL_DIR" \
-	--with-ssl="$INSTALL_DIR" \
-	--enable-threaded-resolver \
-	--prefix="$INSTALL_DIR" \
-	$EXTRA_FLAGS \
-	$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
-	echo -n " compiling..."
-	make -j $THREADS >> "$DIR/install.log" 2>&1
+	write_library curl "$CURL_VERSION"
+	local curl_dir="./curl-$CURL_VERSION"
+	if cant_use_cache "$curl_dir"; then
+		rm -rf "$curl_dir"
+		write_download
+		download_file "https://github.com/curl/curl/archive/$CURL_VERSION.tar.gz" "curl" | tar -zx >> "$DIR/install.log" 2>&1
+		echo -n " checking..."
+		cd "$curl_dir"
+		./buildconf --force >> "$DIR/install.log" 2>&1
+		RANLIB=$RANLIB ./configure --disable-dependency-tracking \
+		--enable-ipv6 \
+		--enable-optimize \
+		--enable-http \
+		--enable-ftp \
+		--disable-dict \
+		--enable-file \
+		--without-librtmp \
+		--disable-gopher \
+		--disable-imap \
+		--disable-pop3 \
+		--disable-rtsp \
+		--disable-smtp \
+		--disable-telnet \
+		--disable-tftp \
+		--disable-ldap \
+		--disable-ldaps \
+		--without-libidn \
+		--without-libidn2 \
+		--without-brotli \
+		--without-nghttp2 \
+		--without-zstd \
+		--with-zlib="$INSTALL_DIR" \
+		--with-ssl="$INSTALL_DIR" \
+		--enable-threaded-resolver \
+		--prefix="$INSTALL_DIR" \
+		$EXTRA_FLAGS \
+		$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
+		echo -n " compiling..."
+		make -j $THREADS >> "$DIR/install.log" 2>&1 && mark_cache
+	else
+		write_caching
+		cd "$curl_dir"
+	fi
+
 	echo -n " installing..."
 	make install >> "$DIR/install.log" 2>&1
 	cd ..
@@ -568,21 +667,29 @@ function build_yaml {
 	else
 		local EXTRA_FLAGS="--enable-shared --disable-static"
 	fi
-	echo -n "[YAML] downloading $YAML_VERSION..."
-	download_file "https://github.com/yaml/libyaml/archive/$YAML_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv libyaml-$YAML_VERSION yaml
-	cd yaml
-	./bootstrap >> "$DIR/install.log" 2>&1
 
-	echo -n " checking..."
+	write_library yaml "$YAML_VERSION"
+	local yaml_dir="./libyaml-$YAML_VERSION"
+	if cant_use_cache "$yaml_dir"; then
+		rm -rf "$yaml_dir"
+		write_download
+		download_file "https://github.com/yaml/libyaml/archive/$YAML_VERSION.tar.gz" "yaml" | tar -zx >> "$DIR/install.log" 2>&1
+		cd "$yaml_dir"
+		./bootstrap >> "$DIR/install.log" 2>&1
 
-	RANLIB=$RANLIB ./configure \
-	--prefix="$INSTALL_DIR" \
-	$EXTRA_FLAGS \
-	$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
-	sed -i=".backup" 's/ tests win32/ win32/g' Makefile
-	echo -n " compiling..."
-	make -j $THREADS all >> "$DIR/install.log" 2>&1
+		echo -n " checking..."
+
+		RANLIB=$RANLIB ./configure \
+		--prefix="$INSTALL_DIR" \
+		$EXTRA_FLAGS \
+		$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
+		sed -i=".backup" 's/ tests win32/ win32/g' Makefile
+		echo -n " compiling..."
+		make -j $THREADS all >> "$DIR/install.log" 2>&1 && mark_cache
+	else
+		write_caching
+		cd "$yaml_dir"
+	fi
 	echo -n " installing..."
 	make install >> "$DIR/install.log" 2>&1
 	cd ..
@@ -590,32 +697,39 @@ function build_yaml {
 }
 
 function build_leveldb {
-	echo -n "[LevelDB] downloading $LEVELDB_VERSION..."
-	download_file "https://github.com/pmmp/leveldb/archive/$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	#download_file "https://github.com/Mojang/leveldb-mcpe/archive/$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv leveldb-$LEVELDB_VERSION leveldb
-	echo -n " checking..."
-	cd leveldb
-	if [ "$DO_STATIC" != "yes" ]; then
-		local EXTRA_FLAGS="-DBUILD_SHARED_LIBS=ON"
+	write_library leveldb "$LEVELDB_VERSION"
+	local leveldb_dir="./leveldb-$LEVELDB_VERSION"
+	if cant_use_cache "$leveldb_dir"; then
+		rm -rf "$leveldb_dir"
+		write_download
+		download_file "https://github.com/pmmp/leveldb/archive/$LEVELDB_VERSION.tar.gz" "leveldb" | tar -zx >> "$DIR/install.log" 2>&1
+		#download_file "https://github.com/Mojang/leveldb-mcpe/archive/$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
+		echo -n " checking..."
+		cd "$leveldb_dir"
+		if [ "$DO_STATIC" != "yes" ]; then
+			local EXTRA_FLAGS="-DBUILD_SHARED_LIBS=ON"
+		else
+			local EXTRA_FLAGS=""
+		fi
+		cmake . \
+			-DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
+			-DCMAKE_PREFIX_PATH="$INSTALL_DIR" \
+			-DCMAKE_INSTALL_LIBDIR=lib \
+			-DLEVELDB_BUILD_TESTS=OFF \
+			-DLEVELDB_BUILD_BENCHMARKS=OFF \
+			-DLEVELDB_SNAPPY=OFF \
+			-DLEVELDB_ZSTD=OFF \
+			-DLEVELDB_TCMALLOC=OFF \
+			-DCMAKE_BUILD_TYPE=Release \
+			$CMAKE_GLOBAL_EXTRA_FLAGS \
+			$EXTRA_FLAGS \
+			>> "$DIR/install.log" 2>&1
+		echo -n " compiling..."
+		make -j $THREADS >> "$DIR/install.log" 2>&1 && mark_cache
 	else
-		local EXTRA_FLAGS=""
+		write_caching
+		cd "$leveldb_dir"
 	fi
-	cmake . \
-		-DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
-		-DCMAKE_PREFIX_PATH="$INSTALL_DIR" \
-		-DCMAKE_INSTALL_LIBDIR=lib \
-		-DLEVELDB_BUILD_TESTS=OFF \
-		-DLEVELDB_BUILD_BENCHMARKS=OFF \
-		-DLEVELDB_SNAPPY=OFF \
-		-DLEVELDB_ZSTD=OFF \
-		-DLEVELDB_TCMALLOC=OFF \
-		-DCMAKE_BUILD_TYPE=Release \
-		$CMAKE_GLOBAL_EXTRA_FLAGS \
-		$EXTRA_FLAGS \
-		>> "$DIR/install.log" 2>&1
-	echo -n " compiling..."
-	make -j $THREADS >> "$DIR/install.log" 2>&1
 	echo -n " installing..."
 	make install >> "$DIR/install.log" 2>&1
 	cd ..
@@ -628,18 +742,25 @@ function build_libpng {
 	else
 		local EXTRA_FLAGS="--enable-shared=yes --enable-static=no"
 	fi
-	#libpng
-	echo -n "[libpng] downloading $LIBPNG_VERSION..."
-	download_file "https://sourceforge.net/projects/libpng/files/libpng16/$LIBPNG_VERSION/libpng-$LIBPNG_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv libpng-$LIBPNG_VERSION libpng
-	echo -n " checking..."
-	cd libpng
-	LDFLAGS="$LDFLAGS -L${INSTALL_DIR}/lib" CPPFLAGS="$CPPFLAGS -I${INSTALL_DIR}/include" RANLIB=$RANLIB ./configure \
-	--prefix="$INSTALL_DIR" \
-	$EXTRA_FLAGS \
-	$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
-	echo -n " compiling..."
-	make -j $THREADS >> "$DIR/install.log" 2>&1
+
+	write_library libpng "$LIBPNG_VERSION"
+	local libpng_dir="./libpng-$LIBPNG_VERSION"
+	if cant_use_cache "$libpng_dir"; then
+		rm -rf "$libpng_dir"
+		write_download
+		download_file "https://sourceforge.net/projects/libpng/files/libpng16/$LIBPNG_VERSION/libpng-$LIBPNG_VERSION.tar.gz" "libpng" | tar -zx >> "$DIR/install.log" 2>&1
+		echo -n " checking..."
+		cd "$libpng_dir"
+		LDFLAGS="$LDFLAGS -L${INSTALL_DIR}/lib" CPPFLAGS="$CPPFLAGS -I${INSTALL_DIR}/include" RANLIB=$RANLIB ./configure \
+		--prefix="$INSTALL_DIR" \
+		$EXTRA_FLAGS \
+		$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
+		echo -n " compiling..."
+		make -j $THREADS >> "$DIR/install.log" 2>&1 && mark_cache
+	else
+		write_caching
+		cd "$libpng_dir"
+	fi
 	echo -n " installing..."
 	make install >> "$DIR/install.log" 2>&1
 	cd ..
@@ -652,18 +773,26 @@ function build_libjpeg {
 	else
 		local EXTRA_FLAGS="--enable-shared=yes --enable-static=no"
 	fi
-	#libjpeg
-	echo -n "[libjpeg] downloading $LIBJPEG_VERSION..."
-	download_file "http://ijg.org/files/jpegsrc.v$LIBJPEG_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv jpeg-$LIBJPEG_VERSION libjpeg
-	echo -n " checking..."
-	cd libjpeg
-	LDFLAGS="$LDFLAGS -L${INSTALL_DIR}/lib" CPPFLAGS="$CPPFLAGS -I${INSTALL_DIR}/include" RANLIB=$RANLIB ./configure \
-	--prefix="$INSTALL_DIR" \
-	$EXTRA_FLAGS \
-	$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
-	echo -n " compiling..."
-	make -j $THREADS >> "$DIR/install.log" 2>&1
+
+	write_library libjpeg "$LIBJPEG_VERSION"
+	local libjpeg_dir="./libjpeg-$LIBJPEG_VERSION"
+	if cant_use_cache "$libjpeg_dir"; then
+		rm -rf "$libjpeg_dir"
+		write_download
+		download_file "http://ijg.org/files/jpegsrc.v$LIBJPEG_VERSION.tar.gz" "libjpeg" | tar -zx >> "$DIR/install.log" 2>&1
+		mv jpeg-$LIBJPEG_VERSION "$libjpeg_dir"
+		echo -n " checking..."
+		cd "$libjpeg_dir"
+		LDFLAGS="$LDFLAGS -L${INSTALL_DIR}/lib" CPPFLAGS="$CPPFLAGS -I${INSTALL_DIR}/include" RANLIB=$RANLIB ./configure \
+		--prefix="$INSTALL_DIR" \
+		$EXTRA_FLAGS \
+		$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
+		echo -n " compiling..."
+		make -j $THREADS >> "$DIR/install.log" 2>&1 && mark_cache
+	else
+		write_caching
+		cd "$libjpeg_dir"
+	fi
 	echo -n " installing..."
 	make install >> "$DIR/install.log" 2>&1
 	cd ..
@@ -672,28 +801,36 @@ function build_libjpeg {
 
 
 function build_libxml2 {
-	#libxml2
-	echo -n "[libxml] downloading $LIBXML_VERSION... "
-	download_file "https://gitlab.gnome.org/GNOME/libxml2/-/archive/v$LIBXML_VERSION/libxml2-v$LIBXML_VERSION.tar.gz" | tar -xz >> "$DIR/install.log" 2>&1
-	mv libxml2-v$LIBXML_VERSION libxml2
-	echo -n "checking... "
-	cd libxml2
-	if [ "$DO_STATIC" == "yes" ]; then
-		local EXTRA_FLAGS="--enable-shared=no --enable-static=yes"
+	write_library libxml2 "$LIBXML_VERSION"
+	local libxml2_dir="./libxml2-$LIBXML_VERSION"
+
+	if cant_use_cache "$libxml2_dir"; then
+		rm -rf "$libxml2_dir"
+		write_download
+		download_file "https://gitlab.gnome.org/GNOME/libxml2/-/archive/v$LIBXML_VERSION/libxml2-v$LIBXML_VERSION.tar.gz" "libxml2" | tar -xz >> "$DIR/install.log" 2>&1
+		mv libxml2-v$LIBXML_VERSION "$libxml2_dir"
+		echo -n "checking... "
+		cd "$libxml2_dir"
+		if [ "$DO_STATIC" == "yes" ]; then
+			local EXTRA_FLAGS="--enable-shared=no --enable-static=yes"
+		else
+			local EXTRA_FLAGS="--enable-shared=yes --enable-static=no"
+		fi
+		sed -i.bak 's{libtoolize --version{"$LIBTOOLIZE" --version{' autogen.sh #needed for glibtool on macos
+		./autogen.sh --prefix="$INSTALL_DIR" \
+			--without-iconv \
+			--without-python \
+			--without-lzma \
+			--with-zlib="$INSTALL_DIR" \
+			--config-cache \
+			$EXTRA_FLAGS \
+			$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
+		echo -n "compiling... "
+		make -j $THREADS >> "$DIR/install.log" 2>&1 && mark_cache
 	else
-		local EXTRA_FLAGS="--enable-shared=yes --enable-static=no"
+		write_caching
+		cd "$libxml2_dir"
 	fi
-	sed -i.bak 's{libtoolize --version{"$LIBTOOLIZE" --version{' autogen.sh #needed for glibtool on macos
-	./autogen.sh --prefix="$INSTALL_DIR" \
-		--without-iconv \
-		--without-python \
-		--without-lzma \
-		--with-zlib="$INSTALL_DIR" \
-		--config-cache \
-		$EXTRA_FLAGS \
-		$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
-	echo -n "compiling... "
-	make -j $THREADS >> "$DIR/install.log" 2>&1
 	echo -n "installing... "
 	make install >> "$DIR/install.log" 2>&1
 	cd ..
@@ -705,31 +842,39 @@ function build_libzip {
 	if [ "$DO_STATIC" == "yes" ]; then
 		local CMAKE_LIBZIP_EXTRA_FLAGS="-DBUILD_SHARED_LIBS=OFF"
 	fi
-	echo -n "[libzip] downloading $LIBZIP_VERSION..."
-	download_file "https://libzip.org/download/libzip-$LIBZIP_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv libzip-$LIBZIP_VERSION libzip >> "$DIR/install.log" 2>&1
-	echo -n " checking..."
-	cd libzip
 
-	#we're using OpenSSL for crypto
-	cmake . \
-		-DCMAKE_PREFIX_PATH="$INSTALL_DIR" \
-		-DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
-		-DCMAKE_INSTALL_LIBDIR=lib \
-		$CMAKE_LIBZIP_EXTRA_FLAGS \
-		$CMAKE_GLOBAL_EXTRA_FLAGS \
-		-DBUILD_TOOLS=OFF \
-		-DBUILD_REGRESS=OFF \
-		-DBUILD_EXAMPLES=OFF \
-		-DBUILD_DOC=OFF \
-		-DENABLE_BZIP2=OFF \
-		-DENABLE_COMMONCRYPTO=OFF \
-		-DENABLE_GNUTLS=OFF \
-		-DENABLE_MBEDTLS=OFF \
-		-DENABLE_LZMA=OFF \
-		-DENABLE_ZSTD=OFF >> "$DIR/install.log" 2>&1
-	echo -n " compiling..."
-	make -j $THREADS >> "$DIR/install.log" 2>&1
+	write_library libzip "$LIBZIP_VERSION"
+	local libzip_dir="./libzip-$LIBZIP_VERSION"
+	if cant_use_cache "$libzip_dir"; then
+		rm -rf "$libzip_dir"
+		write_download
+		download_file "https://libzip.org/download/libzip-$LIBZIP_VERSION.tar.gz" "libzip" | tar -zx >> "$DIR/install.log" 2>&1
+		echo -n " checking..."
+		cd "$libzip_dir"
+
+		#we're using OpenSSL for crypto
+		cmake . \
+			-DCMAKE_PREFIX_PATH="$INSTALL_DIR" \
+			-DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
+			-DCMAKE_INSTALL_LIBDIR=lib \
+			$CMAKE_LIBZIP_EXTRA_FLAGS \
+			$CMAKE_GLOBAL_EXTRA_FLAGS \
+			-DBUILD_TOOLS=OFF \
+			-DBUILD_REGRESS=OFF \
+			-DBUILD_EXAMPLES=OFF \
+			-DBUILD_DOC=OFF \
+			-DENABLE_BZIP2=OFF \
+			-DENABLE_COMMONCRYPTO=OFF \
+			-DENABLE_GNUTLS=OFF \
+			-DENABLE_MBEDTLS=OFF \
+			-DENABLE_LZMA=OFF \
+			-DENABLE_ZSTD=OFF >> "$DIR/install.log" 2>&1
+		echo -n " compiling..."
+		make -j $THREADS >> "$DIR/install.log" 2>&1 && mark_cache
+	else
+		write_caching
+		cd "$libzip_dir"
+	fi
 	echo -n " installing..."
 	make install >> "$DIR/install.log" 2>&1
 	cd ..
@@ -742,20 +887,29 @@ function build_sqlite3 {
 	else
 		local EXTRA_FLAGS="--enable-static=no --enable-shared=yes"
 	fi
-	#sqlite3
-	echo -n "[sqlite3] downloading $SQLITE3_VERSION..."
-	download_file "https://www.sqlite.org/$SQLITE3_YEAR/sqlite-autoconf-$SQLITE3_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv sqlite-autoconf-$SQLITE3_VERSION sqlite3 >> "$DIR/install.log" 2>&1
-	echo -n " checking..."
-	cd sqlite3
-	LDFLAGS="$LDFLAGS -L${INSTALL_DIR}/lib" CPPFLAGS="$CPPFLAGS -I${INSTALL_DIR}/include" RANLIB=$RANLIB ./configure \
-	--prefix="$INSTALL_DIR" \
-	--disable-dependency-tracking \
-	--enable-static-shell=no \
-	$EXTRA_FLAGS \
-	$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
-	echo -n " compiling..."
-	make -j $THREADS >> "$DIR/install.log" 2>&1
+
+	write_library sqlite3 "$SQLITE3_VERSION"
+	local sqlite3_dir="./sqlite3-$SQLITE3_VERSION"
+
+	if cant_use_cache "$sqlite3_dir"; then
+		rm -rf "$sqlite3_dir"
+		write_download
+		download_file "https://www.sqlite.org/$SQLITE3_YEAR/sqlite-autoconf-$SQLITE3_VERSION.tar.gz" "sqlite3" | tar -zx >> "$DIR/install.log" 2>&1
+		mv sqlite-autoconf-$SQLITE3_VERSION "$sqlite3_dir" >> "$DIR/install.log" 2>&1
+		echo -n " checking..."
+		cd "$sqlite3_dir"
+		LDFLAGS="$LDFLAGS -L${INSTALL_DIR}/lib" CPPFLAGS="$CPPFLAGS -I${INSTALL_DIR}/include" RANLIB=$RANLIB ./configure \
+		--prefix="$INSTALL_DIR" \
+		--disable-dependency-tracking \
+		--enable-static-shell=no \
+		$EXTRA_FLAGS \
+		$CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
+		echo -n " compiling..."
+		make -j $THREADS >> "$DIR/install.log" 2>&1 && mark_cache
+	else
+		write_caching
+		cd "$sqlite3_dir"
+	fi
 	echo -n " installing..."
 	make install >> "$DIR/install.log" 2>&1
 	cd ..
@@ -763,10 +917,19 @@ function build_sqlite3 {
 }
 
 function build_libdeflate {
-	echo -n "[libdeflate] downloading $LIBDEFLATE_VERSION..."
-	download_file "https://github.com/ebiggers/libdeflate/archive/$LIBDEFLATE_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
-	mv libdeflate-$LIBDEFLATE_VERSION libdeflate >> "$DIR/install.log" 2>&1
-	cd libdeflate
+	write_library libdeflate "$LIBDEFLATE_VERSION"
+	local libdeflate_dir="./libdeflate-$LIBDEFLATE_VERSION"
+
+	if cant_use_cache "$libdeflate_dir"; then
+		rm -rf "$libdeflate_dir"
+		write_download
+		download_file "https://github.com/ebiggers/libdeflate/archive/$LIBDEFLATE_VERSION.tar.gz" "libdeflate" | tar -zx >> "$DIR/install.log" 2>&1
+		cd "$libdeflate_dir"
+		mark_cache
+	else
+		write_caching
+		cd "$libdeflate_dir"
+	fi
 	if [ "$DO_STATIC" == "yes" ]; then
 		echo -n " compiling..."
 		make -j $THREADS libdeflate.a >> "$DIR/install.log" 2>&1
@@ -786,6 +949,8 @@ function build_libdeflate {
 	cd ..
 	echo " done!"
 }
+
+cd "$LIB_BUILD_DIR"
 
 build_zlib
 build_gmp
@@ -816,7 +981,7 @@ build_libdeflate
 # 4: Name of extracted directory to move
 function get_extension_tar_gz {
 	echo -n "  $1: downloading $2..."
-	download_file "$3" | tar -zx >> "$DIR/install.log" 2>&1
+	download_file "$3" "php-ext-$1" | tar -zx >> "$DIR/install.log" 2>&1
 	mv "$4" "$BUILD_DIR/php/ext/$1"
 	echo " done!"
 }
@@ -836,6 +1001,7 @@ function get_pecl_extension {
 	get_extension_tar_gz "$1" "$2" "http://pecl.php.net/get/$1-$2.tgz" "$1-$2"
 }
 
+cd "$BUILD_DIR/php"
 echo "[PHP] Downloading additional extensions..."
 
 get_github_extension "pthreads" "$EXT_PTHREADS_VERSION" "pmmp" "pthreads" #"v" needed for release tags because github removes the "v"
