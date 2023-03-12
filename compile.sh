@@ -21,7 +21,7 @@ EXT_PTHREADS_VERSION="$EXT_PTHREADS_VERSION_PM4"
 EXT_YAML_VERSION="2.2.2"
 EXT_LEVELDB_VERSION="317fdcd8415e1566fc2835ce2bdb8e19b890f9f3"
 EXT_CHUNKUTILS2_VERSION="0.3.3"
-EXT_XDEBUG_VERSION="3.2.0"
+EXT_XDEBUG_VERSION="fbd5d9cb9e18502992e017925a34b7232755f34f" #fork of xdebug used to work around https://github.com/xdebug/xdebug/pull/878
 EXT_IGBINARY_VERSION="3.2.13"
 EXT_CRYPTO_VERSION="0.3.2"
 EXT_RECURSIONGUARD_VERSION="0.1.0"
@@ -1258,7 +1258,7 @@ fi
 echo " done!"
 
 if [[ "$HAVE_XDEBUG" == "yes" ]]; then
-	get_pecl_extension "xdebug" "$EXT_XDEBUG_VERSION"
+	get_github_extension "xdebug" "$EXT_XDEBUG_VERSION" "dktapps" "xdebug"
 	echo -n "[xdebug] checking..."
 	cd "$BUILD_DIR/php/ext/xdebug"
 	"$INSTALL_DIR/bin/phpize" >> "$DIR/install.log" 2>&1
