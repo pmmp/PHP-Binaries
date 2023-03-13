@@ -21,7 +21,7 @@ set MSBUILD_CONFIGURATION=RelWithDebInfo
 set LIBYAML_VER=0.2.5
 set PTHREAD_W32_VER=3.0.0
 set LEVELDB_MCPE_VER=1c7564468b41610da4f498430e795ca4de0931ff
-set LIBDEFLATE_VER=0d1779a071bcc636e5156ddb7538434da7acad22
+set LIBDEFLATE_VER=bd925ae68e99f65d69f20181cb845aaba5c8f098
 
 set PHP_PTHREADS_VER_PM4=4.2.1
 set PHP_PTHREADS_VER_PM5=5.3.0
@@ -33,7 +33,7 @@ set PHP_LEVELDB_VER=317fdcd8415e1566fc2835ce2bdb8e19b890f9f3
 set PHP_CRYPTO_VER=0.3.2
 set PHP_RECURSIONGUARD_VER=0.1.0
 set PHP_MORTON_VER=0.1.2
-set PHP_LIBDEFLATE_VER=0.1.0
+set PHP_LIBDEFLATE_VER=0.2.0
 set PHP_XXHASH_VER=0.1.1
 REM fork of xdebug to work around https://github.com/xdebug/xdebug/pull/878
 set PHP_XDEBUG_VER=fbd5d9cb9e18502992e017925a34b7232755f34f
@@ -194,12 +194,19 @@ call :get-zip https://github.com/ebiggers/libdeflate/archive/%LIBDEFLATE_VER%.zi
 move libdeflate-%LIBDEFLATE_VER% libdeflate >>"%log_file%" 2>&1
 cd /D libdeflate
 
-call :pm-echo "Compiling..."
-nmake /f Makefile.msc >>"%log_file%" 2>&1 || exit 1
-call :pm-echo "Copying files..."
-copy libdeflate.dll "%DEPS_DIR%\bin\libdeflate.dll" >>"%log_file%" 2>&1 || exit 1
-copy libdeflate.lib "%DEPS_DIR%\lib\libdeflate.lib" >>"%log_file%" 2>&1 || exit 1
-copy libdeflate.h "%DEPS_DIR%\include\libdeflate.h" >>"%log_file%" 2>&1 || exit 1
+call :pm-echo "Generating build configuration..."
+cmake -G "%CMAKE_TARGET%" -A "%ARCH%"^
+ -DCMAKE_PREFIX_PATH="%DEPS_DIR%"^
+ -DCMAKE_INSTALL_PREFIX="%DEPS_DIR%"^
+ -DLIBDEFLATE_BUILD_GZIP=OFF^
+ -DLIBDEFLATE_BUILD_SHARED_LIB=ON^
+ -DLIBDEFLATE_BUILD_STATIC_LIB=OFF^
+ . >>"%log_file%" 2>&1 || exit 1
+call :pm-echo "Compiling"
+msbuild ALL_BUILD.vcxproj /p:Configuration=%MSBUILD_CONFIGURATION% /m >>"%log_file%" 2>&1 || exit 1
+call :pm-echo "Installing files..."
+msbuild INSTALL.vcxproj /p:Configuration=%MSBUILD_CONFIGURATION% >>"%log_file%" 2>&1 || exit 1
+copy %MSBUILD_CONFIGURATION%\deflate.pdb "%DEPS_DIR%\bin\deflate.pdb" >>"%log_file%" 2>&1 || exit 1
 
 cd /D "%DEPS_DIR%"
 
