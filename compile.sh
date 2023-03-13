@@ -13,7 +13,7 @@ OPENSSL_VERSION="1.1.1t"
 LIBZIP_VERSION="1.9.2"
 SQLITE3_YEAR="2023"
 SQLITE3_VERSION="3410100" #3.41.1
-LIBDEFLATE_VERSION="0d1779a071bcc636e5156ddb7538434da7acad22" #1.14
+LIBDEFLATE_VERSION="bd925ae68e99f65d69f20181cb845aaba5c8f098" #1.17
 
 EXT_PTHREADS_VERSION_PM4="4.2.1"
 EXT_PTHREADS_VERSION_PM5="5.3.0"
@@ -25,7 +25,7 @@ EXT_XDEBUG_VERSION="fbd5d9cb9e18502992e017925a34b7232755f34f" #fork of xdebug us
 EXT_IGBINARY_VERSION="3.2.14"
 EXT_CRYPTO_VERSION="0.3.2"
 EXT_RECURSIONGUARD_VERSION="0.1.0"
-EXT_LIBDEFLATE_VERSION="0.1.0"
+EXT_LIBDEFLATE_VERSION="0.2.0"
 EXT_MORTON_VERSION="0.1.2"
 EXT_XXHASH_VERSION="0.1.1"
 
@@ -920,32 +920,33 @@ function build_libdeflate {
 	write_library libdeflate "$LIBDEFLATE_VERSION"
 	local libdeflate_dir="./libdeflate-$LIBDEFLATE_VERSION"
 
+	if [ "$DO_STATIC" == "yes" ]; then
+		local CMAKE_LIBDEFLATE_EXTRA_FLAGS="-DLIBDEFLATE_BUILD_STATIC_LIB=ON -DLIBDEFLATE_BUILD_SHARED_LIB=OFF"
+	else
+		local CMAKE_LIBDEFLATE_EXTRA_FLAGS="-DLIBDEFLATE_BUILD_STATIC_LIB=OFF -DLIBDEFLATE_BUILD_SHARED_LIB=ON"
+	fi
+
 	if cant_use_cache "$libdeflate_dir"; then
 		rm -rf "$libdeflate_dir"
 		write_download
 		download_file "https://github.com/ebiggers/libdeflate/archive/$LIBDEFLATE_VERSION.tar.gz" "libdeflate" | tar -zx >> "$DIR/install.log" 2>&1
 		cd "$libdeflate_dir"
-		mark_cache
+		echo -n " checking..."
+		cmake . \
+			-DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
+			-DCMAKE_PREFIX_PATH="$INSTALL_DIR" \
+			-DCMAKE_INSTALL_LIBDIR=lib \
+			$CMAKE_GLOBAL_EXTRA_FLAGS \
+			-DLIBDEFLATE_BUILD_GZIP=OFF \
+			$CMAKE_LIBDEFLATE_EXTRA_FLAGS >> "$DIR/install.log" 2>&1
+		echo -n " compiling..."
+		make -j $THREADS >> "$DIR/install.log" 2>&1 && mark_cache
 	else
 		write_caching
-		cd "$libdeflate_dir"
+		cd "$libzip_dir"
 	fi
-	if [ "$DO_STATIC" == "yes" ]; then
-		echo -n " compiling..."
-		make -j $THREADS libdeflate.a >> "$DIR/install.log" 2>&1
-		echo -n " manually copying installation files for static build..."
-		cp ./libdeflate.a "$INSTALL_DIR/lib"
-		cp ./libdeflate.h "$INSTALL_DIR/include"
-	else
-		echo -n " compiling..."
-		PREFIX="$INSTALL_DIR" make -j $THREADS install >> "$DIR/install.log" 2>&1
-		echo -n " cleaning..."
-		rm "$INSTALL_DIR/lib/libdeflate.a"
-		if [ "$(uname -s)" == "Darwin" ]; then
-			#libdeflate makefile doesn't set this correctly
-			install_name_tool -id "$INSTALL_DIR/lib/libdeflate.0.dylib" "$INSTALL_DIR/lib/libdeflate.0.dylib"
-		fi
-	fi
+	echo -n " installing..."
+	make install >> "$DIR/install.log" 2>&1
 	cd ..
 	echo " done!"
 }
@@ -1116,7 +1117,7 @@ RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS_LTO" LDFLA
 --with-yaml \
 --with-openssl \
 --with-zip \
---with-libdeflate="$INSTALL_DIR" \
+--with-libdeflate \
 $HAS_LIBJPEG \
 $HAS_GD \
 --with-leveldb="$INSTALL_DIR" \
