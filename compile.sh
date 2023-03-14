@@ -943,7 +943,7 @@ function build_libdeflate {
 		make -j $THREADS >> "$DIR/install.log" 2>&1 && mark_cache
 	else
 		write_caching
-		cd "$libzip_dir"
+		cd "$libdeflate_dir"
 	fi
 	echo -n " installing..."
 	make install >> "$DIR/install.log" 2>&1
