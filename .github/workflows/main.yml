@@ -166,7 +166,7 @@ jobs:
     name: Publish binaries
     needs: [linux, macos, windows]
     runs-on: ubuntu-20.04
-    if: ${{ startsWith(github.ref_name, 'php/') && github.ref_type == 'branch' }}
+    if: ${{ startsWith(github.ref_name, 'php/') && github.ref_type == 'branch' && !contains(github.event.head_commit.message, '[no release]') }}
 
     steps:
       - uses: actions/checkout@v3
