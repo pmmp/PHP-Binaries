@@ -3,7 +3,7 @@
 
 ZLIB_VERSION="1.2.13"
 GMP_VERSION="6.2.1"
-CURL_VERSION="curl-7_88_1"
+CURL_VERSION="curl-8_0_1"
 YAML_VERSION="0.2.5"
 LEVELDB_VERSION="1c7564468b41610da4f498430e795ca4de0931ff"
 LIBXML_VERSION="2.10.1" #2.10.2 requires automake 1.16.3, which isn't easily available on Ubuntu 20.04
@@ -12,20 +12,20 @@ LIBJPEG_VERSION="9e"
 OPENSSL_VERSION="1.1.1t"
 LIBZIP_VERSION="1.9.2"
 SQLITE3_YEAR="2023"
-SQLITE3_VERSION="3410100" #3.41.1
-LIBDEFLATE_VERSION="bd925ae68e99f65d69f20181cb845aaba5c8f098" #1.17
+SQLITE3_VERSION="3410200" #3.41.2
+LIBDEFLATE_VERSION="495fee110ebb48a5eb63b75fd67e42b2955871e2" #1.18
 
 EXT_PTHREADS_VERSION_PM4="4.2.1"
-EXT_PTHREADS_VERSION_PM5="5.3.0"
+EXT_PTHREADS_VERSION_PM5="5.3.1"
 EXT_PTHREADS_VERSION="$EXT_PTHREADS_VERSION_PM4"
 EXT_YAML_VERSION="2.2.3"
 EXT_LEVELDB_VERSION="317fdcd8415e1566fc2835ce2bdb8e19b890f9f3"
 EXT_CHUNKUTILS2_VERSION="0.3.5"
-EXT_XDEBUG_VERSION="fbd5d9cb9e18502992e017925a34b7232755f34f" #fork of xdebug used to work around https://github.com/xdebug/xdebug/pull/878
+EXT_XDEBUG_VERSION="3.2.1"
 EXT_IGBINARY_VERSION="3.2.14"
 EXT_CRYPTO_VERSION="0.3.2"
 EXT_RECURSIONGUARD_VERSION="0.1.0"
-EXT_LIBDEFLATE_VERSION="0.2.0"
+EXT_LIBDEFLATE_VERSION="0.2.1"
 EXT_MORTON_VERSION="0.1.2"
 EXT_XXHASH_VERSION="0.1.1"
 
@@ -943,7 +943,7 @@ function build_libdeflate {
 		make -j $THREADS >> "$DIR/install.log" 2>&1 && mark_cache
 	else
 		write_caching
-		cd "$libzip_dir"
+		cd "$libdeflate_dir"
 	fi
 	echo -n " installing..."
 	make install >> "$DIR/install.log" 2>&1
@@ -1259,7 +1259,7 @@ fi
 echo " done!"
 
 if [[ "$HAVE_XDEBUG" == "yes" ]]; then
-	get_github_extension "xdebug" "$EXT_XDEBUG_VERSION" "dktapps" "xdebug"
+	get_github_extension "xdebug" "$EXT_XDEBUG_VERSION" "xdebug" "xdebug"
 	echo -n "[xdebug] checking..."
 	cd "$BUILD_DIR/php/ext/xdebug"
 	"$INSTALL_DIR/bin/phpize" >> "$DIR/install.log" 2>&1
