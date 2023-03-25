@@ -21,10 +21,10 @@ set MSBUILD_CONFIGURATION=RelWithDebInfo
 set LIBYAML_VER=0.2.5
 set PTHREAD_W32_VER=3.0.0
 set LEVELDB_MCPE_VER=1c7564468b41610da4f498430e795ca4de0931ff
-set LIBDEFLATE_VER=bd925ae68e99f65d69f20181cb845aaba5c8f098
+set LIBDEFLATE_VER=495fee110ebb48a5eb63b75fd67e42b2955871e2
 
 set PHP_PTHREADS_VER_PM4=4.2.1
-set PHP_PTHREADS_VER_PM5=5.3.0
+set PHP_PTHREADS_VER_PM5=5.3.1
 set PHP_PTHREADS_VER=
 set PHP_YAML_VER=2.2.3
 set PHP_CHUNKUTILS2_VER=0.3.5
@@ -33,10 +33,9 @@ set PHP_LEVELDB_VER=317fdcd8415e1566fc2835ce2bdb8e19b890f9f3
 set PHP_CRYPTO_VER=0.3.2
 set PHP_RECURSIONGUARD_VER=0.1.0
 set PHP_MORTON_VER=0.1.2
-set PHP_LIBDEFLATE_VER=0.2.0
+set PHP_LIBDEFLATE_VER=0.2.1
 set PHP_XXHASH_VER=0.1.1
-REM fork of xdebug to work around https://github.com/xdebug/xdebug/pull/878
-set PHP_XDEBUG_VER=fbd5d9cb9e18502992e017925a34b7232755f34f
+set PHP_XDEBUG_VER=3.2.1
 
 set script_path=%~dp0
 set log_file=%script_path%compile.log
@@ -224,7 +223,7 @@ call :get-extension-zip-from-github "recursionguard"        "%PHP_RECURSIONGUARD
 call :get-extension-zip-from-github "morton"                "%PHP_MORTON_VER%"                "pmmp"     "ext-morton"              || exit 1
 call :get-extension-zip-from-github "libdeflate"            "%PHP_LIBDEFLATE_VER%"            "pmmp"     "ext-libdeflate"          || exit 1
 call :get-extension-zip-from-github "xxhash"                "%PHP_XXHASH_VER%"                "pmmp"     "ext-xxhash"              || exit 1
-call :get-extension-zip-from-github "xdebug"                "%PHP_XDEBUG_VER%"                "dktapps"  "xdebug"                  || exit 1
+call :get-extension-zip-from-github "xdebug"                "%PHP_XDEBUG_VER%"                "xdebug"   "xdebug"                  || exit 1
 
 call :pm-echo " - crypto: downloading %PHP_CRYPTO_VER%..."
 git clone https://github.com/bukka/php-crypto.git crypto >>"%log_file%" 2>&1 || exit 1
