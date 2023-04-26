@@ -9,7 +9,7 @@ LEVELDB_VERSION="1c7564468b41610da4f498430e795ca4de0931ff"
 LIBXML_VERSION="2.10.1" #2.10.2 requires automake 1.16.3, which isn't easily available on Ubuntu 20.04
 LIBPNG_VERSION="1.6.39"
 LIBJPEG_VERSION="9e"
-OPENSSL_VERSION="1.1.1t"
+OPENSSL_VERSION="3.1.0"
 LIBZIP_VERSION="1.9.2"
 SQLITE3_YEAR="2023"
 SQLITE3_VERSION="3410200" #3.41.2
@@ -587,6 +587,7 @@ function build_openssl {
 		RANLIB=$RANLIB $OPENSSL_CMD \
 		--prefix="$INSTALL_DIR" \
 		--openssldir="$INSTALL_DIR" \
+		--libdir="$INSTALL_DIR/lib" \
 		no-asm \
 		no-hw \
 		no-engine \
