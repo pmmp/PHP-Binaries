@@ -20,10 +20,12 @@ Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have
 
 | Script flags | Description                                                                                        |
 |--------------|----------------------------------------------------------------------------------------------------|
+| -c           | Uses the folder specified for caching downloaded tarballs, zipballs etc.                           |
 | -d           | Will compile with debug and the xdebug PHP extension                                               |
 | -f           | Enabling abusive optimizations...                                                                  |
 | -g           | Will compile GD2                                                                                   |
 | -j           | Set make threads to #                                                                              |
+| -l           | Uses the folder specified for caching compilation artifacts (useful for rapid rebuild and testing) |
 | -n           | Don't remove sources after completing compilation                                                  |
 | -s           | Will compile everything statically                                                                 |
 | -t           | Set target                                                                                         |
