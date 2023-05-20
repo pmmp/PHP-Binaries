@@ -11,7 +11,6 @@ Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have
 #### Mac OSX (native compile)
 - Most dependencies can be installed using Homebrew
 - You will additionally need `glibtool` (GNU libtool, xcode libtool won't work)
-- You also MUST specify target as `mac-x86-64` or `mac-arm64` if building for Mac, on Mac.
 
 #### Android 64-bit (cross-compile)
 - Only aarch64 targets are supported for Android cross-compile.
