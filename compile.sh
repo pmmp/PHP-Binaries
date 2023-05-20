@@ -178,6 +178,7 @@ HAVE_OPCACHE="yes"
 HAVE_XDEBUG="yes"
 FSANITIZE_OPTIONS=""
 FLAGS_LTO=""
+HAVE_OPCACHE_JIT="no"
 
 LD_PRELOAD=""
 
@@ -185,7 +186,7 @@ COMPILE_GD="no"
 
 PM_VERSION_MAJOR="4"
 
-while getopts "::t:j:srdxff:gnva:P:c:l:" OPTION; do
+while getopts "::t:j:srdxff:gnva:P:c:l:J" OPTION; do
 
 	case $OPTION in
 		l)
@@ -246,6 +247,10 @@ while getopts "::t:j:srdxff:gnva:P:c:l:" OPTION; do
 			;;
 		P)
 			PM_VERSION_MAJOR="$OPTARG"
+			;;
+		J)
+			echo "[opt] Compiling JIT support in OPcache (unstable)"
+			HAVE_OPCACHE_JIT="yes"
 			;;
 		\?)
 			echo "Invalid option: -$OPTARG" >&2
@@ -373,6 +378,7 @@ fi
 
 if [ "$DO_STATIC" == "yes" ]; then
 	HAVE_OPCACHE="no" #doesn't work on static builds
+	HAVE_OPCACHE_JIT="no"
 	echo "[warning] OPcache cannot be used on static builds; this may have a negative effect on performance"
 	if [ "$FSANITIZE_OPTIONS" != "" ]; then
 		echo "[warning] Sanitizers cannot be used on static builds"
@@ -1158,7 +1164,7 @@ $HAVE_MYSQLI \
 --enable-cli \
 --enable-ftp \
 --enable-opcache=$HAVE_OPCACHE \
---enable-opcache-jit=$HAVE_OPCACHE \
+--enable-opcache-jit=$HAVE_OPCACHE_JIT \
 --enable-igbinary \
 --with-crypto \
 --enable-recursionguard \
@@ -1242,12 +1248,14 @@ if [ "$HAVE_OPCACHE" == "yes" ]; then
 	echo "opcache.revalidate_freq=0" >> "$INSTALL_DIR/bin/php.ini"
 	echo "opcache.file_update_protection=0" >> "$INSTALL_DIR/bin/php.ini"
 	echo "opcache.optimization_level=0x7FFEBFFF ;https://github.com/php/php-src/blob/53c1b485741f31a17b24f4db2b39afeb9f4c8aba/ext/opcache/Optimizer/zend_optimizer.h" >> "$INSTALL_DIR/bin/php.ini"
-	echo "" >> "$INSTALL_DIR/bin/php.ini"
-	echo "; ---- ! WARNING ! ----" >> "$INSTALL_DIR/bin/php.ini"
-	echo "; JIT can provide big performance improvements, but as of PHP 8.0.8 it is still unstable. For this reason, it is disabled by default." >> "$INSTALL_DIR/bin/php.ini"
-	echo "; Enable it at your own risk. See https://www.php.net/manual/en/opcache.configuration.php#ini.opcache.jit for possible options." >> "$INSTALL_DIR/bin/php.ini"
-	echo "opcache.jit=off" >> "$INSTALL_DIR/bin/php.ini"
-	echo "opcache.jit_buffer_size=128M" >> "$INSTALL_DIR/bin/php.ini"
+	if [ "$HAVE_OPCACHE_JIT" == "yes" ]; then
+		echo "" >> "$INSTALL_DIR/bin/php.ini"
+		echo "; ---- ! WARNING ! ----" >> "$INSTALL_DIR/bin/php.ini"
+		echo "; JIT can provide big performance improvements, but as of PHP $PHP_VERSION it is still unstable. For this reason, it is disabled by default." >> "$INSTALL_DIR/bin/php.ini"
+		echo "; Enable it at your own risk. See https://www.php.net/manual/en/opcache.configuration.php#ini.opcache.jit for possible options." >> "$INSTALL_DIR/bin/php.ini"
+		echo "opcache.jit=off" >> "$INSTALL_DIR/bin/php.ini"
+		echo "opcache.jit_buffer_size=128M" >> "$INSTALL_DIR/bin/php.ini"
+	fi
 fi
 if [ "$COMPILE_TARGET" == "mac-"* ]; then
 	#we don't have permission to allocate executable memory on macOS due to not being codesigned

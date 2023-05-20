@@ -17,6 +17,7 @@ if "%PHP_DEBUG_BUILD%"=="" (
 	set PHP_DEBUG_BUILD=0
 )
 set MSBUILD_CONFIGURATION=RelWithDebInfo
+set PHP_JIT_ENABLE_ARG=off
 
 set LIBYAML_VER=0.2.5
 set PTHREAD_W32_VER=3.0.0
@@ -61,6 +62,11 @@ if "%PHP_DEBUG_BUILD%"=="0" (
 	REM I don't like this, but YAML will crash if it's not built with the same target as PHP
 	set MSBUILD_CONFIGURATION=Debug
 	call :pm-echo "Building debug binaries"
+)
+
+if "%PHP_JIT_SUPPORT%"=="1" (
+    set PHP_JIT_ENABLE_ARG=on
+    call :pm-echo "Compiling JIT support in OPcache (unstable)"
 )
 
 if "%PM_VERSION_MAJOR%"=="" (
@@ -264,7 +270,7 @@ call configure^
  --enable-mbstring^
  --enable-morton^
  --enable-opcache^
- --enable-opcache-jit^
+ --enable-opcache-jit=%PHP_JIT_ENABLE_ARG%^
  --enable-phar^
  --enable-recursionguard=shared^
  --enable-sockets^
@@ -356,12 +362,14 @@ call :pm-echo "Generating php.ini..."
 (echo extension=php_recursionguard.dll)>>"%php_ini%"
 (echo recursionguard.enabled=0 ;disabled due to minor performance impact, only enable this if you need it for debugging)>>"%php_ini%"
 (echo.)>>"%php_ini%"
-(echo ; ---- ! WARNING ! ----)>>"%php_ini%"
-(echo ; JIT can provide big performance improvements, but as of PHP 8.0.8 it is still unstable. For this reason, it is disabled by default.)>>"%php_ini%"
-(echo ; Enable it at your own risk. See https://www.php.net/manual/en/opcache.configuration.php#ini.opcache.jit for possible options.)>>"%php_ini%"
-(echo opcache.jit=off)>>"%php_ini%"
-(echo opcache.jit_buffer_size=128M)>>"%php_ini%"
-(echo.)>>"%php_ini%"
+if "%PHP_JIT_ENABLE_ARG%"=="on" (
+    (echo ; ---- ! WARNING ! ----)>>"%php_ini%"
+    (echo ; JIT can provide big performance improvements, but as of PHP %PHP_VER% it is still unstable. For this reason, it is disabled by default.)>>"%php_ini%"
+    (echo ; Enable it at your own risk. See https://www.php.net/manual/en/opcache.configuration.php#ini.opcache.jit for possible options.)>>"%php_ini%"
+    (echo opcache.jit=off)>>"%php_ini%"
+    (echo opcache.jit_buffer_size=128M)>>"%php_ini%"
+    (echo.)>>"%php_ini%"
+)
 (echo ;WARNING: When loaded, xdebug 3.2.0 will cause segfaults whenever an uncaught error is thrown, even if xdebug.mode=off. Load it at your own risk.)>>"%php_ini%"
 (echo ;zend_extension=php_xdebug.dll)>>"%php_ini%"
 (echo ;https://xdebug.org/docs/all_settings#mode)>>"%php_ini%"
