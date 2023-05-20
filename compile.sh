@@ -1198,7 +1198,7 @@ function relativize_macos_library_paths {
 
 function relativize_macos_all_libraries_paths {
 	set +e
-	for _library in $(ls "$INSTALL_DIR/lib/"*".dylib"); do
+	for _library in $(find "$INSTALL_DIR" -name "*.dylib" -o -name "*.so"); do
 		relativize_macos_library_paths "$_library"
 	done
 	set -e

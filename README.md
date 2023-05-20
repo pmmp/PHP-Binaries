@@ -11,7 +11,6 @@ Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have
 #### Mac OSX (native compile)
 - Most dependencies can be installed using Homebrew
 - You will additionally need `glibtool` (GNU libtool, xcode libtool won't work)
-- You also MUST specify target as `mac` or `mac64` if building for Mac, on Mac.
 
 #### Android 64-bit (cross-compile)
 - Only aarch64 targets are supported for Android cross-compile.
@@ -20,10 +19,12 @@ Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have
 
 | Script flags | Description                                                                                        |
 |--------------|----------------------------------------------------------------------------------------------------|
+| -c           | Uses the folder specified for caching downloaded tarballs, zipballs etc.                           |
 | -d           | Will compile with debug and the xdebug PHP extension                                               |
 | -f           | Enabling abusive optimizations...                                                                  |
 | -g           | Will compile GD2                                                                                   |
 | -j           | Set make threads to #                                                                              |
+| -l           | Uses the folder specified for caching compilation artifacts (useful for rapid rebuild and testing) |
 | -n           | Don't remove sources after completing compilation                                                  |
 | -s           | Will compile everything statically                                                                 |
 | -t           | Set target                                                                                         |
@@ -37,7 +38,7 @@ Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have
 |-----------------|-----------------------------------|
 | linux64         | ``-t linux64 -j4 -f x86_64``      |
 | linux64, PM5    | ``-t linux64 -j4 -f x86_64 -P 5`` |
-| mac64           | ``-t mac64 -j4 -f``               |
+| mac64           | ``-t mac-x86-64 -j4 -f``               |
 | android-aarch64 | ``-t android-aarch64 -x -j4 -f``  |
 
 ### Common pitfalls
