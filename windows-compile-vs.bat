@@ -24,9 +24,8 @@ set PTHREAD_W32_VER=3.0.0
 set LEVELDB_MCPE_VER=1c7564468b41610da4f498430e795ca4de0931ff
 set LIBDEFLATE_VER=495fee110ebb48a5eb63b75fd67e42b2955871e2
 
-set PHP_PTHREADS_VER_PM4=4.2.1
-set PHP_PTHREADS_VER_PM5=5.3.1
-set PHP_PTHREADS_VER=
+set PHP_PTHREADS_VER=4.2.1
+set PHP_PMMPTHREAD_VER=6.0.0
 set PHP_YAML_VER=2.2.3
 set PHP_CHUNKUTILS2_VER=0.3.5
 set PHP_IGBINARY_VER=3.2.14
@@ -71,12 +70,6 @@ if "%PHP_JIT_SUPPORT%"=="1" (
 
 if "%PM_VERSION_MAJOR%"=="" (
     set PM_VERSION_MAJOR=4
-)
-
-if "%PM_VERSION_MAJOR%" geq "5" (
-    set PHP_PTHREADS_VER=%PHP_PTHREADS_VER_PM5%
-) else (
-    set PHP_PTHREADS_VER=%PHP_PTHREADS_VER_PM4%
 )
 
 call :pm-echo "Compiling with configuration for PocketMine-MP %PM_VERSION_MAJOR%"
@@ -220,7 +213,14 @@ cd /D ..
 call :pm-echo "Getting additional PHP extensions..."
 cd /D php-src\ext
 
-call :get-extension-zip-from-github "pthreads"              "%PHP_PTHREADS_VER%"              "pmmp"     "ext-pmmpthread"          || exit 1
+set THREAD_EXT_FLAGS=""
+if "%PM_VERSION_MAJOR%" geq "5" (
+    call :get-extension-zip-from-github "pmmpthread" "%PHP_PMMPTHREAD_VER%" "pmmp" "ext-pmmpthread" || exit 1
+    set THREAD_EXT_FLAGS="--with-pmmpthread=shared"
+) else (
+    call :get-extension-zip-from-github "pthreads" "%PHP_PTHREADS_VER%" "pmmp" "ext-pmmpthread" || exit 1
+    set THREAD_EXT_FLAGS="--with-pthreads=shared"
+)
 call :get-extension-zip-from-github "yaml"                  "%PHP_YAML_VER%"                  "php"      "pecl-file_formats-yaml"  || exit 1
 call :get-extension-zip-from-github "chunkutils2"           "%PHP_CHUNKUTILS2_VER%"           "pmmp"     "ext-chunkutils2"         || exit 1
 call :get-extension-zip-from-github "igbinary"              "%PHP_IGBINARY_VER%"              "igbinary" "igbinary"                || exit 1
@@ -294,7 +294,7 @@ call configure^
  --with-mysqlnd^
  --with-openssl^
  --with-pcre-jit^
- --with-pthreads=shared^
+ %THREAD_EXT_FLAGS%^
  --with-simplexml^
  --with-sodium^
  --with-sqlite3=shared^
@@ -335,7 +335,11 @@ call :pm-echo "Generating php.ini..."
 (echo error_reporting=-1)>>"%php_ini%"
 (echo zend.assertions=-1)>>"%php_ini%"
 (echo extension_dir=ext)>>"%php_ini%"
-(echo extension=php_pthreads.dll)>>"%php_ini%"
+if "%PM_VERSION_MAJOR%" geq "5" (
+    (echo extension=php_pmmpthread.dll)>>"%php_ini%"
+) else (
+    (echo extension=php_pthreads.dll)>>"%php_ini%"
+)
 (echo extension=php_openssl.dll)>>"%php_ini%"
 (echo extension=php_chunkutils2.dll)>>"%php_ini%"
 (echo extension=php_igbinary.dll)>>"%php_ini%"
