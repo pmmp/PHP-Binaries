@@ -15,9 +15,8 @@ SQLITE3_YEAR="2023"
 SQLITE3_VERSION="3420000" #3.42.0
 LIBDEFLATE_VERSION="495fee110ebb48a5eb63b75fd67e42b2955871e2" #1.18
 
-EXT_PTHREADS_VERSION_PM4="4.2.1"
-EXT_PTHREADS_VERSION_PM5="5.3.1"
-EXT_PTHREADS_VERSION="$EXT_PTHREADS_VERSION_PM4"
+EXT_PTHREADS_VERSION="4.2.1"
+EXT_PMMPTHREAD_VERSION="6.0.0"
 EXT_YAML_VERSION="2.2.3"
 EXT_LEVELDB_VERSION="317fdcd8415e1566fc2835ce2bdb8e19b890f9f3"
 EXT_CHUNKUTILS2_VERSION="0.3.5"
@@ -259,11 +258,6 @@ while getopts "::t:j:srdxff:gnva:P:c:l:J" OPTION; do
 	esac
 done
 
-if [ "$PM_VERSION_MAJOR" -ge 5 ]; then
-	EXT_PTHREADS_VERSION="$EXT_PTHREADS_VERSION_PM5"
-else
-	EXT_PTHREADS_VERSION="$EXT_PTHREADS_VERSION_PM4"
-fi
 write_out "opt" "Compiling with configuration for PocketMine-MP $PM_VERSION_MAJOR"
 
 GMP_ABI=""
@@ -1012,7 +1006,13 @@ function get_pecl_extension {
 cd "$BUILD_DIR/php"
 echo "[PHP] Downloading additional extensions..."
 
-get_github_extension "pthreads" "$EXT_PTHREADS_VERSION" "pmmp" "ext-pmmpthread" #"v" needed for release tags because github removes the "v"
+if [ "$PM_VERSION_MAJOR" -ge 5 ]; then
+	get_github_extension "pmmpthread" "$EXT_PMMPTHREAD_VERSION" "pmmp" "ext-pmmpthread"
+	THREAD_EXT_FLAGS="--enable-pmmpthread"
+else
+	get_github_extension "pthreads" "$EXT_PTHREADS_VERSION" "pmmp" "ext-pmmpthread" #"v" needed for release tags because github removes the "v"
+	THREAD_EXT_FLAGS="--enable-pthreads"
+fi
 
 get_github_extension "yaml" "$EXT_YAML_VERSION" "php" "pecl-file_formats-yaml"
 #get_pecl_extension "yaml" "$EXT_YAML_VERSION"
@@ -1134,7 +1134,7 @@ $HAS_DEBUG \
 --enable-mbstring \
 --disable-mbregex \
 --enable-calendar \
---enable-pthreads \
+$THREAD_EXT_FLAGS \
 --enable-fileinfo \
 --with-libxml \
 --enable-xml \
