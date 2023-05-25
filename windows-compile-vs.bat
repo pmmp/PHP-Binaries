@@ -34,8 +34,9 @@ set PHP_CRYPTO_VER=0.3.2
 set PHP_RECURSIONGUARD_VER=0.1.0
 set PHP_MORTON_VER=0.1.2
 set PHP_LIBDEFLATE_VER=0.2.1
-set PHP_XXHASH_VER=0.1.1
+set PHP_XXHASH_VER=0.2.0
 set PHP_XDEBUG_VER=3.2.1
+set PHP_ARRAYDEBUG_VER=0.1.0
 
 set script_path=%~dp0
 set log_file=%script_path%compile.log
@@ -230,6 +231,7 @@ call :get-extension-zip-from-github "morton"                "%PHP_MORTON_VER%"  
 call :get-extension-zip-from-github "libdeflate"            "%PHP_LIBDEFLATE_VER%"            "pmmp"     "ext-libdeflate"          || exit 1
 call :get-extension-zip-from-github "xxhash"                "%PHP_XXHASH_VER%"                "pmmp"     "ext-xxhash"              || exit 1
 call :get-extension-zip-from-github "xdebug"                "%PHP_XDEBUG_VER%"                "xdebug"   "xdebug"                  || exit 1
+call :get-extension-zip-from-github "arraydebug"            "%PHP_ARRAYDEBUG_VER%"            "pmmp"     "ext-arraydebug"          || exit 1
 
 call :pm-echo " - crypto: downloading %PHP_CRYPTO_VER%..."
 git clone https://github.com/bukka/php-crypto.git crypto >>"%log_file%" 2>&1 || exit 1
@@ -257,6 +259,7 @@ call configure^
  --enable-cli^
  --enable-zts^
  --enable-pdo^
+ --enable-arraydebug=shared^
  --enable-bcmath^
  --enable-calendar^
  --enable-chunkutils2=shared^
@@ -365,6 +368,7 @@ if "%PM_VERSION_MAJOR%" geq "5" (
 (echo ;Optional extensions, supplied for debugging)>>"%php_ini%"
 (echo extension=php_recursionguard.dll)>>"%php_ini%"
 (echo recursionguard.enabled=0 ;disabled due to minor performance impact, only enable this if you need it for debugging)>>"%php_ini%"
+(echo ;extension=php_arraydebug.dll)>>"%php_ini%"
 (echo.)>>"%php_ini%"
 if "%PHP_JIT_ENABLE_ARG%"=="on" (
     (echo ; ---- ! WARNING ! ----)>>"%php_ini%"

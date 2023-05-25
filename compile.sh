@@ -26,7 +26,8 @@ EXT_CRYPTO_VERSION="0.3.2"
 EXT_RECURSIONGUARD_VERSION="0.1.0"
 EXT_LIBDEFLATE_VERSION="0.2.1"
 EXT_MORTON_VERSION="0.1.2"
-EXT_XXHASH_VERSION="0.1.1"
+EXT_XXHASH_VERSION="0.2.0"
+EXT_ARRAYDEBUG_VERSION="0.1.0"
 
 function write_out {
 	echo "[$1] $2"
@@ -1039,6 +1040,8 @@ get_github_extension "morton" "$EXT_MORTON_VERSION" "pmmp" "ext-morton"
 
 get_github_extension "xxhash" "$EXT_XXHASH_VERSION" "pmmp" "ext-xxhash"
 
+get_github_extension "arraydebug" "$EXT_ARRAYDEBUG_VERSION" "pmmp" "ext-arraydebug"
+
 echo -n "[PHP]"
 
 if [ "$DO_OPTIMIZE" != "no" ]; then
@@ -1169,6 +1172,7 @@ $HAVE_MYSQLI \
 --with-crypto \
 --enable-recursionguard \
 --enable-xxhash \
+--enable-arraydebug \
 $HAVE_VALGRIND \
 $CONFIGURE_FLAGS >> "$DIR/install.log" 2>&1
 echo -n " compiling..."
