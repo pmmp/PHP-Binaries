@@ -188,7 +188,9 @@ jobs:
 
       - name: Generate release notes
         run: |
-          echo "Built by: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" > changelog.md
+          echo "Last updated on **$(date -u +'%Y-%m-%d at %H:%M:%S %Z')**" > changelog.md
+          echo -e "\n\n" >> changelog.md
+          echo "Built by: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> changelog.md
           if [[ "${{ github.ref_name }}" != "${{ github.event.repository.default_branch }}" ]]; then
             echo -e "\n\n\n" >> changelog.md
             echo ":warning: **This isn't the currently recommended version for PocketMine-MP.**" >> changelog.md
