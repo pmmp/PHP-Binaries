@@ -184,7 +184,7 @@ LD_PRELOAD=""
 
 COMPILE_GD="no"
 
-PM_VERSION_MAJOR="4"
+PM_VERSION_MAJOR=""
 
 while getopts "::t:j:srdxff:gnva:P:c:l:J" OPTION; do
 
@@ -258,6 +258,11 @@ while getopts "::t:j:srdxff:gnva:P:c:l:J" OPTION; do
 			;;
 	esac
 done
+
+if [ "$PM_VERSION_MAJOR" == "" ]; then
+	echo "Please specify PocketMine-MP major version target with -P (e.g. -P5)"
+	exit 1
+fi
 
 write_out "opt" "Compiling with configuration for PocketMine-MP $PM_VERSION_MAJOR"
 

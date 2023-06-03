@@ -70,7 +70,8 @@ if "%PHP_JIT_SUPPORT%"=="1" (
 )
 
 if "%PM_VERSION_MAJOR%"=="" (
-    set PM_VERSION_MAJOR=4
+    call :pm-echo-error "Please specify PocketMine-MP major version by setting the PM_VERSION_MAJOR environment variable"
+    exit 1
 )
 
 call :pm-echo "Compiling with configuration for PocketMine-MP %PM_VERSION_MAJOR%"
