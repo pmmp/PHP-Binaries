@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 [ -z "$PHP_VERSION" ] && PHP_VERSION="8.1.19"
 
 ZLIB_VERSION="1.2.13"
