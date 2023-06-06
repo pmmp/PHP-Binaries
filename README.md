@@ -5,7 +5,7 @@
 
 ## compile.sh
 
-Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have ``make autoconf automake libtool m4 wget getconf gzip bzip2 bison g++ git cmake pkg-config re2c``.
+Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have ``make autoconf automake libtool m4 wget getconf gzip bzip2 bison g++ git cmake pkg-config re2c ca-certificates``.
 
 ### Additional notes
 #### Mac OSX (native compile)
@@ -34,12 +34,12 @@ Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have
 
 ### Example:
 
-| Target          | Arguments                         |
-|-----------------|-----------------------------------|
-| linux64         | ``-t linux64 -j4 -f x86_64``      |
-| linux64, PM5    | ``-t linux64 -j4 -f x86_64 -P 5`` |
-| mac64           | ``-t mac-x86-64 -j4 -f``               |
-| android-aarch64 | ``-t android-aarch64 -x -j4 -f``  |
+| Target          | Arguments                            |
+|-----------------|--------------------------------------|
+| linux64         | ``-t linux64 -j4 -f x86_64 -P5``     |
+| mac64           | ``-t mac-x86-64 -j4 -f -P5``         |
+| android-aarch64 | ``-t android-aarch64 -x -j4 -f -P5`` |
+| linux64, PM4    | ``-t linux64 -j4 -f x86_64 -P4``     |
 
 ### Common pitfalls
 - If used, the `-t` option (target) MUST be specified BEFORE the `-f` option (optimizations)
