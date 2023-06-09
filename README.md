@@ -10,7 +10,7 @@ Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have
 ### Recommendations
 - `-f` makes the compiled binary much faster, don't forget to use it if you're targeting production.
 - If you're going to use the compiled binary only on the machine you're build it on, remove the `-t` option for best performance - this will allow the script to optimize for the current machine rather than a generic one.
-- [`ext-gd2`]() is NOT included unless the `-g` flag is provided, as PocketMine-MP doesn't need it. However, if your plugins need it, don't forget to enable it using `-g`.
+- [`ext-gd2`](https://www.php.net/manual/en/book.image.php) is NOT included unless the `-g` flag is provided, as PocketMine-MP doesn't need it. However, if your plugins need it, don't forget to enable it using `-g`.
 - The `-c` and `-l` options can be used to specify cache folders to speed up recompiling if you're recompiling many times (e.g. to improve the script).
 
 ### Common pitfalls
