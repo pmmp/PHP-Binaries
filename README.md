@@ -7,6 +7,16 @@
 
 Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have ``make autoconf automake libtool m4 wget getconf gzip bzip2 bison g++ git cmake pkg-config re2c ca-certificates``.
 
+### Recommendations
+- `-f` makes the compiled binary much faster, don't forget to use it if you're targeting production.
+- If you're going to use the compiled binary only on the machine you're build it on, remove the `-t` option for best performance - this will allow the script to optimize for the current machine rather than a generic one.
+- [`ext-gd2`]() is NOT included unless the `-g` flag is provided, as PocketMine-MP doesn't need it. However, if your plugins need it, don't forget to enable it using `-g`.
+- The `-c` and `-l` options can be used to specify cache folders to speed up recompiling if you're recompiling many times (e.g. to improve the script).
+
+### Common pitfalls
+- `-f` should be specified at the END of the command line, otherwise it may cause argument errors (due to weird magic)
+- Avoid using the script in directory trees containing spaces. Some libraries don't like trying to be built in directory trees containing spaces, e.g. `/home/user/my folder/pocketmine-mp/` might experience problems.
+
 ### Additional notes
 #### Mac OSX (native compile)
 - Most dependencies can be installed using Homebrew
@@ -36,14 +46,10 @@ Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have
 
 | Target          | Arguments                            |
 |-----------------|--------------------------------------|
-| linux64         | ``-t linux64 -j4 -f x86_64 -P5``     |
-| mac64           | ``-t mac-x86-64 -j4 -f -P5``         |
-| android-aarch64 | ``-t android-aarch64 -x -j4 -f -P5`` |
-| linux64, PM4    | ``-t linux64 -j4 -f x86_64 -P4``     |
-
-### Common pitfalls
-- If used, the `-t` option (target) MUST be specified BEFORE the `-f` option (optimizations)
-- Avoid using the script in directory trees containing spaces. Some libraries don't like trying to be built in directory trees containing spaces, e.g. `/home/user/my folder/pocketmine-mp/` might experience problems.
+| linux64         | ``-t linux64 -j4 -P5 -f x86_64``     |
+| linux64, PM4    | ``-t linux64 -j4 -P4 -f x86_64``     |
+| mac64           | ``-t mac-x86-64 -j4 -P5 -f ``        |
+| android-aarch64 | ``-t android-aarch64 -x -j4 -P5 -f`` |
 
 ## windows-compile-vs.bat
 
