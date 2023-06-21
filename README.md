@@ -14,7 +14,6 @@ Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have
 - The `-c` and `-l` options can be used to specify cache folders to speed up recompiling if you're recompiling many times (e.g. to improve the script).
 
 ### Common pitfalls
-- `-f` should be specified at the END of the command line, otherwise it may cause argument errors (due to weird magic)
 - Avoid using the script in directory trees containing spaces. Some libraries don't like trying to be built in directory trees containing spaces, e.g. `/home/user/my folder/pocketmine-mp/` might experience problems.
 
 ### Additional notes
@@ -31,7 +30,7 @@ Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have
 |--------------|----------------------------------------------------------------------------------------------------|
 | -c           | Uses the folder specified for caching downloaded tarballs, zipballs etc.                           |
 | -d           | Will compile with debug and the xdebug PHP extension                                               |
-| -f           | Enabling abusive optimizations...                                                                  |
+| -f           | Enable optimizations (increases compile time, but improves performance)                            |
 | -g           | Will compile GD2                                                                                   |
 | -j           | Set make threads to #                                                                              |
 | -l           | Uses the folder specified for caching compilation artifacts (useful for rapid rebuild and testing) |
@@ -46,9 +45,9 @@ Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have
 
 | Target          | Arguments                            |
 |-----------------|--------------------------------------|
-| linux64         | ``-t linux64 -j4 -P5 -f x86_64``     |
-| linux64, PM4    | ``-t linux64 -j4 -P4 -f x86_64``     |
-| mac64           | ``-t mac-x86-64 -j4 -P5 -f ``        |
+| linux64         | ``-t linux64 -j4 -P5 -f``            |
+| linux64, PM4    | ``-t linux64 -j4 -P4 -f``            |
+| mac64           | ``-t mac-x86-64 -j4 -P5 -f``         |
 | android-aarch64 | ``-t android-aarch64 -x -j4 -P5 -f`` |
 
 ## windows-compile-vs.bat

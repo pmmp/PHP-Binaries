@@ -169,7 +169,6 @@ COMPILE_TARGET=""
 IS_CROSSCOMPILE="no"
 IS_WINDOWS="no"
 DO_OPTIMIZE="no"
-OPTIMIZE_TARGET=""
 DO_STATIC="no"
 DO_CLEANUP="yes"
 COMPILE_DEBUG="no"
@@ -186,7 +185,7 @@ COMPILE_GD="no"
 
 PM_VERSION_MAJOR=""
 
-while getopts "::t:j:srdxff:gnva:P:c:l:J" OPTION; do
+while getopts "::t:j:srdxfgnva:P:c:l:J" OPTION; do
 
 	case $OPTION in
 		l)
@@ -227,7 +226,6 @@ while getopts "::t:j:srdxff:gnva:P:c:l:J" OPTION; do
 		f)
 			echo "[opt] Enabling abusive optimizations..."
 			DO_OPTIMIZE="yes"
-			OPTIMIZE_TARGET="$OPTARG"
 			;;
 		g)
 			echo "[opt] Will enable GD2"
@@ -391,17 +389,9 @@ fi
 
 if [ "$DO_OPTIMIZE" != "no" ]; then
 	#FLAGS_LTO="-fvisibility=hidden -flto"
-	CFLAGS="$CFLAGS -O2 -ftree-vectorize -fomit-frame-pointer -funswitch-loops -fivopts"
+	CFLAGS="$CFLAGS -O2 -ftree-vectorize -fomit-frame-pointer -funswitch-loops -fivopts -ftree-parallelize-loops=4"
 	if [ "$COMPILE_TARGET" != "mac-x86-64" ] && [ "$COMPILE_TARGET" != "mac-arm64" ]; then
 		CFLAGS="$CFLAGS -funsafe-loop-optimizations -fpredictive-commoning -ftracer -ftree-loop-im -frename-registers -fcx-limited-range"
-	fi
-
-	if [ "$OPTIMIZE_TARGET" == "arm" ]; then
-		CFLAGS="$CFLAGS -mfpu=vfp"
-	elif [ "$OPTIMIZE_TARGET" == "x86_64" ]; then
-		CFLAGS="$CFLAGS -mmmx -msse -msse2 -msse3 -mfpmath=sse -free -msahf -ftree-parallelize-loops=4"
-	elif [ "$OPTIMIZE_TARGET" == "x86" ]; then
-		CFLAGS="$CFLAGS -mmmx -msse -msse2 -mfpmath=sse -m128bit-long-double -malign-double -ftree-parallelize-loops=4"
 	fi
 fi
 
