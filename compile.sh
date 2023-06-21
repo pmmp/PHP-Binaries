@@ -111,45 +111,6 @@ if [ $ERRORS -ne 0 ]; then
 	exit 1
 fi
 
-#Needed to use aliases
-shopt -s expand_aliases
-type wget >> "$DIR/install.log" 2>&1
-if [ $? -eq 0 ]; then
-	alias _download_file="wget --no-check-certificate -nv -O -"
-else
-	type curl >> "$DIR/install.log" 2>&1
-	if [ $? -eq 0 ]; then
-		alias _download_file="curl --insecure --silent --show-error --location --globoff"
-	else
-		echo "error, curl or wget not found"
-		exit 1
-	fi
-fi
-
-DOWNLOAD_CACHE=""
-
-function download_file {
-	local url="$1"
-	local prefix="$2"
-	local cached_filename="$prefix-${url##*/}"
-
-	if [[ "$DOWNLOAD_CACHE" != "" ]]; then
-		if [[ ! -d "$DOWNLOAD_CACHE" ]]; then
-			mkdir "$DOWNLOAD_CACHE" >> "$DIR/install.log" 2>&1
-		fi
-		if [[ -f "$DOWNLOAD_CACHE/$cached_filename" ]]; then
-			echo "Cache hit for URL: $url" >> "$DIR/install.log"
-		else
-			echo "Downloading file to cache: $url" >> "$DIR/install.log"
-			_download_file "$1" > "$DOWNLOAD_CACHE/$cached_filename" 2>> "$DIR/install.log"
-		fi
-		cat "$DOWNLOAD_CACHE/$cached_filename" 2>> "$DIR/install.log"
-	else
-		echo "Downloading non-cached file: $url" >> "$DIR/install.log"
-		_download_file "$1" 2>> "$DIR/install.log"
-	fi
-}
-
 #if type llvm-gcc >/dev/null 2>&1; then
 #	export CC="llvm-gcc"
 #	export CXX="llvm-g++"
@@ -183,7 +144,10 @@ COMPILE_GD="no"
 
 PM_VERSION_MAJOR=""
 
-while getopts "::t:j:sdxfgnva:P:c:l:J" OPTION; do
+DOWNLOAD_INSECURE="no"
+DOWNLOAD_CACHE=""
+
+while getopts "::t:j:sdxfgnva:P:c:l:Ji" OPTION; do
 
 	case $OPTION in
 		l)
@@ -248,6 +212,11 @@ while getopts "::t:j:sdxfgnva:P:c:l:J" OPTION; do
 			echo "[opt] Compiling JIT support in OPcache (unstable)"
 			HAVE_OPCACHE_JIT="yes"
 			;;
+		i)
+			echo "[opt] Disabling SSL certificate verification for downloads"
+			echo "[WARNING] This is a security risk, please only use this if you know what you are doing!"
+			DOWNLOAD_INSECURE="yes"
+			;;
 		\?)
 			echo "Invalid option: -$OPTARG" >&2
 			exit 1
@@ -261,6 +230,51 @@ if [ "$PM_VERSION_MAJOR" == "" ]; then
 fi
 
 write_out "opt" "Compiling with configuration for PocketMine-MP $PM_VERSION_MAJOR"
+
+#Needed to use aliases
+shopt -s expand_aliases
+type wget >> "$DIR/install.log" 2>&1
+if [ $? -eq 0 ]; then
+	wget_flags=""
+	if [ "$DOWNLOAD_INSECURE" == "yes" ]; then
+		wget_flags="--no-check-certificate"
+	fi
+	alias _download_file="wget $wget_flags -nv -O -"
+else
+	type curl >> "$DIR/install.log" 2>&1
+	if [ $? -eq 0 ]; then
+		curl_flags=""
+		if [ "$DOWNLOAD_INSECURE" == "yes" ]; then
+			curl_flags="--insecure"
+		fi
+		alias _download_file="curl $curl_flags --silent --show-error --location --globoff"
+	else
+		echo "error, curl or wget not found"
+		exit 1
+	fi
+fi
+
+function download_file {
+	local url="$1"
+	local prefix="$2"
+	local cached_filename="$prefix-${url##*/}"
+
+	if [[ "$DOWNLOAD_CACHE" != "" ]]; then
+		if [[ ! -d "$DOWNLOAD_CACHE" ]]; then
+			mkdir "$DOWNLOAD_CACHE" >> "$DIR/install.log" 2>&1
+		fi
+		if [[ -f "$DOWNLOAD_CACHE/$cached_filename" ]]; then
+			echo "Cache hit for URL: $url" >> "$DIR/install.log"
+		else
+			echo "Downloading file to cache: $url" >> "$DIR/install.log"
+			_download_file "$1" > "$DOWNLOAD_CACHE/$cached_filename" 2>> "$DIR/install.log"
+		fi
+		cat "$DOWNLOAD_CACHE/$cached_filename" 2>> "$DIR/install.log"
+	else
+		echo "Downloading non-cached file: $url" >> "$DIR/install.log"
+		_download_file "$1" 2>> "$DIR/install.log"
+	fi
+}
 
 GMP_ABI=""
 TOOLCHAIN_PREFIX=""
@@ -556,7 +570,7 @@ function build_openssl {
 	if cant_use_cache "$openssl_dir"; then
 		rm -rf "$openssl_dir"
 		write_download
-		download_file "http://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" "openssl" | tar -zx >> "$DIR/install.log" 2>&1
+		download_file "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" "openssl" | tar -zx >> "$DIR/install.log" 2>&1
 
 		echo -n " checking..."
 		cd "$openssl_dir"
@@ -756,7 +770,7 @@ function build_libjpeg {
 	if cant_use_cache "$libjpeg_dir"; then
 		rm -rf "$libjpeg_dir"
 		write_download
-		download_file "http://ijg.org/files/jpegsrc.v$LIBJPEG_VERSION.tar.gz" "libjpeg" | tar -zx >> "$DIR/install.log" 2>&1
+		download_file "https://ijg.org/files/jpegsrc.v$LIBJPEG_VERSION.tar.gz" "libjpeg" | tar -zx >> "$DIR/install.log" 2>&1
 		mv jpeg-$LIBJPEG_VERSION "$libjpeg_dir"
 		echo -n " checking..."
 		cd "$libjpeg_dir"
@@ -976,7 +990,7 @@ function get_github_extension {
 # 1: extension name
 # 2: extension version
 function get_pecl_extension {
-	get_extension_tar_gz "$1" "$2" "http://pecl.php.net/get/$1-$2.tgz" "$1-$2"
+	get_extension_tar_gz "$1" "$2" "https://pecl.php.net/get/$1-$2.tgz" "$1-$2"
 }
 
 cd "$BUILD_DIR/php"
