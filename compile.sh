@@ -16,7 +16,7 @@ SQLITE3_VERSION="3420000" #3.42.0
 LIBDEFLATE_VERSION="495fee110ebb48a5eb63b75fd67e42b2955871e2" #1.18
 
 EXT_PTHREADS_VERSION="4.2.1"
-EXT_PMMPTHREAD_VERSION="6.0.2"
+EXT_PMMPTHREAD_VERSION="6.0.4"
 EXT_YAML_VERSION="2.2.3"
 EXT_LEVELDB_VERSION="317fdcd8415e1566fc2835ce2bdb8e19b890f9f3"
 EXT_CHUNKUTILS2_VERSION="0.3.5"
@@ -111,45 +111,6 @@ if [ $ERRORS -ne 0 ]; then
 	exit 1
 fi
 
-#Needed to use aliases
-shopt -s expand_aliases
-type wget >> "$DIR/install.log" 2>&1
-if [ $? -eq 0 ]; then
-	alias _download_file="wget --no-check-certificate -nv -O -"
-else
-	type curl >> "$DIR/install.log" 2>&1
-	if [ $? -eq 0 ]; then
-		alias _download_file="curl --insecure --silent --show-error --location --globoff"
-	else
-		echo "error, curl or wget not found"
-		exit 1
-	fi
-fi
-
-DOWNLOAD_CACHE=""
-
-function download_file {
-	local url="$1"
-	local prefix="$2"
-	local cached_filename="$prefix-${url##*/}"
-
-	if [[ "$DOWNLOAD_CACHE" != "" ]]; then
-		if [[ ! -d "$DOWNLOAD_CACHE" ]]; then
-			mkdir "$DOWNLOAD_CACHE" >> "$DIR/install.log" 2>&1
-		fi
-		if [[ -f "$DOWNLOAD_CACHE/$cached_filename" ]]; then
-			echo "Cache hit for URL: $url" >> "$DIR/install.log"
-		else
-			echo "Downloading file to cache: $url" >> "$DIR/install.log"
-			_download_file "$1" > "$DOWNLOAD_CACHE/$cached_filename" 2>> "$DIR/install.log"
-		fi
-		cat "$DOWNLOAD_CACHE/$cached_filename" 2>> "$DIR/install.log"
-	else
-		echo "Downloading non-cached file: $url" >> "$DIR/install.log"
-		_download_file "$1" 2>> "$DIR/install.log"
-	fi
-}
-
 #if type llvm-gcc >/dev/null 2>&1; then
 #	export CC="llvm-gcc"
 #	export CXX="llvm-g++"
@@ -169,7 +130,6 @@ COMPILE_TARGET=""
 IS_CROSSCOMPILE="no"
 IS_WINDOWS="no"
 DO_OPTIMIZE="no"
-OPTIMIZE_TARGET=""
 DO_STATIC="no"
 DO_CLEANUP="yes"
 COMPILE_DEBUG="no"
@@ -180,13 +140,14 @@ FSANITIZE_OPTIONS=""
 FLAGS_LTO=""
 HAVE_OPCACHE_JIT="no"
 
-LD_PRELOAD=""
-
 COMPILE_GD="no"
 
 PM_VERSION_MAJOR=""
 
-while getopts "::t:j:srdxff:gnva:P:c:l:J" OPTION; do
+DOWNLOAD_INSECURE="no"
+DOWNLOAD_CACHE=""
+
+while getopts "::t:j:sdxfgnva:P:c:l:Ji" OPTION; do
 
 	case $OPTION in
 		l)
@@ -227,7 +188,6 @@ while getopts "::t:j:srdxff:gnva:P:c:l:J" OPTION; do
 		f)
 			echo "[opt] Enabling abusive optimizations..."
 			DO_OPTIMIZE="yes"
-			OPTIMIZE_TARGET="$OPTARG"
 			;;
 		g)
 			echo "[opt] Will enable GD2"
@@ -252,6 +212,11 @@ while getopts "::t:j:srdxff:gnva:P:c:l:J" OPTION; do
 			echo "[opt] Compiling JIT support in OPcache (unstable)"
 			HAVE_OPCACHE_JIT="yes"
 			;;
+		i)
+			echo "[opt] Disabling SSL certificate verification for downloads"
+			echo "[WARNING] This is a security risk, please only use this if you know what you are doing!"
+			DOWNLOAD_INSECURE="yes"
+			;;
 		\?)
 			echo "Invalid option: -$OPTARG" >&2
 			exit 1
@@ -266,6 +231,51 @@ fi
 
 write_out "opt" "Compiling with configuration for PocketMine-MP $PM_VERSION_MAJOR"
 
+#Needed to use aliases
+shopt -s expand_aliases
+type wget >> "$DIR/install.log" 2>&1
+if [ $? -eq 0 ]; then
+	wget_flags=""
+	if [ "$DOWNLOAD_INSECURE" == "yes" ]; then
+		wget_flags="--no-check-certificate"
+	fi
+	alias _download_file="wget $wget_flags -nv -O -"
+else
+	type curl >> "$DIR/install.log" 2>&1
+	if [ $? -eq 0 ]; then
+		curl_flags=""
+		if [ "$DOWNLOAD_INSECURE" == "yes" ]; then
+			curl_flags="--insecure"
+		fi
+		alias _download_file="curl $curl_flags --silent --show-error --location --globoff"
+	else
+		echo "error, curl or wget not found"
+		exit 1
+	fi
+fi
+
+function download_file {
+	local url="$1"
+	local prefix="$2"
+	local cached_filename="$prefix-${url##*/}"
+
+	if [[ "$DOWNLOAD_CACHE" != "" ]]; then
+		if [[ ! -d "$DOWNLOAD_CACHE" ]]; then
+			mkdir "$DOWNLOAD_CACHE" >> "$DIR/install.log" 2>&1
+		fi
+		if [[ -f "$DOWNLOAD_CACHE/$cached_filename" ]]; then
+			echo "Cache hit for URL: $url" >> "$DIR/install.log"
+		else
+			echo "Downloading file to cache: $url" >> "$DIR/install.log"
+			_download_file "$1" > "$DOWNLOAD_CACHE/$cached_filename" 2>> "$DIR/install.log"
+		fi
+		cat "$DOWNLOAD_CACHE/$cached_filename" 2>> "$DIR/install.log"
+	else
+		echo "Downloading non-cached file: $url" >> "$DIR/install.log"
+		_download_file "$1" 2>> "$DIR/install.log"
+	fi
+}
+
 GMP_ABI=""
 TOOLCHAIN_PREFIX=""
 OPENSSL_TARGET=""
@@ -273,30 +283,7 @@ CMAKE_GLOBAL_EXTRA_FLAGS=""
 
 if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 	export CROSS_COMPILER="$PATH"
-	if [[ "$COMPILE_TARGET" == "win" ]] || [[ "$COMPILE_TARGET" == "win64" ]]; then
-		TOOLCHAIN_PREFIX="x86_64-w64-mingw32"
-		[ -z "$march" ] && march=x86_64;
-		[ -z "$mtune" ] && mtune=nocona;
-		CFLAGS="$CFLAGS -mconsole"
-		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --target=$TOOLCHAIN_PREFIX --build=$TOOLCHAIN_PREFIX"
-		IS_WINDOWS="yes"
-		OPENSSL_TARGET="mingw64"
-		GMP_ABI="64"
-		echo "[INFO] Cross-compiling for Windows 64-bit"
-	elif [ "$COMPILE_TARGET" == "mac" ]; then
-		[ -z "$march" ] && march=prescott;
-		[ -z "$mtune" ] && mtune=generic;
-		CFLAGS="$CFLAGS -fomit-frame-pointer";
-		TOOLCHAIN_PREFIX="i686-apple-darwin10"
-		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX"
-		#zlib doesn't use the correct ranlib
-		RANLIB=$TOOLCHAIN_PREFIX-ranlib
-		CFLAGS="$CFLAGS -Qunused-arguments -Wno-error=unused-command-line-argument-hard-error-in-future"
-		ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
-		OPENSSL_TARGET="darwin64-x86_64-cc"
-		GMP_ABI="32"
-		echo "[INFO] Cross-compiling for Intel MacOS"
-	elif [ "$COMPILE_TARGET" == "android-aarch64" ]; then
+	if [ "$COMPILE_TARGET" == "android-aarch64" ]; then
 		COMPILE_FOR_ANDROID=yes
 		[ -z "$march" ] && march="armv8-a";
 		[ -z "$mtune" ] && mtune=generic;
@@ -311,7 +298,7 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		echo "[INFO] Cross-compiling for Android ARMv8 (aarch64)"
 	#TODO: add cross-compile for aarch64 platforms (ios, rpi)
 	else
-		echo "Please supply a proper platform [mac win win64 android-aarch64] to cross-compile"
+		echo "Please supply a proper platform [android-aarch64] to cross-compile"
 		exit 1
 	fi
 else
@@ -340,7 +327,6 @@ else
 			export DYLD_LIBRARY_PATH="@loader_path/../lib"
 		fi
 		CFLAGS="$CFLAGS -Qunused-arguments -Wno-error=unused-command-line-argument-hard-error-in-future"
-		ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
 		GMP_ABI="64"
 		OPENSSL_TARGET="darwin64-x86_64-cc"
 		CMAKE_GLOBAL_EXTRA_FLAGS="-DCMAKE_OSX_ARCHITECTURES=x86_64"
@@ -389,22 +375,6 @@ if [ "$DO_STATIC" == "yes" ]; then
 	fi
 fi
 
-if [ "$DO_OPTIMIZE" != "no" ]; then
-	#FLAGS_LTO="-fvisibility=hidden -flto"
-	CFLAGS="$CFLAGS -O2 -ftree-vectorize -fomit-frame-pointer -funswitch-loops -fivopts"
-	if [ "$COMPILE_TARGET" != "mac-x86-64" ] && [ "$COMPILE_TARGET" != "mac-arm64" ]; then
-		CFLAGS="$CFLAGS -funsafe-loop-optimizations -fpredictive-commoning -ftracer -ftree-loop-im -frename-registers -fcx-limited-range"
-	fi
-
-	if [ "$OPTIMIZE_TARGET" == "arm" ]; then
-		CFLAGS="$CFLAGS -mfpu=vfp"
-	elif [ "$OPTIMIZE_TARGET" == "x86_64" ]; then
-		CFLAGS="$CFLAGS -mmmx -msse -msse2 -msse3 -mfpmath=sse -free -msahf -ftree-parallelize-loops=4"
-	elif [ "$OPTIMIZE_TARGET" == "x86" ]; then
-		CFLAGS="$CFLAGS -mmmx -msse -msse2 -mfpmath=sse -m128bit-long-double -malign-double -ftree-parallelize-loops=4"
-	fi
-fi
-
 if [ "$TOOLCHAIN_PREFIX" != "" ]; then
 		export CC="$TOOLCHAIN_PREFIX-gcc"
 		export CXX="$TOOLCHAIN_PREFIX-g++"
@@ -446,6 +416,22 @@ else
 	$CC -march=$march $CFLAGS -o test test.c >> "$DIR/install.log" 2>&1
 	if [ $? -eq 0 ]; then
 		CFLAGS="-march=$march -fno-gcse $CFLAGS"
+	fi
+fi
+
+if [ "$DO_OPTIMIZE" != "no" ]; then
+	#FLAGS_LTO="-fvisibility=hidden -flto"
+	CFLAGS="$CFLAGS -O2"
+	GENERIC_CFLAGS="$CFLAGS -ftree-vectorize -fomit-frame-pointer -funswitch-loops -fivopts"
+	$CC $CFLAGS $GENERIC_CFLAGS -o test test.c >> "$DIR/install.log" 2>&1
+	if [ $? -eq 0 ]; then
+		CFLAGS="$CFLAGS $GENERIC_CFLAGS"
+	fi
+	#clang does not understand the following and will fail
+	GCC_CFLAGS="$CFLAGS -funsafe-loop-optimizations -fpredictive-commoning -ftracer -ftree-loop-im -frename-registers -fcx-limited-range -ftree-parallelize-loops=4"
+	$CC $CFLAGS $GCC_CFLAGS -o test test.c >> "$DIR/install.log" 2>&1
+	if [ $? -eq 0 ]; then
+		CFLAGS="$CFLAGS $GCC_CFLAGS"
 	fi
 fi
 
@@ -578,15 +564,13 @@ function build_openssl {
 		local EXTRA_FLAGS="shared"
 	fi
 
-	WITH_OPENSSL="--with-openssl=$INSTALL_DIR"
-
 	write_library openssl "$OPENSSL_VERSION"
 	local openssl_dir="./openssl-$OPENSSL_VERSION"
 
 	if cant_use_cache "$openssl_dir"; then
 		rm -rf "$openssl_dir"
 		write_download
-		download_file "http://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" "openssl" | tar -zx >> "$DIR/install.log" 2>&1
+		download_file "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" "openssl" | tar -zx >> "$DIR/install.log" 2>&1
 
 		echo -n " checking..."
 		cd "$openssl_dir"
@@ -786,7 +770,7 @@ function build_libjpeg {
 	if cant_use_cache "$libjpeg_dir"; then
 		rm -rf "$libjpeg_dir"
 		write_download
-		download_file "http://ijg.org/files/jpegsrc.v$LIBJPEG_VERSION.tar.gz" "libjpeg" | tar -zx >> "$DIR/install.log" 2>&1
+		download_file "https://ijg.org/files/jpegsrc.v$LIBJPEG_VERSION.tar.gz" "libjpeg" | tar -zx >> "$DIR/install.log" 2>&1
 		mv jpeg-$LIBJPEG_VERSION "$libjpeg_dir"
 		echo -n " checking..."
 		cd "$libjpeg_dir"
@@ -1006,7 +990,7 @@ function get_github_extension {
 # 1: extension name
 # 2: extension version
 function get_pecl_extension {
-	get_extension_tar_gz "$1" "$2" "http://pecl.php.net/get/$1-$2.tgz" "$1-$2"
+	get_extension_tar_gz "$1" "$2" "https://pecl.php.net/get/$1-$2.tgz" "$1-$2"
 }
 
 cd "$BUILD_DIR/php"

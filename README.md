@@ -5,7 +5,16 @@
 
 ## compile.sh
 
-Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have ``make autoconf automake libtool m4 wget getconf gzip bzip2 bison g++ git cmake pkg-config re2c``.
+Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have ``make autoconf automake libtool m4 wget getconf gzip bzip2 bison g++ git cmake pkg-config re2c ca-certificates``.
+
+### Recommendations
+- `-f` makes the compiled binary much faster, don't forget to use it if you're targeting production.
+- If you're going to use the compiled binary only on the machine you're build it on, remove the `-t` option for best performance - this will allow the script to optimize for the current machine rather than a generic one.
+- [`ext-gd2`](https://www.php.net/manual/en/book.image.php) is NOT included unless the `-g` flag is provided, as PocketMine-MP doesn't need it. However, if your plugins need it, don't forget to enable it using `-g`.
+- The `-c` and `-l` options can be used to specify cache folders to speed up recompiling if you're recompiling many times (e.g. to improve the script).
+
+### Common pitfalls
+- Avoid using the script in directory trees containing spaces. Some libraries don't like trying to be built in directory trees containing spaces, e.g. `/home/user/my folder/pocketmine-mp/` might experience problems.
 
 ### Additional notes
 #### Mac OSX (native compile)
@@ -21,7 +30,7 @@ Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have
 |--------------|----------------------------------------------------------------------------------------------------|
 | -c           | Uses the folder specified for caching downloaded tarballs, zipballs etc.                           |
 | -d           | Will compile with debug and the xdebug PHP extension                                               |
-| -f           | Enabling abusive optimizations...                                                                  |
+| -f           | Enable optimizations (increases compile time, but improves performance)                            |
 | -g           | Will compile GD2                                                                                   |
 | -j           | Set make threads to #                                                                              |
 | -l           | Uses the folder specified for caching compilation artifacts (useful for rapid rebuild and testing) |
@@ -30,20 +39,16 @@ Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have
 | -t           | Set target                                                                                         |
 | -v           | Enable Valgrind support in PHP                                                                     |
 | -x           | Specifies we are doing cross-compile                                                               |
-| -P           | Compiles extensions for the major PocketMine-MP version specified (default `4`, can be `4` or `5`) |
+| -P           | Compiles extensions for the major PocketMine-MP version specified (can be `4` or `5`)              |
 
 ### Example:
 
-| Target          | Arguments                         |
-|-----------------|-----------------------------------|
-| linux64         | ``-t linux64 -j4 -f x86_64``      |
-| linux64, PM5    | ``-t linux64 -j4 -f x86_64 -P 5`` |
-| mac64           | ``-t mac-x86-64 -j4 -f``               |
-| android-aarch64 | ``-t android-aarch64 -x -j4 -f``  |
-
-### Common pitfalls
-- If used, the `-t` option (target) MUST be specified BEFORE the `-f` option (optimizations)
-- Avoid using the script in directory trees containing spaces. Some libraries don't like trying to be built in directory trees containing spaces, e.g. `/home/user/my folder/pocketmine-mp/` might experience problems.
+| Target          | Arguments                            |
+|-----------------|--------------------------------------|
+| linux64         | ``-t linux64 -j4 -P5 -f``            |
+| linux64, PM4    | ``-t linux64 -j4 -P4 -f``            |
+| mac64           | ``-t mac-x86-64 -j4 -P5 -f``         |
+| android-aarch64 | ``-t android-aarch64 -x -j4 -P5 -f`` |
 
 ## windows-compile-vs.bat
 

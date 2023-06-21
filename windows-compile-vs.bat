@@ -25,7 +25,7 @@ set LEVELDB_MCPE_VER=1c7564468b41610da4f498430e795ca4de0931ff
 set LIBDEFLATE_VER=495fee110ebb48a5eb63b75fd67e42b2955871e2
 
 set PHP_PTHREADS_VER=4.2.1
-set PHP_PMMPTHREAD_VER=6.0.2
+set PHP_PMMPTHREAD_VER=6.0.4
 set PHP_YAML_VER=2.2.3
 set PHP_CHUNKUTILS2_VER=0.3.5
 set PHP_IGBINARY_VER=3.2.14
@@ -48,6 +48,9 @@ where git >nul 2>nul || (call :pm-echo-error "git is required" & exit 1)
 where cmake >nul 2>nul || (call :pm-echo-error "cmake is required" & exit 1)
 where 7z >nul 2>nul || (call :pm-echo-error "7z is required" & exit 1)
 where wget >nul 2>nul || (call :pm-echo-error "wget is required" & exit 1)
+
+REM to ensure we use the correct version of wget - the SDK provides an outdated one that has outdated SSL certs
+set ORIG_PATH=%PATH%
 
 call :pm-echo "PHP Windows compiler"
 call :pm-echo "Setting up environment..."
@@ -115,7 +118,7 @@ cd /D "%SOURCES_PATH%"
 call bin\phpsdk_setvars.bat >>"%log_file%" 2>&1
 
 call :pm-echo "Downloading PHP source version %PHP_VER%..."
-call :get-zip https://github.com/php/php-src/archive/%PHP_GIT_REV%.zip >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to download PHP source"
+call :get-zip https://github.com/php/php-src/archive/%PHP_GIT_REV%.zip || call :pm-fatal-error "Failed to download PHP source"
 move php-src-%PHP_GIT_REV% php-src >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to move PHP source to target directory"
 
 set DEPS_DIR_NAME=deps
@@ -149,7 +152,7 @@ cd /D "%DEPS_DIR%"
 call :pm-echo "Downloading pthread-w32 version %PTHREAD_W32_VER%..."
 mkdir pthread-w32
 cd /D pthread-w32
-call :get-zip https://netcologne.dl.sourceforge.net/project/pthreads4w/pthreads4w-code-v%PTHREAD_W32_VER%.zip || exit 1
+call :get-zip https://sourceforge.net/projects/pthreads4w/files/pthreads4w-code-v%PTHREAD_W32_VER%.zip || exit 1
 move pthreads4w-code-* pthreads4w-code >>"%log_file%" 2>&1
 cd /D pthreads4w-code
 
@@ -397,7 +400,7 @@ cd /D ..\..
 
 REM this includes all the stuff necessary to run anything needing 2015, 2017 and 2019 in one package
 call :pm-echo "Downloading Microsoft Visual C++ Redistributable 2015-2019"
-wget https://aka.ms/vs/16/release/vc_redist.x64.exe --no-check-certificate -q -O vc_redist.x64.exe || exit 1
+wget https://aka.ms/vs/16/release/vc_redist.x64.exe -nv -O vc_redist.x64.exe >>"%log_file%" 2>&1 || exit 1
 
 call :pm-echo "Checking PHP build works..."
 bin\php\php.exe --version >>"%log_file%" 2>&1 || call :pm-fatal-error "PHP build isn't working"
@@ -437,9 +440,13 @@ exit /B 0
 
 
 :get-zip
-wget %~1 --no-check-certificate -q -O temp.zip || exit /B 1
+setlocal
+PATH=%ORIG_PATH%
+wget "%~1" -nv -O temp.zip >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to download %~1"
 7z x -y temp.zip >nul || exit /B 1
 del /s /q temp.zip >nul || exit /B 1
+endlocal
+@echo off
 exit /B 0
 
 :pm-fatal-error
