@@ -269,30 +269,7 @@ CMAKE_GLOBAL_EXTRA_FLAGS=""
 
 if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 	export CROSS_COMPILER="$PATH"
-	if [[ "$COMPILE_TARGET" == "win" ]] || [[ "$COMPILE_TARGET" == "win64" ]]; then
-		TOOLCHAIN_PREFIX="x86_64-w64-mingw32"
-		[ -z "$march" ] && march=x86_64;
-		[ -z "$mtune" ] && mtune=nocona;
-		CFLAGS="$CFLAGS -mconsole"
-		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX --target=$TOOLCHAIN_PREFIX --build=$TOOLCHAIN_PREFIX"
-		IS_WINDOWS="yes"
-		OPENSSL_TARGET="mingw64"
-		GMP_ABI="64"
-		echo "[INFO] Cross-compiling for Windows 64-bit"
-	elif [ "$COMPILE_TARGET" == "mac" ]; then
-		[ -z "$march" ] && march=prescott;
-		[ -z "$mtune" ] && mtune=generic;
-		CFLAGS="$CFLAGS -fomit-frame-pointer";
-		TOOLCHAIN_PREFIX="i686-apple-darwin10"
-		CONFIGURE_FLAGS="--host=$TOOLCHAIN_PREFIX"
-		#zlib doesn't use the correct ranlib
-		RANLIB=$TOOLCHAIN_PREFIX-ranlib
-		CFLAGS="$CFLAGS -Qunused-arguments -Wno-error=unused-command-line-argument-hard-error-in-future"
-		ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
-		OPENSSL_TARGET="darwin64-x86_64-cc"
-		GMP_ABI="32"
-		echo "[INFO] Cross-compiling for Intel MacOS"
-	elif [ "$COMPILE_TARGET" == "android-aarch64" ]; then
+	if [ "$COMPILE_TARGET" == "android-aarch64" ]; then
 		COMPILE_FOR_ANDROID=yes
 		[ -z "$march" ] && march="armv8-a";
 		[ -z "$mtune" ] && mtune=generic;
@@ -307,7 +284,7 @@ if [ "$IS_CROSSCOMPILE" == "yes" ]; then
 		echo "[INFO] Cross-compiling for Android ARMv8 (aarch64)"
 	#TODO: add cross-compile for aarch64 platforms (ios, rpi)
 	else
-		echo "Please supply a proper platform [mac win win64 android-aarch64] to cross-compile"
+		echo "Please supply a proper platform [android-aarch64] to cross-compile"
 		exit 1
 	fi
 else
