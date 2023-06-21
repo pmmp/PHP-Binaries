@@ -179,13 +179,11 @@ FSANITIZE_OPTIONS=""
 FLAGS_LTO=""
 HAVE_OPCACHE_JIT="no"
 
-LD_PRELOAD=""
-
 COMPILE_GD="no"
 
 PM_VERSION_MAJOR=""
 
-while getopts "::t:j:srdxfgnva:P:c:l:J" OPTION; do
+while getopts "::t:j:sdxfgnva:P:c:l:J" OPTION; do
 
 	case $OPTION in
 		l)
@@ -338,7 +336,6 @@ else
 			export DYLD_LIBRARY_PATH="@loader_path/../lib"
 		fi
 		CFLAGS="$CFLAGS -Qunused-arguments -Wno-error=unused-command-line-argument-hard-error-in-future"
-		ARCHFLAGS="-Wno-error=unused-command-line-argument-hard-error-in-future"
 		GMP_ABI="64"
 		OPENSSL_TARGET="darwin64-x86_64-cc"
 		CMAKE_GLOBAL_EXTRA_FLAGS="-DCMAKE_OSX_ARCHITECTURES=x86_64"
@@ -567,8 +564,6 @@ function build_openssl {
 	else
 		local EXTRA_FLAGS="shared"
 	fi
-
-	WITH_OPENSSL="--with-openssl=$INSTALL_DIR"
 
 	write_library openssl "$OPENSSL_VERSION"
 	local openssl_dir="./openssl-$OPENSSL_VERSION"
