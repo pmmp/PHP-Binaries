@@ -442,7 +442,7 @@ exit /B 0
 :get-zip
 setlocal
 PATH=%ORIG_PATH%
-wget "%~1" -vvv -O temp.zip >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to download %~1"
+wget "%~1" -nv -O temp.zip >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to download %~1"
 7z x -y temp.zip >nul || exit /B 1
 del /s /q temp.zip >nul || exit /B 1
 endlocal
