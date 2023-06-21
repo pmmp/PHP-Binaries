@@ -361,14 +361,6 @@ if [ "$DO_STATIC" == "yes" ]; then
 	fi
 fi
 
-if [ "$DO_OPTIMIZE" != "no" ]; then
-	#FLAGS_LTO="-fvisibility=hidden -flto"
-	CFLAGS="$CFLAGS -O2 -ftree-vectorize -fomit-frame-pointer -funswitch-loops -fivopts -ftree-parallelize-loops=4"
-	if [ "$COMPILE_TARGET" != "mac-x86-64" ] && [ "$COMPILE_TARGET" != "mac-arm64" ]; then
-		CFLAGS="$CFLAGS -funsafe-loop-optimizations -fpredictive-commoning -ftracer -ftree-loop-im -frename-registers -fcx-limited-range"
-	fi
-fi
-
 if [ "$TOOLCHAIN_PREFIX" != "" ]; then
 		export CC="$TOOLCHAIN_PREFIX-gcc"
 		export CXX="$TOOLCHAIN_PREFIX-g++"
@@ -410,6 +402,22 @@ else
 	$CC -march=$march $CFLAGS -o test test.c >> "$DIR/install.log" 2>&1
 	if [ $? -eq 0 ]; then
 		CFLAGS="-march=$march -fno-gcse $CFLAGS"
+	fi
+fi
+
+if [ "$DO_OPTIMIZE" != "no" ]; then
+	#FLAGS_LTO="-fvisibility=hidden -flto"
+	CFLAGS="$CFLAGS -O2"
+	GENERIC_CFLAGS="$CFLAGS -ftree-vectorize -fomit-frame-pointer -funswitch-loops -fivopts"
+	$CC $CFLAGS $GENERIC_CFLAGS -o test test.c >> "$DIR/install.log" 2>&1
+	if [ $? -eq 0 ]; then
+		CFLAGS="$CFLAGS $GENERIC_CFLAGS"
+	fi
+	#clang does not understand the following and will fail
+	GCC_CFLAGS="$CFLAGS -funsafe-loop-optimizations -fpredictive-commoning -ftracer -ftree-loop-im -frename-registers -fcx-limited-range -ftree-parallelize-loops=4"
+	$CC $CFLAGS $GCC_CFLAGS -o test test.c >> "$DIR/install.log" 2>&1
+	if [ $? -eq 0 ]; then
+		CFLAGS="$CFLAGS $GCC_CFLAGS"
 	fi
 fi
 
