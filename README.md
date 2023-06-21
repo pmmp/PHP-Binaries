@@ -39,7 +39,7 @@ Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have
 | -t           | Set target                                                                                         |
 | -v           | Enable Valgrind support in PHP                                                                     |
 | -x           | Specifies we are doing cross-compile                                                               |
-| -P           | Compiles extensions for the major PocketMine-MP version specified (default `4`, can be `4` or `5`) |
+| -P           | Compiles extensions for the major PocketMine-MP version specified (can be `4` or `5`)              |
 
 ### Example:
 
