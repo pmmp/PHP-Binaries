@@ -983,9 +983,16 @@ function get_extension_tar_gz {
 # 2: extension version
 # 3: github user name
 # 4: github repo name
-# 5: version prefix (optional)
 function get_github_extension {
-	get_extension_tar_gz "$1" "$2" "https://github.com/$3/$4/archive/$5$2.tar.gz" "$4-$2"
+	# if is github tag will remove `v` prefix under commit tag it will add it.
+	local tags_info=$(curl -s "https://api.github.com/repos/$3/$4/tags")
+	local tag_version=$(echo "$tags_info" | grep -E "\"name\":\s*\"v?$2\"" | head -n 1)
+	local tag_prefix=""
+	if [[ $tag_version == *v* ]]; then
+		tag_prefix="v"
+	fi
+
+	get_extension_tar_gz "$1" "$2" "https://github.com/$3/$4/archive/$tag_prefix$2.tar.gz" "$4-$2"
 }
 
 # 1: extension name
