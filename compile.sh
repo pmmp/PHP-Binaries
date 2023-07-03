@@ -139,6 +139,7 @@ HAVE_XDEBUG="yes"
 FSANITIZE_OPTIONS=""
 FLAGS_LTO=""
 HAVE_OPCACHE_JIT="no"
+USE_AVX=""
 
 COMPILE_GD="no"
 
@@ -147,7 +148,7 @@ PM_VERSION_MAJOR=""
 DOWNLOAD_INSECURE="no"
 DOWNLOAD_CACHE=""
 
-while getopts "::t:j:sdxfgnva:P:c:l:Ji" OPTION; do
+while getopts "::t:j:sdxfgnva:P::c:l:Ji:A" OPTION; do
 
 	case $OPTION in
 		l)
@@ -208,6 +209,14 @@ while getopts "::t:j:sdxfgnva:P:c:l:Ji" OPTION; do
 		P)
 			PM_VERSION_MAJOR="$OPTARG"
 			;;
+		A)
+		    if [ "$(uname -m)" != "x86_64" ]; then
+		        echo "[opt] Compilation with AVX instruction set only available on x86_64 host architecture"
+		        exit
+		    fi
+		    echo "[opt] Compiling with AVX instruction set"
+		    USE_AVX="-mavx -ftree-vectorize"
+		    ;;
 		J)
 			echo "[opt] Compiling JIT support in OPcache (unstable)"
 			HAVE_OPCACHE_JIT="yes"
@@ -454,7 +463,7 @@ rm test >> "$DIR/install.log" 2>&1
 
 export CC="$CC"
 export CXX="$CXX"
-export CFLAGS="-O2 -fPIC $CFLAGS"
+export CFLAGS="-O2 -fPIC $CFLAGS $USE_AVX"
 export CXXFLAGS="$CFLAGS $CXXFLAGS"
 export LDFLAGS="$LDFLAGS"
 export CPPFLAGS="$CPPFLAGS"
@@ -945,8 +954,15 @@ function build_libdeflate {
 
 cd "$LIB_BUILD_DIR"
 
+GMP_TIMEOUT="--with-gmp"
 build_zlib
-build_gmp
+if wget --timeout 4 --tries 1 -O /dev/null -q gmplib.org; then
+    build_gmp
+else
+    echo "[GMP] Can't connect to gmplib.org, gmp will not installed"
+    GMP_TIMEOUT="" #gmplib blocked in russia
+fi
+
 build_openssl
 build_curl
 build_yaml
@@ -1111,8 +1127,7 @@ RANLIB=$RANLIB CFLAGS="$CFLAGS $FLAGS_LTO" CXXFLAGS="$CXXFLAGS $FLAGS_LTO" LDFLA
 --exec-prefix="$INSTALL_DIR" \
 --with-curl \
 --with-zlib \
---with-zlib \
---with-gmp \
+$GMP_TIMEOUT \
 --with-yaml \
 --with-openssl \
 --with-zip \
