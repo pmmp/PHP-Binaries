@@ -62,7 +62,7 @@ function write_install {
 	write_status "installing"
 }
 function write_done {
-	echo -n " done!"
+	echo " done!"
 }
 function cant_use_cache {
 	if [ -f "$1/.compile.sh.cache" ]; then
