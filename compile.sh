@@ -132,7 +132,7 @@ HAVE_MYSQLI="--enable-mysqlnd --with-mysqli=mysqlnd"
 COMPILE_TARGET=""
 IS_CROSSCOMPILE="no"
 IS_WINDOWS="no"
-DO_OPTIMIZE="no"
+DO_OPTIMIZE="yes"
 DO_STATIC="no"
 DO_CLEANUP="yes"
 COMPILE_DEBUG="no"
@@ -176,6 +176,7 @@ while getopts "::t:j:sdxfgnva:P:c:l:Ji" OPTION; do
 			write_out "opt" "Will compile everything with debugging symbols, will not remove sources"
 			COMPILE_DEBUG="yes"
 			DO_CLEANUP="no"
+			DO_OPTIMIZE="no"
 			CFLAGS="$CFLAGS -g"
 			CXXFLAGS="$CXXFLAGS -g"
 			;;
@@ -189,8 +190,7 @@ while getopts "::t:j:sdxfgnva:P:c:l:Ji" OPTION; do
 			CFLAGS="$CFLAGS -static"
 			;;
 		f)
-			write_out "opt" "Enabling abusive optimizations..."
-			DO_OPTIMIZE="yes"
+			write_out "deprecated" "The -f flag is deprecated, as optimizations are now enabled by default unless -d (debug mode) is specified"
 			;;
 		g)
 			write_out "opt" "Will enable GD2"
@@ -1049,11 +1049,6 @@ get_github_extension "arraydebug" "$EXT_ARRAYDEBUG_VERSION" "pmmp" "ext-arraydeb
 
 write_library "PHP" "$PHP_VERSION"
 
-if [ "$DO_OPTIMIZE" != "no" ]; then
-	PHP_OPTIMIZATION="--enable-inline-optimization "
-else
-	PHP_OPTIMIZATION="--disable-inline-optimization "
-fi
 write_configure
 cd php
 rm -f ./aclocal.m4 >> "$DIR/install.log" 2>&1
