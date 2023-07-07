@@ -184,7 +184,6 @@ while getopts "::t:j:sdDxfgnva:P:c:l:Ji" OPTION; do
 			;;
 		D)
 			write_out "opt" "Compiling with separated debugging symbols, but leaving optimizations enabled"
-			write_out "INFO" "Recommended for building distributed binaries - for local debugging, use -d instead to disable optimizations for a better debugging experience"
 			SEPARATE_SYMBOLS="yes"
 			CFLAGS="$CFLAGS -g"
 			CXXFLAGS="$CXXFLAGS -g"
