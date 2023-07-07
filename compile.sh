@@ -1310,7 +1310,7 @@ function separate_symbols {
 	output_dirname="$SYMBOLS_DIR/$(dirname $libname)"
 	mkdir -p "$output_dirname" >> "$DIR/install.log" 2>&1
 	cp "$libname" "$SYMBOLS_DIR/$libname.debug" >> "$DIR/install.log" 2>&1
-	strip -S "$libname" >> "$DIR/install.log" 2>&1
+	strip -S "$libname" >> "$DIR/install.log" 2>&1 || rm "$SYMBOLS_DIR/$libname.debug" #if this fails, this probably isn't an executable binary
 }
 
 if [ "$SEPARATE_SYMBOLS" != "no" ]; then
