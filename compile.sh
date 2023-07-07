@@ -83,6 +83,7 @@ BASE_BUILD_DIR="$DIR/install_data"
 BUILD_DIR="$BASE_BUILD_DIR/subdir"
 LIB_BUILD_DIR="$BUILD_DIR/lib"
 INSTALL_DIR="$DIR/bin/php7"
+SYMBOLS_DIR="$DIR/bin-debug/php7"
 
 date > "$DIR/install.log" 2>&1
 
@@ -149,8 +150,9 @@ PM_VERSION_MAJOR=""
 
 DOWNLOAD_INSECURE="no"
 DOWNLOAD_CACHE=""
+SEPARATE_SYMBOLS="no"
 
-while getopts "::t:j:sdxfgnva:P:c:l:Ji" OPTION; do
+while getopts "::t:j:sdDxfgnva:P:c:l:Ji" OPTION; do
 
 	case $OPTION in
 		l)
@@ -177,6 +179,13 @@ while getopts "::t:j:sdxfgnva:P:c:l:Ji" OPTION; do
 			COMPILE_DEBUG="yes"
 			DO_CLEANUP="no"
 			DO_OPTIMIZE="no"
+			CFLAGS="$CFLAGS -g"
+			CXXFLAGS="$CXXFLAGS -g"
+			;;
+		D)
+			write_out "opt" "Compiling with separated debugging symbols, but leaving optimizations enabled"
+			write_out "INFO" "Recommended for building distributed binaries - for local debugging, use -d instead to disable optimizations for a better debugging experience"
+			SEPARATE_SYMBOLS="yes"
 			CFLAGS="$CFLAGS -g"
 			CXXFLAGS="$CXXFLAGS -g"
 			;;
@@ -1292,6 +1301,29 @@ if [[ "$HAVE_XDEBUG" == "yes" ]]; then
 	echo "xdebug.trace_output_name=trace.%s.%p.%r" >> "$INSTALL_DIR/bin/php.ini" 2>&1
 	write_done
 	write_out INFO "Xdebug is included, but disabled by default. To enable it, change 'xdebug.mode' in your php.ini file."
+fi
+
+function separate_symbols {
+	local libname="$1"
+	local output_dirname
+
+	output_dirname="$SYMBOLS_DIR/$(dirname $libname)"
+	mkdir -p "$output_dirname" >> "$DIR/install.log" 2>&1
+	cp "$libname" "$SYMBOLS_DIR/$libname.debug" >> "$DIR/install.log" 2>&1
+	strip -S "$libname" >> "$DIR/install.log" 2>&1
+}
+
+if [ "$SEPARATE_SYMBOLS" != "no" ]; then
+	echo -n "[INFO] Separating debugging symbols into $SYMBOLS_DIR..."
+	cd "$INSTALL_DIR"
+	find "lib" \( -name '*.so' -o -name '*.so.*' -o -name '*.dylib' -o -name '*.dylib.*' \) -print0 | while IFS= read -r -d '' file; do
+		separate_symbols "$file"
+	done
+	for file in "bin/"*; do
+		separate_symbols "$file"
+	done
+	cd "$DIR"
+	write_done
 fi
 
 cd "$DIR"

@@ -25,19 +25,20 @@ Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have
 - The `aarch64-linux-musl` toolchain is required. You can compile and install it using https://github.com/pmmp/musl-cross-make (PMMP fork includes musl-libc patches for DNS resolver config path and increasing stack size limit for LevelDB)
 - It is strongly recommended that you enable abusive optimizations for Android targets (`-f` flag) for best performance.
 
-| Script flags | Description                                                                                           |
-|--------------|-------------------------------------------------------------------------------------------------------|
-| -c           | Uses the folder specified for caching downloaded tarballs, zipballs etc.                              |
-| -d           | Compiles with debugging symbols and disables optimizations (slow, but useful for debugging segfaults) |
-| -g           | Will compile GD2                                                                                      |
-| -j           | Set make threads to #                                                                                 |
-| -l           | Uses the folder specified for caching compilation artifacts (useful for rapid rebuild and testing)    |
-| -n           | Don't remove sources after completing compilation                                                     |
-| -s           | Will compile everything statically                                                                    |
-| -t           | Set target                                                                                            |
-| -v           | Enable Valgrind support in PHP                                                                        |
-| -x           | Specifies we are doing cross-compile                                                                  |
-| -P           | Compiles extensions for the major PocketMine-MP version specified (can be `4` or `5`)                 |
+| Script flags | Description                                                                                                 |
+|--------------|-------------------------------------------------------------------------------------------------------------|
+| -c           | Uses the folder specified for caching downloaded tarballs, zipballs etc.                                    |
+| -d           | Compiles with debugging symbols and disables optimizations (slow, but useful for debugging segfaults)       |
+| -D           | Compiles with separated debugging symbols, but leaves optimizations enabled (used for distributed binaries) |
+| -g           | Will compile GD2                                                                                            |
+| -j           | Set make threads to #                                                                                       |
+| -l           | Uses the folder specified for caching compilation artifacts (useful for rapid rebuild and testing)          |
+| -n           | Don't remove sources after completing compilation                                                           |
+| -s           | Will compile everything statically                                                                          |
+| -t           | Set target                                                                                                  |
+| -v           | Enable Valgrind support in PHP                                                                              |
+| -x           | Specifies we are doing cross-compile                                                                        |
+| -P           | Compiles extensions for the major PocketMine-MP version specified (can be `4` or `5`)                       |
 
 ### Example:
 

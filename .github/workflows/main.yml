@@ -40,18 +40,20 @@ jobs:
           # Used "set -ex" instead of hashbang since script isn't executed with hashbang
           set -ex
           trap "exit 1" ERR
-          ./compile.sh -t linux64 -j 4 -g -P ${{ matrix.pm-version-major }} -c ./download_cache
+          ./compile.sh -t linux64 -j 4 -g -P ${{ matrix.pm-version-major }} -c ./download_cache -D
 
       - name: Create tarball
-        run: tar -czf ./PHP-Linux-x86_64-PM${{ matrix.pm-version-major }}.tar.gz bin
-        
+        run: |
+          tar -czf ./PHP-Linux-x86_64-PM${{ matrix.pm-version-major }}.tar.gz bin
+          tar -czf ./PHP-Linux-x86_64-PM${{ matrix.pm-version-major }}-debugging-symbols.tar.gz bin-debug
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         if: always()
         with:
           name: Linux-PM${{ matrix.pm-version-major }}
           path: |
-            ./PHP-Linux-x86_64-PM${{ matrix.pm-version-major }}.tar.gz
+            ./PHP-Linux-x86_64-PM${{ matrix.pm-version-major }}*.tar.gz
             install.log
             compile.sh
           if-no-files-found: error
@@ -95,10 +97,12 @@ jobs:
           export PATH="/usr/local/opt/bison/bin:$PATH"
           set -ex
           trap "exit 1" ERR
-          ./compile.sh -t mac-x86-64 -j4 -g -P ${{ matrix.pm-version-major }} -c ./download_cache
+          ./compile.sh -t mac-x86-64 -j4 -g -P ${{ matrix.pm-version-major }} -c ./download_cache -D
           
       - name: Create tarball
-        run: tar -czf ./PHP-MacOS-x86_64-PM${{ matrix.pm-version-major }}.tar.gz bin
+        run: |
+          tar -czf ./PHP-MacOS-x86_64-PM${{ matrix.pm-version-major }}.tar.gz bin
+          tar -czf ./PHP-MacOS-x86_64-PM${{ matrix.pm-version-major }}-debugging-symbols.tar.gz bin-debug
         
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -106,7 +110,7 @@ jobs:
         with:
           name: MacOS-PM${{ matrix.pm-version-major }}
           path: |
-            ./PHP-MacOS-x86_64-PM${{ matrix.pm-version-major }}.tar.gz
+            ./PHP-MacOS-x86_64-PM${{ matrix.pm-version-major }}*.tar.gz
             install.log
             compile.sh
           if-no-files-found: error
@@ -147,7 +151,7 @@ jobs:
       - name: Rename artifacts
         run: |
           mkdir temp
-          move php-debug-pack-*.zip temp/PHP-Windows-x64-debug-pack-PM${{ matrix.pm-version-major }}.zip
+          move php-debug-pack-*.zip temp/PHP-Windows-x64-PM${{ matrix.pm-version-major }}-debugging-symbols.zip
           move php-*.zip temp/PHP-Windows-x64-PM${{ matrix.pm-version-major }}.zip
           move temp\*.zip .
 
