@@ -152,7 +152,7 @@ cd /D "%DEPS_DIR%"
 call :pm-echo "Downloading pthread-w32 version %PTHREAD_W32_VER%..."
 mkdir pthread-w32
 cd /D pthread-w32
-call :get-zip https://sourceforge.net/projects/pthreads4w/files/pthreads4w-code-v%PTHREAD_W32_VER%.zip || exit 1
+call :get-zip https://github.com/pmmp/DependencyMirror/releases/download/mirror/pthreads4w-code-v%PTHREAD_W32_VER%.zip || exit 1
 move pthreads4w-code-* pthreads4w-code >>"%log_file%" 2>&1
 cd /D pthreads4w-code
 
