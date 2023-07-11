@@ -287,6 +287,17 @@ function download_file {
 	fi
 }
 
+function download_from_mirror {
+	download_file "https://github.com/pmmp/DependencyMirror/releases/download/mirror/$1" "$2"
+}
+
+#1: github repo
+#2: tag or commit
+#3: cache prefix
+function download_github_src {
+	download_file "https://github.com/$1/archive/$2.tar.gz" "$3"
+}
+
 GMP_ABI=""
 TOOLCHAIN_PREFIX=""
 OPENSSL_TARGET=""
@@ -489,7 +500,7 @@ set -e
 write_library "PHP" "$PHP_VERSION"
 write_download
 
-download_file "https://github.com/php/php-src/archive/php-$PHP_VERSION.tar.gz" "php" | tar -zx >> "$DIR/install.log" 2>&1
+download_github_src "php/php-src" "php-$PHP_VERSION" "php" | tar -zx >> "$DIR/install.log" 2>&1
 mv php-src-php-$PHP_VERSION php
 write_done
 
@@ -506,7 +517,7 @@ function build_zlib {
 	if cant_use_cache "$zlib_dir"; then
 		rm -rf "$zlib_dir"
 		write_download
-		download_file "https://github.com/madler/zlib/archive/v$ZLIB_VERSION.tar.gz" "zlib" | tar -zx >> "$DIR/install.log" 2>&1
+		download_github_src "madler/zlib" "v$ZLIB_VERSION" "zlib" | tar -zx >> "$DIR/install.log" 2>&1
 		write_configure
 		cd "$zlib_dir"
 		RANLIB=$RANLIB ./configure --prefix="$INSTALL_DIR" \
@@ -544,7 +555,7 @@ function build_gmp {
 	if cant_use_cache "$gmp_dir"; then
 		rm -rf "$gmp_dir"
 		write_download
-		download_file "https://github.com/pmmp/DependencyMirror/releases/download/mirror/gmp-$GMP_VERSION.tar.xz" "gmp" | tar -Jx >> "$DIR/install.log" 2>&1
+		download_from_mirror "gmp-$GMP_VERSION.tar.xz" "gmp" | tar -Jx >> "$DIR/install.log" 2>&1
 		write_configure
 		cd "$gmp_dir"
 		RANLIB=$RANLIB ./configure --prefix="$INSTALL_DIR" \
@@ -620,7 +631,7 @@ function build_curl {
 	if cant_use_cache "$curl_dir"; then
 		rm -rf "$curl_dir"
 		write_download
-		download_file "https://github.com/curl/curl/archive/$CURL_VERSION.tar.gz" "curl" | tar -zx >> "$DIR/install.log" 2>&1
+		download_github_src "curl/curl" "$CURL_VERSION" "curl" | tar -zx >> "$DIR/install.log" 2>&1
 		write_configure
 		cd "$curl_dir"
 		./buildconf --force >> "$DIR/install.log" 2>&1
@@ -677,7 +688,7 @@ function build_yaml {
 	if cant_use_cache "$yaml_dir"; then
 		rm -rf "$yaml_dir"
 		write_download
-		download_file "https://github.com/yaml/libyaml/archive/$YAML_VERSION.tar.gz" "yaml" | tar -zx >> "$DIR/install.log" 2>&1
+		download_github_src "yaml/libyaml" "$YAML_VERSION" "yaml" | tar -zx >> "$DIR/install.log" 2>&1
 		cd "$yaml_dir"
 		./bootstrap >> "$DIR/install.log" 2>&1
 
@@ -707,7 +718,7 @@ function build_leveldb {
 	if cant_use_cache "$leveldb_dir"; then
 		rm -rf "$leveldb_dir"
 		write_download
-		download_file "https://github.com/pmmp/leveldb/archive/$LEVELDB_VERSION.tar.gz" "leveldb" | tar -zx >> "$DIR/install.log" 2>&1
+		download_github_src "pmmp/leveldb" "$LEVELDB_VERSION" "leveldb" | tar -zx >> "$DIR/install.log" 2>&1
 		#download_file "https://github.com/Mojang/leveldb-mcpe/archive/$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 
 		write_configure
@@ -944,7 +955,7 @@ function build_libdeflate {
 	if cant_use_cache "$libdeflate_dir"; then
 		rm -rf "$libdeflate_dir"
 		write_download
-		download_file "https://github.com/ebiggers/libdeflate/archive/$LIBDEFLATE_VERSION.tar.gz" "libdeflate" | tar -zx >> "$DIR/install.log" 2>&1
+		download_github_src "ebiggers/libdeflate" "$LIBDEFLATE_VERSION" "libdeflate" | tar -zx >> "$DIR/install.log" 2>&1
 		cd "$libdeflate_dir"
 		write_configure
 		cmake . \
