@@ -593,7 +593,7 @@ function build_openssl {
 	if cant_use_cache "$openssl_dir"; then
 		rm -rf "$openssl_dir"
 		write_download
-		download_file "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" "openssl" | tar -zx >> "$DIR/install.log" 2>&1
+		download_from_mirror "openssl-$OPENSSL_VERSION.tar.gz" "openssl" | tar -zx >> "$DIR/install.log" 2>&1
 
 		write_configure
 		cd "$openssl_dir"
@@ -766,7 +766,7 @@ function build_libpng {
 	if cant_use_cache "$libpng_dir"; then
 		rm -rf "$libpng_dir"
 		write_download
-		download_file "https://sourceforge.net/projects/libpng/files/libpng16/$LIBPNG_VERSION/libpng-$LIBPNG_VERSION.tar.gz" "libpng" | tar -zx >> "$DIR/install.log" 2>&1
+		download_from_mirror "libpng-$LIBPNG_VERSION.tar.gz" "libpng" | tar -zx >> "$DIR/install.log" 2>&1
 
 		write_configure
 		cd "$libpng_dir"
@@ -800,7 +800,7 @@ function build_libjpeg {
 	if cant_use_cache "$libjpeg_dir"; then
 		rm -rf "$libjpeg_dir"
 		write_download
-		download_file "https://ijg.org/files/jpegsrc.v$LIBJPEG_VERSION.tar.gz" "libjpeg" | tar -zx >> "$DIR/install.log" 2>&1
+		download_from_mirror "jpegsrc.v$LIBJPEG_VERSION.tar.gz" "libjpeg" | tar -zx >> "$DIR/install.log" 2>&1
 		mv jpeg-$LIBJPEG_VERSION "$libjpeg_dir"
 
 		write_configure
@@ -830,7 +830,7 @@ function build_libxml2 {
 	if cant_use_cache "$libxml2_dir"; then
 		rm -rf "$libxml2_dir"
 		write_download
-		download_file "https://gitlab.gnome.org/GNOME/libxml2/-/archive/v$LIBXML_VERSION/libxml2-v$LIBXML_VERSION.tar.gz" "libxml2" | tar -xz >> "$DIR/install.log" 2>&1
+		download_from_mirror "libxml2-v$LIBXML_VERSION.tar.gz" "libxml2" | tar -xz >> "$DIR/install.log" 2>&1
 		mv libxml2-v$LIBXML_VERSION "$libxml2_dir"
 
 		write_configure
@@ -873,7 +873,7 @@ function build_libzip {
 	if cant_use_cache "$libzip_dir"; then
 		rm -rf "$libzip_dir"
 		write_download
-		download_file "https://libzip.org/download/libzip-$LIBZIP_VERSION.tar.gz" "libzip" | tar -zx >> "$DIR/install.log" 2>&1
+		download_from_mirror "libzip-$LIBZIP_VERSION.tar.gz" "libzip" | tar -zx >> "$DIR/install.log" 2>&1
 		write_configure
 		cd "$libzip_dir"
 
