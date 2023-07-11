@@ -11,7 +11,6 @@ LIBPNG_VERSION="1.6.39"
 LIBJPEG_VERSION="9e"
 OPENSSL_VERSION="3.1.1"
 LIBZIP_VERSION="1.9.2"
-SQLITE3_YEAR="2023"
 SQLITE3_VERSION="3420000" #3.42.0
 LIBDEFLATE_VERSION="495fee110ebb48a5eb63b75fd67e42b2955871e2" #1.18
 
@@ -920,7 +919,7 @@ function build_sqlite3 {
 	if cant_use_cache "$sqlite3_dir"; then
 		rm -rf "$sqlite3_dir"
 		write_download
-		download_file "https://www.sqlite.org/$SQLITE3_YEAR/sqlite-autoconf-$SQLITE3_VERSION.tar.gz" "sqlite3" | tar -zx >> "$DIR/install.log" 2>&1
+		download_from_mirror "sqlite-autoconf-$SQLITE3_VERSION.tar.gz" "sqlite3" | tar -zx >> "$DIR/install.log" 2>&1
 		mv sqlite-autoconf-$SQLITE3_VERSION "$sqlite3_dir" >> "$DIR/install.log" 2>&1
 		write_configure
 		cd "$sqlite3_dir"
