@@ -7,11 +7,10 @@ CURL_VERSION="curl-8_1_2"
 YAML_VERSION="0.2.5"
 LEVELDB_VERSION="1c7564468b41610da4f498430e795ca4de0931ff"
 LIBXML_VERSION="2.10.1" #2.10.2 requires automake 1.16.3, which isn't easily available on Ubuntu 20.04
-LIBPNG_VERSION="1.6.39"
+LIBPNG_VERSION="1.6.40"
 LIBJPEG_VERSION="9e"
 OPENSSL_VERSION="3.1.1"
-LIBZIP_VERSION="1.9.2"
-SQLITE3_YEAR="2023"
+LIBZIP_VERSION="1.10.0"
 SQLITE3_VERSION="3420000" #3.42.0
 LIBDEFLATE_VERSION="495fee110ebb48a5eb63b75fd67e42b2955871e2" #1.18
 
@@ -287,6 +286,17 @@ function download_file {
 	fi
 }
 
+function download_from_mirror {
+	download_file "https://github.com/pmmp/DependencyMirror/releases/download/mirror/$1" "$2"
+}
+
+#1: github repo
+#2: tag or commit
+#3: cache prefix
+function download_github_src {
+	download_file "https://github.com/$1/archive/$2.tar.gz" "$3"
+}
+
 GMP_ABI=""
 TOOLCHAIN_PREFIX=""
 OPENSSL_TARGET=""
@@ -489,7 +499,7 @@ set -e
 write_library "PHP" "$PHP_VERSION"
 write_download
 
-download_file "https://github.com/php/php-src/archive/php-$PHP_VERSION.tar.gz" "php" | tar -zx >> "$DIR/install.log" 2>&1
+download_github_src "php/php-src" "php-$PHP_VERSION" "php" | tar -zx >> "$DIR/install.log" 2>&1
 mv php-src-php-$PHP_VERSION php
 write_done
 
@@ -506,7 +516,7 @@ function build_zlib {
 	if cant_use_cache "$zlib_dir"; then
 		rm -rf "$zlib_dir"
 		write_download
-		download_file "https://github.com/madler/zlib/archive/v$ZLIB_VERSION.tar.gz" "zlib" | tar -zx >> "$DIR/install.log" 2>&1
+		download_github_src "madler/zlib" "v$ZLIB_VERSION" "zlib" | tar -zx >> "$DIR/install.log" 2>&1
 		write_configure
 		cd "$zlib_dir"
 		RANLIB=$RANLIB ./configure --prefix="$INSTALL_DIR" \
@@ -544,7 +554,7 @@ function build_gmp {
 	if cant_use_cache "$gmp_dir"; then
 		rm -rf "$gmp_dir"
 		write_download
-		download_file "https://github.com/pmmp/DependencyMirror/releases/download/mirror/gmp-$GMP_VERSION.tar.xz" "gmp" | tar -Jx >> "$DIR/install.log" 2>&1
+		download_from_mirror "gmp-$GMP_VERSION.tar.xz" "gmp" | tar -Jx >> "$DIR/install.log" 2>&1
 		write_configure
 		cd "$gmp_dir"
 		RANLIB=$RANLIB ./configure --prefix="$INSTALL_DIR" \
@@ -583,7 +593,7 @@ function build_openssl {
 	if cant_use_cache "$openssl_dir"; then
 		rm -rf "$openssl_dir"
 		write_download
-		download_file "https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz" "openssl" | tar -zx >> "$DIR/install.log" 2>&1
+		download_from_mirror "openssl-$OPENSSL_VERSION.tar.gz" "openssl" | tar -zx >> "$DIR/install.log" 2>&1
 
 		write_configure
 		cd "$openssl_dir"
@@ -620,7 +630,7 @@ function build_curl {
 	if cant_use_cache "$curl_dir"; then
 		rm -rf "$curl_dir"
 		write_download
-		download_file "https://github.com/curl/curl/archive/$CURL_VERSION.tar.gz" "curl" | tar -zx >> "$DIR/install.log" 2>&1
+		download_github_src "curl/curl" "$CURL_VERSION" "curl" | tar -zx >> "$DIR/install.log" 2>&1
 		write_configure
 		cd "$curl_dir"
 		./buildconf --force >> "$DIR/install.log" 2>&1
@@ -677,7 +687,7 @@ function build_yaml {
 	if cant_use_cache "$yaml_dir"; then
 		rm -rf "$yaml_dir"
 		write_download
-		download_file "https://github.com/yaml/libyaml/archive/$YAML_VERSION.tar.gz" "yaml" | tar -zx >> "$DIR/install.log" 2>&1
+		download_github_src "yaml/libyaml" "$YAML_VERSION" "yaml" | tar -zx >> "$DIR/install.log" 2>&1
 		cd "$yaml_dir"
 		./bootstrap >> "$DIR/install.log" 2>&1
 
@@ -707,7 +717,7 @@ function build_leveldb {
 	if cant_use_cache "$leveldb_dir"; then
 		rm -rf "$leveldb_dir"
 		write_download
-		download_file "https://github.com/pmmp/leveldb/archive/$LEVELDB_VERSION.tar.gz" "leveldb" | tar -zx >> "$DIR/install.log" 2>&1
+		download_github_src "pmmp/leveldb" "$LEVELDB_VERSION" "leveldb" | tar -zx >> "$DIR/install.log" 2>&1
 		#download_file "https://github.com/Mojang/leveldb-mcpe/archive/$LEVELDB_VERSION.tar.gz" | tar -zx >> "$DIR/install.log" 2>&1
 
 		write_configure
@@ -756,7 +766,7 @@ function build_libpng {
 	if cant_use_cache "$libpng_dir"; then
 		rm -rf "$libpng_dir"
 		write_download
-		download_file "https://sourceforge.net/projects/libpng/files/libpng16/$LIBPNG_VERSION/libpng-$LIBPNG_VERSION.tar.gz" "libpng" | tar -zx >> "$DIR/install.log" 2>&1
+		download_from_mirror "libpng-$LIBPNG_VERSION.tar.gz" "libpng" | tar -zx >> "$DIR/install.log" 2>&1
 
 		write_configure
 		cd "$libpng_dir"
@@ -790,7 +800,7 @@ function build_libjpeg {
 	if cant_use_cache "$libjpeg_dir"; then
 		rm -rf "$libjpeg_dir"
 		write_download
-		download_file "https://ijg.org/files/jpegsrc.v$LIBJPEG_VERSION.tar.gz" "libjpeg" | tar -zx >> "$DIR/install.log" 2>&1
+		download_from_mirror "jpegsrc.v$LIBJPEG_VERSION.tar.gz" "libjpeg" | tar -zx >> "$DIR/install.log" 2>&1
 		mv jpeg-$LIBJPEG_VERSION "$libjpeg_dir"
 
 		write_configure
@@ -820,7 +830,7 @@ function build_libxml2 {
 	if cant_use_cache "$libxml2_dir"; then
 		rm -rf "$libxml2_dir"
 		write_download
-		download_file "https://gitlab.gnome.org/GNOME/libxml2/-/archive/v$LIBXML_VERSION/libxml2-v$LIBXML_VERSION.tar.gz" "libxml2" | tar -xz >> "$DIR/install.log" 2>&1
+		download_from_mirror "libxml2-v$LIBXML_VERSION.tar.gz" "libxml2" | tar -xz >> "$DIR/install.log" 2>&1
 		mv libxml2-v$LIBXML_VERSION "$libxml2_dir"
 
 		write_configure
@@ -863,7 +873,7 @@ function build_libzip {
 	if cant_use_cache "$libzip_dir"; then
 		rm -rf "$libzip_dir"
 		write_download
-		download_file "https://libzip.org/download/libzip-$LIBZIP_VERSION.tar.gz" "libzip" | tar -zx >> "$DIR/install.log" 2>&1
+		download_from_mirror "libzip-$LIBZIP_VERSION.tar.gz" "libzip" | tar -zx >> "$DIR/install.log" 2>&1
 		write_configure
 		cd "$libzip_dir"
 
@@ -909,7 +919,7 @@ function build_sqlite3 {
 	if cant_use_cache "$sqlite3_dir"; then
 		rm -rf "$sqlite3_dir"
 		write_download
-		download_file "https://www.sqlite.org/$SQLITE3_YEAR/sqlite-autoconf-$SQLITE3_VERSION.tar.gz" "sqlite3" | tar -zx >> "$DIR/install.log" 2>&1
+		download_from_mirror "sqlite-autoconf-$SQLITE3_VERSION.tar.gz" "sqlite3" | tar -zx >> "$DIR/install.log" 2>&1
 		mv sqlite-autoconf-$SQLITE3_VERSION "$sqlite3_dir" >> "$DIR/install.log" 2>&1
 		write_configure
 		cd "$sqlite3_dir"
@@ -944,7 +954,7 @@ function build_libdeflate {
 	if cant_use_cache "$libdeflate_dir"; then
 		rm -rf "$libdeflate_dir"
 		write_download
-		download_file "https://github.com/ebiggers/libdeflate/archive/$LIBDEFLATE_VERSION.tar.gz" "libdeflate" | tar -zx >> "$DIR/install.log" 2>&1
+		download_github_src "ebiggers/libdeflate" "$LIBDEFLATE_VERSION" "libdeflate" | tar -zx >> "$DIR/install.log" 2>&1
 		cd "$libdeflate_dir"
 		write_configure
 		cmake . \
