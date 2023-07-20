@@ -23,7 +23,6 @@ Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have
 #### Android 64-bit (cross-compile)
 - Only aarch64 targets are supported for Android cross-compile.
 - The `aarch64-linux-musl` toolchain is required. You can compile and install it using https://github.com/pmmp/musl-cross-make (PMMP fork includes musl-libc patches for DNS resolver config path and increasing stack size limit for LevelDB)
-- It is strongly recommended that you enable abusive optimizations for Android targets (`-f` flag) for best performance.
 
 | Script flags | Description                                                                                                 |
 |--------------|-------------------------------------------------------------------------------------------------------------|
