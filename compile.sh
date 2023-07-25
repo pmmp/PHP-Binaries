@@ -1292,6 +1292,7 @@ if [[ "$HAVE_XDEBUG" == "yes" ]]; then
 	write_library "xdebug" "$EXT_XDEBUG_VERSION"
 	cd "$BUILD_DIR/php/ext/xdebug"
 	write_configure
+	sed -i".backup" 's{"80300"{"80400"{' ./config.m4
 	"$INSTALL_DIR/bin/phpize" >> "$DIR/install.log" 2>&1
 	./configure --with-php-config="$INSTALL_DIR/bin/php-config" >> "$DIR/install.log" 2>&1
 	write_compile
