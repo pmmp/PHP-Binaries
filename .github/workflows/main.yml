@@ -211,11 +211,12 @@ jobs:
             ${{ github.workspace }}/MacOS-PM*/*.tar.gz
             ${{ github.workspace }}/Windows-PM*/*.zip
           makeLatest: ${{ github.ref_name == github.event.repository.default_branch }}
-          name: PHP ${{ steps.version.outputs.PHP_VERSION }} (Latest)
+          name: PHP ${{ steps.version.outputs.PHP_VERSION }} - Latest (Build ${{ github.run_number }})
           tag: php-${{ steps.version.outputs.PHP_VERSION }}-latest
           commit: ${{ github.sha }}
           allowUpdates: true
           bodyFile: ${{ github.workspace }}/changelog.md
+          removeArtifacts: true
 
       - name: Publish unique release
         uses: ncipollo/release-action@v1.12.0
