@@ -197,8 +197,15 @@ jobs:
           echo "Built by: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> changelog.md
           if [[ "${{ github.ref_name }}" != "${{ github.event.repository.default_branch }}" ]]; then
             echo -e "\n\n\n" >> changelog.md
-            echo ":warning: **This isn't the currently recommended version for PocketMine-MP.**" >> changelog.md
-            echo "Consider using the [recommended release](${{ github.server_url }}/${{ github.repository }}/releases/latest) instead." >> changelog.md
+            if [[ "${{ github.ref_name }}" == *"preview" ]]; then
+              echo "# :warning: :radioactive: EXPERIMENTAL!!! :radioactive: :warning:" >> changelog.md
+              echo "### Your server and/or plugins may crash or misbehave with this release!" >> changelog.md
+              echo "### Consider downloading the [recommended release](${{ github.server_url }}/${{ github.repository }}/releases/latest) instead." >> changelog.md
+            else
+              echo ":warning: **This isn't the currently recommended version for PocketMine-MP.**" >> changelog.md
+              echo "While PocketMine-MP should work with this version, some plugins might crash or misbehave." >> changelog.md
+              echo "Consider using the [recommended release](${{ github.server_url }}/${{ github.repository }}/releases/latest) instead." >> changelog.md
+            fi
           fi
           echo -e "\n\n\n" >> changelog.md
           echo ":information_source: **Linux/MacOS users**: Please see [this page](https://doc.pmmp.io/en/rtfd/faq/installation/opcache.so.html) to fix extension loading errors. Also, check out the [PocketMine-MP Linux/MacOS installer](https://doc.pmmp.io/en/rtfd/installation/get-dot-pmmp-dot-io.html)." >> changelog.md
@@ -230,4 +237,5 @@ jobs:
           tag: php-${{ steps.version.outputs.PHP_VERSION }}-build-${{ github.run_number }}
           commit: ${{ github.sha }}
           bodyFile: ${{ github.workspace }}/changelog.md
+          prerelease: ${{ endsWith(github.ref_name, '-preview') }}
    
