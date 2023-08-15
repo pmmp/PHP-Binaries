@@ -224,6 +224,7 @@ jobs:
           allowUpdates: true
           bodyFile: ${{ github.workspace }}/changelog.md
           removeArtifacts: true
+          prerelease: ${{ endsWith(github.ref_name, '-preview') }}
 
       - name: Publish unique release
         uses: ncipollo/release-action@v1.12.0
