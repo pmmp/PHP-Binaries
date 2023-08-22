@@ -10,7 +10,7 @@ LIBXML_VERSION="2.10.1" #2.10.2 requires automake 1.16.3, which isn't easily ava
 LIBPNG_VERSION="1.6.40"
 LIBJPEG_VERSION="9e"
 OPENSSL_VERSION="3.1.2"
-LIBZIP_VERSION="1.10.0"
+LIBZIP_VERSION="1.9.2" #1.10.0 breaks on static builds (https://github.com/nih-at/libzip/issues/399)
 SQLITE3_VERSION="3420000" #3.42.0
 LIBDEFLATE_VERSION="495fee110ebb48a5eb63b75fd67e42b2955871e2" #1.18
 
