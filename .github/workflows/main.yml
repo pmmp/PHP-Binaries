@@ -202,9 +202,9 @@ jobs:
               echo "### Your server and/or plugins may crash or misbehave with this release!" >> changelog.md
               echo "### Consider downloading the [recommended release](${{ github.server_url }}/${{ github.repository }}/releases/latest) instead." >> changelog.md
             else
-              echo ":warning: **This isn't the currently recommended version for PocketMine-MP.**" >> changelog.md
-              echo "While PocketMine-MP should work with this version, some plugins might crash or misbehave." >> changelog.md
-              echo "Consider using the [recommended release](${{ github.server_url }}/${{ github.repository }}/releases/latest) instead." >> changelog.md
+              echo ":warning: WARNING! :warning:" >> changelog.md
+              echo "Some plugins might not work properly on this version yet." >> changelog.md
+              echo "If you have problems, try the [recommended release](${{ github.server_url }}/${{ github.repository }}/releases/latest) instead." >> changelog.md
             fi
           fi
           echo -e "\n\n\n" >> changelog.md
