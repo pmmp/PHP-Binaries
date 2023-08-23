@@ -206,6 +206,8 @@ jobs:
               echo "Some plugins might not work properly on this version yet." >> changelog.md
               echo "If you have problems, try the [recommended release](${{ github.server_url }}/${{ github.repository }}/releases/latest) instead." >> changelog.md
             fi
+          else
+            echo ":white_check_mark: This version is recommended for production servers." >> changelog.md
           fi
           echo -e "\n\n\n" >> changelog.md
           echo ":information_source: **Linux/MacOS users**: Please see [this page](https://doc.pmmp.io/en/rtfd/faq/installation/opcache.so.html) to fix extension loading errors. Also, check out the [PocketMine-MP Linux/MacOS installer](https://doc.pmmp.io/en/rtfd/installation/get-dot-pmmp-dot-io.html)." >> changelog.md
