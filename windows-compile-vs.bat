@@ -10,8 +10,7 @@ set PHP_SDK_VER=2.2.0
 set PATH=C:\Program Files\7-Zip;C:\Program Files (x86)\GnuWin32\bin;%PATH%
 set VC_VER=vs16
 set ARCH=x64
-set VS_VER=
-set VS_YEAR=
+set VS_PATH=
 set CMAKE_TARGET=
 if "%PHP_DEBUG_BUILD%"=="" (
 	set PHP_DEBUG_BUILD=0
@@ -42,7 +41,7 @@ set script_path=%~dp0
 set log_file=%script_path%compile.log
 echo.>"%log_file%"
 
-set outpath="%cd%"
+set "outpath=%cd%"
 
 where git >nul 2>nul || (call :pm-echo-error "git is required" & exit 1)
 where cmake >nul 2>nul || (call :pm-echo-error "cmake is required" & exit 1)
@@ -88,13 +87,14 @@ if "%SOURCES_PATH%"=="" (
 )
 call :pm-echo "Using path %SOURCES_PATH% for build sources"
 
-call :check-vs-exists 2019 16 || call :pm-fatal-error "Please install Visual Studio 2019"
+call :check-vs-exists 2019 16 "Program Files (x86)" || call :pm-fatal-error "Please install Visual Studio 2019"
 
 REM export an env var to override this if you're using something other than the community edition
 if "%VS_EDITION%"=="" (
 	set VS_EDITION=Community
 )
-call "C:\Program Files (x86)\Microsoft Visual Studio\%VS_YEAR%\%VS_EDITION%\VC\Auxiliary\Build\vcvarsall.bat" %ARCH% >>"%log_file%" 2>&1 || call :pm-fatal-error "Error initializing Visual Studio environment"
+
+call "%VS_PATH%\%VS_EDITION%\VC\Auxiliary\Build\vcvarsall.bat" %ARCH% >>"%log_file%" 2>&1 || call :pm-fatal-error "Error initializing Visual Studio environment"
 :batchfiles-are-stupid
 move "%log_file%" "%log_file%" >nul 2>nul || goto :batchfiles-are-stupid
 
@@ -122,7 +122,7 @@ call :get-zip https://github.com/php/php-src/archive/%PHP_GIT_REV%.zip || call :
 move php-src-%PHP_GIT_REV% php-src >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to move PHP source to target directory"
 
 set DEPS_DIR_NAME=deps
-set DEPS_DIR="%SOURCES_PATH%\%DEPS_DIR_NAME%"
+set "DEPS_DIR=%SOURCES_PATH%\%DEPS_DIR_NAME%"
 
 call :pm-echo "Downloading PHP dependencies into %DEPS_DIR%..."
 call bin\phpsdk_deps.bat -u -t %VC_VER% -b %PHP_MAJOR_VER% -a %ARCH% -f -d %DEPS_DIR_NAME% >>"%log_file%" 2>&1 || exit 1
@@ -419,16 +419,15 @@ call :pm-echo "Done?"
 exit 0
 
 :check-vs-exists
-if exist "C:\Program Files (x86)\Microsoft Visual Studio\%~1" (
-    set VS_VER=%~2
-    set VS_YEAR=%~1
+set "VS_PATH=C:\%~3\Microsoft Visual Studio\%~1"
+if exist "%VS_PATH%" (
     set CMAKE_TARGET=Visual Studio %~2 %~1
-    call :pm-echo "Found Visual Studio %~1"
+    call :pm-echo "Found Visual Studio %~1 in ^%VS_PATH%"
     exit /B 0
 ) else (
     call :pm-echo "DID NOT FIND VS %~1"
-    set VS_VER=
-    set VS_YEAR=
+    set CMAKE_TARGET=
+    set VS_PATH=
     exit /B 1
 )
 
