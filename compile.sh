@@ -582,7 +582,7 @@ function build_openssl {
 		local OPENSSL_CMD="./Configure $OPENSSL_TARGET"
 	fi
 	if [ "$DO_STATIC" == "yes" ]; then
-		local EXTRA_FLAGS="no-shared"
+		local EXTRA_FLAGS="no-shared -static"
 	else
 		local EXTRA_FLAGS="shared"
 	fi
