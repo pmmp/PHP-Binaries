@@ -41,7 +41,7 @@ set script_path=%~dp0
 set log_file=%script_path%compile.log
 echo.>"%log_file%"
 
-set outpath="%cd%"
+set "outpath=%cd%"
 
 where git >nul 2>nul || (call :pm-echo-error "git is required" & exit 1)
 where cmake >nul 2>nul || (call :pm-echo-error "cmake is required" & exit 1)
@@ -124,7 +124,7 @@ call :get-zip https://github.com/php/php-src/archive/%PHP_GIT_REV%.zip || call :
 move php-src-%PHP_GIT_REV% php-src >>"%log_file%" 2>&1 || call :pm-fatal-error "Failed to move PHP source to target directory"
 
 set DEPS_DIR_NAME=deps
-set DEPS_DIR="%SOURCES_PATH%\%DEPS_DIR_NAME%"
+set "DEPS_DIR=%SOURCES_PATH%\%DEPS_DIR_NAME%"
 
 call :pm-echo "Downloading PHP dependencies into %DEPS_DIR%..."
 call bin\phpsdk_deps.bat -u -t %VC_VER% -b %PHP_MAJOR_VER% -a %ARCH% -f -d %DEPS_DIR_NAME% >>"%log_file%" 2>&1 || exit 1
