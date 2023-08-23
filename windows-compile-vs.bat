@@ -422,7 +422,7 @@ exit 0
 set "VS_PATH=C:\%~3\Microsoft Visual Studio\%~1"
 if exist "%VS_PATH%" (
     set CMAKE_TARGET=Visual Studio %~2 %~1
-    call :pm-echo "Found Visual Studio %~1 in ^%VS_PATH%"
+    call :pm-echo "Found Visual Studio %~1 in %VS_PATH%"
     exit /B 0
 ) else (
     call :pm-echo "DID NOT FIND VS %~1"
