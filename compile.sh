@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
 [ -z "$PHP_VERSION" ] && PHP_VERSION="8.3.0beta2"
 
-ZLIB_VERSION="1.2.13"
+ZLIB_VERSION="1.3"
 GMP_VERSION="6.3.0"
-CURL_VERSION="curl-8_2_0"
+CURL_VERSION="curl-8_2_1"
 YAML_VERSION="0.2.5"
 LEVELDB_VERSION="1c7564468b41610da4f498430e795ca4de0931ff"
 LIBXML_VERSION="2.10.1" #2.10.2 requires automake 1.16.3, which isn't easily available on Ubuntu 20.04
 LIBPNG_VERSION="1.6.40"
 LIBJPEG_VERSION="9e"
 OPENSSL_VERSION="3.1.2"
-LIBZIP_VERSION="1.10.0"
+LIBZIP_VERSION="b9cb7e263936f7c112377626c1247a78aa3ace6b" #git head as of 2023-08-23 - 1.10.0 breaks on static builds (https://github.com/nih-at/libzip/issues/399)
 SQLITE3_VERSION="3420000" #3.42.0
 LIBDEFLATE_VERSION="495fee110ebb48a5eb63b75fd67e42b2955871e2" #1.18
 
 EXT_PTHREADS_VERSION="4.2.2"
-EXT_PMMPTHREAD_VERSION="6.0.8"
+EXT_PMMPTHREAD_VERSION="6.0.9"
 EXT_YAML_VERSION="2.2.3"
 EXT_LEVELDB_VERSION="317fdcd8415e1566fc2835ce2bdb8e19b890f9f3"
 EXT_CHUNKUTILS2_VERSION="0.3.5"
@@ -582,7 +582,7 @@ function build_openssl {
 		local OPENSSL_CMD="./Configure $OPENSSL_TARGET"
 	fi
 	if [ "$DO_STATIC" == "yes" ]; then
-		local EXTRA_FLAGS="no-shared"
+		local EXTRA_FLAGS="no-shared -static"
 	else
 		local EXTRA_FLAGS="shared"
 	fi
@@ -873,7 +873,7 @@ function build_libzip {
 	if cant_use_cache "$libzip_dir"; then
 		rm -rf "$libzip_dir"
 		write_download
-		download_from_mirror "libzip-$LIBZIP_VERSION.tar.gz" "libzip" | tar -zx >> "$DIR/install.log" 2>&1
+		download_github_src "nih-at/libzip" "$LIBZIP_VERSION" "libzip" | tar -zx >> "$DIR/install.log" 2>&1
 		write_configure
 		cd "$libzip_dir"
 
