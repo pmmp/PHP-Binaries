@@ -10,7 +10,7 @@ LIBXML_VERSION="2.10.1" #2.10.2 requires automake 1.16.3, which isn't easily ava
 LIBPNG_VERSION="1.6.40"
 LIBJPEG_VERSION="9e"
 OPENSSL_VERSION="3.1.2"
-LIBZIP_VERSION="1.9.2" #1.10.0 breaks on static builds (https://github.com/nih-at/libzip/issues/399)
+LIBZIP_VERSION="b9cb7e263936f7c112377626c1247a78aa3ace6b" #git head as of 2023-08-23 - 1.10.0 breaks on static builds (https://github.com/nih-at/libzip/issues/399)
 SQLITE3_VERSION="3420000" #3.42.0
 LIBDEFLATE_VERSION="495fee110ebb48a5eb63b75fd67e42b2955871e2" #1.18
 
@@ -873,7 +873,7 @@ function build_libzip {
 	if cant_use_cache "$libzip_dir"; then
 		rm -rf "$libzip_dir"
 		write_download
-		download_from_mirror "libzip-$LIBZIP_VERSION.tar.gz" "libzip" | tar -zx >> "$DIR/install.log" 2>&1
+		download_github_src "nih-at/libzip" "$LIBZIP_VERSION" "libzip" | tar -zx >> "$DIR/install.log" 2>&1
 		write_configure
 		cd "$libzip_dir"
 
