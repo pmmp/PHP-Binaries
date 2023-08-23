@@ -94,9 +94,7 @@ if "%VS_EDITION%"=="" (
 	set VS_EDITION=Community
 )
 
-echo on
 call "%VS_PATH%\%VS_EDITION%\VC\Auxiliary\Build\vcvarsall.bat" %ARCH% >>"%log_file%" 2>&1 || call :pm-fatal-error "Error initializing Visual Studio environment"
-echo off
 :batchfiles-are-stupid
 move "%log_file%" "%log_file%" >nul 2>nul || goto :batchfiles-are-stupid
 
@@ -421,7 +419,6 @@ call :pm-echo "Done?"
 exit 0
 
 :check-vs-exists
-echo on
 set "VS_PATH=C:\%~3\Microsoft Visual Studio\%~1"
 if exist "%VS_PATH%" (
     set CMAKE_TARGET=Visual Studio %~2 %~1
