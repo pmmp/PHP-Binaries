@@ -87,7 +87,7 @@ if "%SOURCES_PATH%"=="" (
 )
 call :pm-echo "Using path %SOURCES_PATH% for build sources"
 
-call :check-vs-exists 2019 16 "Program Files (x86)" || call :pm-fatal-error "Please install Visual Studio 2019"
+call :check-vs-exists 2022 17 "Program Files" || call :check-vs-exists 2019 16 "Program Files (x86)" || call :pm-fatal-error "Please install Visual Studio 2019"
 
 REM export an env var to override this if you're using something other than the community edition
 if "%VS_EDITION%"=="" (
