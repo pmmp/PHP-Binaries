@@ -3,7 +3,7 @@
 REM For future users: This file MUST have CRLF line endings. If it doesn't, lots of inexplicable undesirable strange behaviour will result.
 REM Also: Don't modify this version with sed, or it will screw up your line endings.
 set PHP_MAJOR_VER=8.1
-set PHP_VER=%PHP_MAJOR_VER%.24
+set PHP_VER=%PHP_MAJOR_VER%.25
 set PHP_GIT_REV=php-%PHP_VER%
 set PHP_DISPLAY_VER=%PHP_VER%
 set PHP_SDK_VER=2.2.0
@@ -35,7 +35,8 @@ set PHP_MORTON_VER=0.1.2
 set PHP_LIBDEFLATE_VER=0.2.1
 set PHP_XXHASH_VER=0.2.0
 set PHP_XDEBUG_VER=3.2.2
-set PHP_ARRAYDEBUG_VER=0.1.0
+set PHP_ARRAYDEBUG_VER=0.2.0
+set PHP_ENCODING_VER=0.2.3
 
 set script_path=%~dp0
 set log_file=%script_path%compile.log
@@ -269,6 +270,7 @@ call configure^
  --enable-chunkutils2=shared^
  --enable-com-dotnet^
  --enable-ctype^
+ --enable-encoding=shared^
  --enable-fileinfo=shared^
  --enable-filter^
  --enable-hash^
@@ -363,7 +365,6 @@ if "%PM_VERSION_MAJOR%" geq "5" (
 (echo opcache.file_update_protection=0)>>"%php_ini%"
 (echo opcache.optimization_level=0x7FFEBFFF)>>"%php_ini%"
 (echo opcache.cache_id=PHP_BINARY ;prevent sharing SHM between different binaries - they won't work because of ASLR)>>"%php_ini%"
-(echo ;Optional extensions, supplied for PM3 use)>>"%php_ini%"
 (echo ;Optional extensions, supplied for plugin use)>>"%php_ini%"
 (echo extension=php_fileinfo.dll)>>"%php_ini%"
 (echo extension=php_gd.dll)>>"%php_ini%"
@@ -391,6 +392,8 @@ if "%PHP_JIT_ENABLE_ARG%"=="on" (
 (echo xdebug.profiler_output_name=cachegrind.%%s.%%p.%%r)>>"%php_ini%"
 (echo xdebug.gc_stats_output_name=gcstats.%%s.%%p.%%r)>>"%php_ini%"
 (echo xdebug.trace_output_name=trace.%%s.%%p.%%r)>>"%php_ini%"
+(echo ;Optional experimental extensions)>>"%php_ini%"
+(echo extension=php_encoding.dll)>>"%php_ini%"
 
 call :pm-echo "Xdebug is included, but disabled by default. To enable it, change 'xdebug.mode' in your php.ini file."
 
