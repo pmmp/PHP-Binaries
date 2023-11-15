@@ -237,6 +237,7 @@ call :get-extension-zip-from-github "libdeflate"            "%PHP_LIBDEFLATE_VER
 call :get-extension-zip-from-github "xxhash"                "%PHP_XXHASH_VER%"                "pmmp"     "ext-xxhash"              || exit 1
 call :get-extension-zip-from-github "xdebug"                "%PHP_XDEBUG_VER%"                "xdebug"   "xdebug"                  || exit 1
 call :get-extension-zip-from-github "arraydebug"            "%PHP_ARRAYDEBUG_VER%"            "pmmp"     "ext-arraydebug"          || exit 1
+call :get-extension-zip-from-github "encoding"              "%PHP_ENCODING_VER%"              "pmmp"     "ext-encoding"            || exit 1
 
 call :pm-echo " - crypto: downloading %PHP_CRYPTO_VER%..."
 git clone https://github.com/bukka/php-crypto.git crypto >>"%log_file%" 2>&1 || exit 1
