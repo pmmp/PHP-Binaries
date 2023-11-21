@@ -20,7 +20,7 @@ jobs:
         pm-version-major: [ 5 ]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install tools and dependencies
         run: |
@@ -79,7 +79,7 @@ jobs:
         pm-version-major: [ 5 ]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Install tools and dependencies
         run: brew install libtool autoconf automake pkg-config bison re2c
@@ -136,7 +136,7 @@ jobs:
         pm-version-major: [ 5 ]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Install tools and dependencies
         run: choco install wget --no-progress
@@ -173,7 +173,7 @@ jobs:
     if: ${{ startsWith(github.ref_name, 'php/') && github.ref_type == 'branch' && !contains(github.event.head_commit.message, '[no release]') }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Set version information
         id: version
