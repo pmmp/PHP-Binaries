@@ -633,6 +633,9 @@ function build_curl {
 		download_github_src "curl/curl" "$CURL_VERSION" "curl" | tar -zx >> "$DIR/install.log" 2>&1
 		write_configure
 		cd "$curl_dir"
+		if [[ "$(uname -s)" == "Darwin" ]]; then
+			sed -i'.bak' 's/^CURL_CONVERT_INCLUDE_TO_ISYSTEM//' ./configure.ac
+		fi
 		./buildconf --force >> "$DIR/install.log" 2>&1
 		RANLIB=$RANLIB ./configure --disable-dependency-tracking \
 		--enable-ipv6 \

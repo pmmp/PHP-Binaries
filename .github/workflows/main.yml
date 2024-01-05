@@ -48,7 +48,7 @@ jobs:
           tar -czf ./PHP-Linux-x86_64-PM${{ matrix.pm-version-major }}-debugging-symbols.tar.gz bin-debug
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: Linux-PM${{ matrix.pm-version-major }}
@@ -63,7 +63,7 @@ jobs:
         run: tar -czf workspace.tar.gz install_data
 
       - name: Upload workspace
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: Linux-workspace-PM${{ matrix.pm-version-major }}
@@ -105,7 +105,7 @@ jobs:
           tar -czf ./PHP-MacOS-x86_64-PM${{ matrix.pm-version-major }}-debugging-symbols.tar.gz bin-debug
         
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: MacOS-PM${{ matrix.pm-version-major }}
@@ -120,7 +120,7 @@ jobs:
         run: tar -czf workspace.tar.gz install_data
 
       - name: Upload workspace
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: MacOS-workspace-PM${{ matrix.pm-version-major }}
@@ -156,7 +156,7 @@ jobs:
           move temp\*.zip .
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: Windows-PM${{ matrix.pm-version-major }}
@@ -186,7 +186,7 @@ jobs:
           git push -f origin php-${{ steps.version.outputs.PHP_VERSION }}-latest
 
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: ${{ github.workspace }}
 
