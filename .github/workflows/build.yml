@@ -1,0 +1,253 @@
+name: Build PHP binaries
+
+on:
+  workflow_call:
+    inputs:
+      pm-version-major:
+        description: 'PocketMine-MP major version'
+        required: true
+        type: number
+
+jobs:
+  linux:
+    name: Linux
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools and dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install make autoconf automake libtool libtool-bin m4 wget libc-bin gzip bzip2 bison g++ git re2c
+
+      - name: Prepare compile.sh download cache
+        id: download-cache
+        uses: actions/cache@v3
+        with:
+          path: ./download_cache
+          key: compile-sh-cache-ssl-https-${{ hashFiles('./compile.sh') }}
+          restore-keys: compile-sh-cache-ssl-https-
+
+      - name: Compile PHP
+        run: |
+          # Used "set -ex" instead of hashbang since script isn't executed with hashbang
+          set -ex
+          trap "exit 1" ERR
+          ./compile.sh -t linux64 -j 4 -g -P ${{ inputs.pm-version-major }} -c ./download_cache -D
+
+      - name: Create tarball
+        run: |
+          tar -czf ./PHP-Linux-x86_64.tar.gz bin
+          tar -czf ./PHP-Linux-x86_64-debugging-symbols.tar.gz bin-debug
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Linux
+          path: |
+            ./PHP-Linux-x86_64*.tar.gz
+            install.log
+            compile.sh
+          if-no-files-found: error
+
+      - name: Prepare workspace for upload
+        if: failure()
+        run: tar -czf workspace.tar.gz install_data
+
+      - name: Upload workspace
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: Linux-workspace
+          path: |
+            workspace.tar.gz
+          if-no-files-found: error
+
+  macos:
+    name: MacOS
+    runs-on: macos-11.0
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools and dependencies
+        run: brew install libtool autoconf automake pkg-config bison re2c
+
+      - name: Prepare compile.sh download cache
+        id: download-cache
+        uses: actions/cache@v3
+        with:
+          path: ./download_cache
+          key: compile-sh-cache-ssl-https-${{ hashFiles('./compile.sh') }}
+          restore-keys: compile-sh-cache-ssl-https-
+
+      - name: Compile PHP
+        run: |
+          export PATH="/usr/local/opt/bison/bin:$PATH"
+          set -ex
+          trap "exit 1" ERR
+          ./compile.sh -t mac-x86-64 -j4 -g -P ${{ inputs.pm-version-major }} -c ./download_cache -D
+
+      - name: Create tarball
+        run: |
+          tar -czf ./PHP-MacOS-x86_64.tar.gz bin
+          tar -czf ./PHP-MacOS-x86_64-debugging-symbols.tar.gz bin-debug
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: MacOS
+          path: |
+            ./PHP-MacOS-x86_64*.tar.gz
+            install.log
+            compile.sh
+          if-no-files-found: error
+
+      - name: Prepare workspace for upload
+        if: failure()
+        run: tar -czf workspace.tar.gz install_data
+
+      - name: Upload workspace
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: MacOS-workspace
+          path: |
+            workspace.tar.gz
+          if-no-files-found: error
+
+  windows:
+    name: Windows
+    runs-on: windows-2019
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools and dependencies
+        run: choco install wget --no-progress
+
+      - name: Compile PHP
+        run: .\windows-compile-vs.bat
+        env:
+          VS_EDITION: Enterprise
+          SOURCES_PATH: ${{ github.workspace }}\pocketmine-php-sdk
+          PM_VERSION_MAJOR: ${{ inputs.pm-version-major }}
+
+      - name: Rename artifacts
+        run: |
+          mkdir temp
+          move php-debug-pack-*.zip temp/PHP-Windows-x64-debugging-symbols.zip
+          move php-*.zip temp/PHP-Windows-x64.zip
+          move temp\*.zip .
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Windows
+          path: |
+            PHP-Windows-x64*.zip
+            compile.log
+            windows-compile-vs.bat
+          if-no-files-found: error
+
+  publish:
+    name: Publish binaries
+    needs: [linux, macos, windows]
+    runs-on: ubuntu-20.04
+    if: ${{ startsWith(github.ref_name, 'php/') && github.ref_type == 'branch' && !contains(github.event.head_commit.message, '[no release]') }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set version information
+        id: version
+        run: |
+          echo PHP_VERSION=$(echo ${{ github.ref_name }} | cut -d / -f2) >> $GITHUB_OUTPUT
+
+      - name: Update latest tag target
+        run: |
+          git tag -f php-${{ steps.version.outputs.PHP_VERSION }}-pm${{ inputs.pm-version-major }}-latest
+          git push -f origin php-${{ steps.version.outputs.PHP_VERSION }}-pm${{ inputs.pm-version-major }}-latest
+
+          git tag -f php-pm${{ inputs.pm-version-major }}-latest
+          git push -f origin php-${{ inputs.pm-version-major }}-latest
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ github.workspace }}
+
+      - name: Generate release notes
+        run: |
+          echo "Last updated on **$(date -u +'%Y-%m-%d at %H:%M:%S %Z')**" > changelog.md
+          echo -e "\n\n" >> changelog.md
+          echo "Built by: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> changelog.md
+          if [[ "${{ github.ref_name }}" != "${{ github.event.repository.default_branch }}" ]]; then
+            echo -e "\n\n\n" >> changelog.md
+            if [[ "${{ github.ref_name }}" == *"preview" ]]; then
+              echo "# :warning: :radioactive: EXPERIMENTAL!!! :radioactive: :warning:" >> changelog.md
+              echo "### Your server and/or plugins may crash or misbehave with this release!" >> changelog.md
+              echo "### Consider downloading the [recommended release for PM${{ inputs.pm-version-major }}](${{ github.server_url }}/${{ github.repository }}/releases/php-pm${{ inputs.pm-version-major }}-latest) instead." >> changelog.md
+            else
+              echo ":warning: WARNING! :warning:" >> changelog.md
+              echo "Some plugins might not work properly on this version yet." >> changelog.md
+              echo "If you have problems, try the [recommended release for PM${{ inputs.pm-version-major }}](${{ github.server_url }}/${{ github.repository }}/releases/php-pm${{ inputs.pm-version-major }}-latest) instead." >> changelog.md
+            fi
+          else
+            echo ":white_check_mark: Recommended for production servers running **PocketMine-MP ${{ inputs.pm-version-major }}.x**." >> changelog.md
+          fi
+          echo -e "\n\n\n" >> changelog.md
+          echo ":information_source: **Linux/MacOS users**: Please see [this page](https://doc.pmmp.io/en/rtfd/faq/installation/opcache.so.html) to fix extension loading errors. Also, check out the [PocketMine-MP Linux/MacOS installer](https://doc.pmmp.io/en/rtfd/installation/get-dot-pmmp-dot-io.html)." >> changelog.md
+
+      - name: Update latest PM major-version release
+        #TODO: we may not want to recommend the same PHP version for all PM major versions
+        #in the future we should probably introduce configuration for this
+        if: ${{ github.ref_name == github.event.repository.default_branch }}
+        uses: ncipollo/release-action@v1.13.0
+        with:
+          artifacts: |
+            ${{ github.workspace }}/Linux/*.tar.gz
+            ${{ github.workspace }}/MacOS/*.tar.gz
+            ${{ github.workspace }}/Windows/*.zip
+          makeLatest: ${{ github.ref_name == github.event.repository.default_branch }}
+          name: PHP for PocketMine-MP ${{ inputs.pm-version.major }}.x - Latest (Build ${{ github.run_number }})
+          tag: php-pm${{ inputs.pm-version-major }}-latest
+          commit: ${{ github.sha }}
+          allowUpdates: true
+          bodyFile: ${{ github.workspace }}/changelog.md
+          removeArtifacts: true
+
+      - name: Update latest branch release
+        uses: ncipollo/release-action@v1.13.0
+        with:
+          artifacts: |
+            ${{ github.workspace }}/Linux/*.tar.gz
+            ${{ github.workspace }}/MacOS/*.tar.gz
+            ${{ github.workspace }}/Windows/*.zip
+          makeLatest: ${{ github.ref_name == github.event.repository.default_branch }}
+          name: PHP ${{ steps.version.outputs.PHP_VERSION }} for PocketMine-MP ${{ inputs.pm-version.major }}.x - Latest (Build ${{ github.run_number }})
+          tag: php-${{ steps.version.outputs.PHP_VERSION }}-pm${{ inputs.pm-version-major }}-latest
+          commit: ${{ github.sha }}
+          allowUpdates: true
+          bodyFile: ${{ github.workspace }}/changelog.md
+          removeArtifacts: true
+          prerelease: ${{ endsWith(github.ref_name, '-preview') }}
+
+      - name: Publish unique release
+        uses: ncipollo/release-action@v1.13.0
+        with:
+          artifacts: |
+            ${{ github.workspace }}/Linux/*.tar.gz
+            ${{ github.workspace }}/MacOS/*.tar.gz
+            ${{ github.workspace }}/Windows/*.zip
+          makeLatest: false
+          name: PHP ${{ steps.version.outputs.PHP_VERSION }} for PocketMine-MP ${{ inputs.pm-version.major }}.x - (Build ${{ github.run_number }})
+          tag: php-${{ steps.version.outputs.PHP_VERSION }}-pm${{ inputs.pm-version-major }}-build-${{ github.run_number }}
+          commit: ${{ github.sha }}
+          bodyFile: ${{ github.workspace }}/changelog.md
+          prerelease: ${{ endsWith(github.ref_name, '-preview') }}
+
