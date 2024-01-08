@@ -7,6 +7,14 @@ on:
         description: 'PocketMine-MP major version'
         required: true
         type: number
+      latest:
+        description: 'Whether to make this the latest release'
+        required: true
+        type: boolean
+      recommend:
+        description: 'Recommended PHP version for this PM version'
+        required: true
+        type: string
 
 jobs:
   linux:
@@ -185,8 +193,9 @@ jobs:
         run: |
           echo "Last updated on **$(date -u +'%Y-%m-%d at %H:%M:%S %Z')**" > changelog.md
           echo -e "\n\n" >> changelog.md
+          echo "Build number: ${{ github.run_number }}" >> changelog.md
           echo "Built by: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> changelog.md
-          if [[ "${{ github.ref_name }}" != "${{ github.event.repository.default_branch }}" ]]; then
+          if [[ "${{ steps.version.outputs.PHP_VERSION }}" != "${{ inputs.recommend }}" ]]; then
             echo -e "\n\n\n" >> changelog.md
             if [[ "${{ github.ref_name }}" == *"preview" ]]; then
               echo "# :warning: :radioactive: EXPERIMENTAL!!! :radioactive: :warning:" >> changelog.md
@@ -198,28 +207,10 @@ jobs:
               echo "If you have problems, try the [recommended release for PM${{ inputs.pm-version-major }}](${{ github.server_url }}/${{ github.repository }}/releases/php-pm${{ inputs.pm-version-major }}-latest) instead." >> changelog.md
             fi
           else
-            echo ":white_check_mark: Recommended for production servers running **PocketMine-MP ${{ inputs.pm-version-major }}.x**." >> changelog.md
+            echo ":white_check_mark: Recommended for **PocketMine-MP ${{ inputs.pm-version-major }}.x**." >> changelog.md
           fi
           echo -e "\n\n\n" >> changelog.md
           echo ":information_source: **Linux/MacOS users**: Please see [this page](https://doc.pmmp.io/en/rtfd/faq/installation/opcache.so.html) to fix extension loading errors. Also, check out the [PocketMine-MP Linux/MacOS installer](https://doc.pmmp.io/en/rtfd/installation/get-dot-pmmp-dot-io.html)." >> changelog.md
-
-      - name: Update latest PM major-version release
-        #TODO: we may not want to recommend the same PHP version for all PM major versions
-        #in the future we should probably introduce configuration for this
-        if: ${{ github.ref_name == github.event.repository.default_branch }}
-        uses: ncipollo/release-action@v1.13.0
-        with:
-          artifacts: |
-            ${{ github.workspace }}/Linux-PM${{ inputs.pm-version-major }}/*.tar.gz
-            ${{ github.workspace }}/MacOS-PM${{ inputs.pm-version-major }}/*.tar.gz
-            ${{ github.workspace }}/Windows-PM${{ inputs.pm-version-major }}/*.zip
-          makeLatest: ${{ github.ref_name == github.event.repository.default_branch }}
-          name: PHP for PocketMine-MP ${{ inputs.pm-version.major }}.x - Latest (Build ${{ github.run_number }})
-          tag: php-pm${{ inputs.pm-version-major }}-latest
-          commit: ${{ github.sha }}
-          allowUpdates: true
-          bodyFile: ${{ github.workspace }}/changelog.md
-          removeArtifacts: true
 
       - name: Update latest branch release
         uses: ncipollo/release-action@v1.13.0
@@ -228,8 +219,8 @@ jobs:
             ${{ github.workspace }}/Linux-PM${{ inputs.pm-version-major }}/*.tar.gz
             ${{ github.workspace }}/MacOS-PM${{ inputs.pm-version-major }}/*.tar.gz
             ${{ github.workspace }}/Windows-PM${{ inputs.pm-version-major }}/*.zip
-          makeLatest: ${{ github.ref_name == github.event.repository.default_branch }}
-          name: PHP ${{ steps.version.outputs.PHP_VERSION }} for PocketMine-MP ${{ inputs.pm-version.major }}.x - Latest (Build ${{ github.run_number }})
+          makeLatest: ${{ inputs.latest }}
+          name: PHP ${{ steps.version.outputs.PHP_VERSION }} for PocketMine-MP ${{ inputs.pm-version-major }}.x - Latest
           tag: php-${{ steps.version.outputs.PHP_VERSION }}-pm${{ inputs.pm-version-major }}-latest
           commit: ${{ github.sha }}
           allowUpdates: true
@@ -245,7 +236,7 @@ jobs:
             ${{ github.workspace }}/MacOS-PM${{ inputs.pm-version-major }}/*.tar.gz
             ${{ github.workspace }}/Windows-PM${{ inputs.pm-version-major }}/*.zip
           makeLatest: false
-          name: PHP ${{ steps.version.outputs.PHP_VERSION }} for PocketMine-MP ${{ inputs.pm-version.major }}.x - (Build ${{ github.run_number }})
+          name: PHP ${{ steps.version.outputs.PHP_VERSION }} for PocketMine-MP ${{ inputs.pm-version-major }}.x - (Build ${{ github.run_number }})
           tag: php-${{ steps.version.outputs.PHP_VERSION }}-pm${{ inputs.pm-version-major }}-build-${{ github.run_number }}
           commit: ${{ github.sha }}
           bodyFile: ${{ github.workspace }}/changelog.md

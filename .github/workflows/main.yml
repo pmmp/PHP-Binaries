@@ -16,7 +16,13 @@ jobs:
     name: PM${{ matrix.pm-version-major }}
     strategy:
       matrix:
-        pm-version-major: [4, 5]
+        include:
+          - pm-version-major: 4
+            latest: false
+            recommend: '8.1'
+          - pm-version-major: 5
+            latest: ${{ github.ref_name == github.event.repository.default_branch }}
+            recommend: '8.2'
     uses: ./.github/workflows/build.yml
     with:
       pm-version-major: ${{ matrix.pm-version-major }}
