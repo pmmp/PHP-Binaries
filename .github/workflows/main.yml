@@ -26,4 +26,6 @@ jobs:
     uses: ./.github/workflows/build.yml
     with:
       pm-version-major: ${{ matrix.pm-version-major }}
+      latest: ${{ matrix.latest }}
+      recommend: ${{ matrix.recommend }}
     secrets: inherit
