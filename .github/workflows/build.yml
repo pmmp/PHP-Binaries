@@ -236,7 +236,7 @@ jobs:
             ${{ github.workspace }}/MacOS-PM${{ inputs.pm-version-major }}/*.tar.gz
             ${{ github.workspace }}/Windows-PM${{ inputs.pm-version-major }}/*.zip
           makeLatest: false
-          name: PHP ${{ steps.version.outputs.PHP_VERSION }} for PocketMine-MP ${{ inputs.pm-version-major }}.x - (Build ${{ github.run_number }})
+          name: PHP ${{ steps.version.outputs.PHP_VERSION }} for PocketMine-MP ${{ inputs.pm-version-major }}.x - Build ${{ github.run_number }}
           tag: php-${{ steps.version.outputs.PHP_VERSION }}-pm${{ inputs.pm-version-major }}-build-${{ github.run_number }}
           commit: ${{ github.sha }}
           bodyFile: ${{ github.workspace }}/changelog.md
