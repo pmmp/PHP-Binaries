@@ -1,4 +1,4 @@
-name: Build PHP binaries (parent workflow)
+name: Build PHP binaries
 
 on:
   push:
@@ -13,6 +13,7 @@ concurrency:
 
 jobs:
   everything:
+    name: PM${{ matrix.pm-version-major }}
     strategy:
       matrix:
         pm-version-major: [4, 5]

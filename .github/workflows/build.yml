@@ -1,4 +1,4 @@
-name: Build PHP binaries
+name: Build PHP binaries (reusable workflow)
 
 on:
   workflow_call:
