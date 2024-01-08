@@ -174,7 +174,7 @@ jobs:
           git push -f origin php-${{ steps.version.outputs.PHP_VERSION }}-pm${{ inputs.pm-version-major }}-latest
 
           git tag -f php-pm${{ inputs.pm-version-major }}-latest
-          git push -f origin php-${{ inputs.pm-version-major }}-latest
+          git push -f origin php-pm${{ inputs.pm-version-major }}-latest
 
       - name: Download artifacts
         uses: actions/download-artifact@v4
