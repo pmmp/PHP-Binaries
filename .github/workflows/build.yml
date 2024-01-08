@@ -200,11 +200,11 @@ jobs:
             if [[ "${{ github.ref_name }}" == *"preview" ]]; then
               echo "# :warning: :radioactive: EXPERIMENTAL!!! :radioactive: :warning:" >> changelog.md
               echo "### Your server and/or plugins may crash or misbehave with this release!" >> changelog.md
-              echo "### Consider downloading the [recommended release for PM${{ inputs.pm-version-major }}](${{ github.server_url }}/${{ github.repository }}/releases/php-pm${{ inputs.pm-version-major }}-latest) instead." >> changelog.md
+              echo "### Consider downloading the [recommended release for PM${{ inputs.pm-version-major }}](${{ github.server_url }}/${{ github.repository }}/releases/php-${{ inputs.recommend }}-pm${{ inputs.pm-version-major }}-latest) instead." >> changelog.md
             else
               echo ":warning: WARNING! :warning:" >> changelog.md
               echo "Some plugins might not work properly on this version yet." >> changelog.md
-              echo "If you have problems, try the [recommended release for PM${{ inputs.pm-version-major }}](${{ github.server_url }}/${{ github.repository }}/releases/php-pm${{ inputs.pm-version-major }}-latest) instead." >> changelog.md
+              echo "If you have problems, try the [recommended release for PM${{ inputs.pm-version-major }}](${{ github.server_url }}/${{ github.repository }}/releases/php-${{ inputs.recommend }}-pm${{ inputs.pm-version-major }}-latest) instead." >> changelog.md
             fi
           else
             echo ":white_check_mark: Recommended for **PocketMine-MP ${{ inputs.pm-version-major }}.x**." >> changelog.md
