@@ -14,6 +14,7 @@ Bash script used to compile PHP on MacOS and Linux platforms. Make sure you have
 
 ### Common pitfalls
 - Avoid using the script in directory trees containing spaces. Some libraries don't like trying to be built in directory trees containing spaces, e.g. `/home/user/my folder/pocketmine-mp/` might experience problems.
+- Avoid directory trees containing special (non-English) symbols. For example, `Développement` might cause issues.
 
 ### Additional notes
 #### Mac OSX (native compile)
