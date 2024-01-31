@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        pm-version-major: [4, 5]
+        pm-version-major: [ 4, 5 ]
 
     steps:
       - uses: actions/checkout@v4
@@ -71,8 +71,8 @@ jobs:
             workspace.tar.gz
           if-no-files-found: error
 
-  macos:
-    name: MacOS (PM ${{ matrix.pm-version-major }})
+  macos-x86-64:
+    name: MacOS-x86_64 (PM ${{ matrix.pm-version-major }})
     runs-on: macos-11.0
     strategy:
       matrix:
@@ -108,7 +108,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: MacOS-PM${{ matrix.pm-version-major }}
+          name: MacOS-x86_64-PM${{ matrix.pm-version-major }}
           path: |
             ./PHP-MacOS-x86_64-PM${{ matrix.pm-version-major }}*.tar.gz
             install.log
@@ -123,7 +123,64 @@ jobs:
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: MacOS-workspace-PM${{ matrix.pm-version-major }}
+          name: MacOS-x86_64-workspace-PM${{ matrix.pm-version-major }}
+          path: |
+            workspace.tar.gz
+          if-no-files-found: error
+
+  macos-arm64:
+    name: MacOS-ARM64 (PM ${{ matrix.pm-version-major }})
+    runs-on: macos-14
+    strategy:
+      matrix:
+        pm-version-major: [ 4, 5 ]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools and dependencies
+        run: brew install libtool autoconf automake pkg-config bison re2c
+
+      - name: Prepare compile.sh download cache
+        id: download-cache
+        uses: actions/cache@v3
+        with:
+          path: ./download_cache
+          key: compile-sh-cache-ssl-https-${{ hashFiles('./compile.sh') }}
+          restore-keys: compile-sh-cache-ssl-https-
+
+      - name: Compile PHP
+        run: |
+          export PATH="/usr/local/opt/bison/bin:$PATH"
+          set -ex
+          trap "exit 1" ERR
+          ./compile.sh -t mac-arm64 -j4 -g -P ${{ matrix.pm-version-major }} -c ./download_cache -D
+
+      - name: Create tarball
+        run: |
+          tar -czf ./PHP-MacOS-ARM64-PM${{ matrix.pm-version-major }}.tar.gz bin
+          tar -czf ./PHP-MacOS-ARM64-PM${{ matrix.pm-version-major }}-debugging-symbols.tar.gz bin-debug
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: MacOS-ARM64-PM${{ matrix.pm-version-major }}
+          path: |
+            ./PHP-MacOS-ARM64-PM${{ matrix.pm-version-major }}*.tar.gz
+            install.log
+            compile.sh
+          if-no-files-found: error
+
+      - name: Prepare workspace for upload
+        if: failure()
+        run: tar -czf workspace.tar.gz install_data
+
+      - name: Upload workspace
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: MacOS-ARM64-workspace-PM${{ matrix.pm-version-major }}
           path: |
             workspace.tar.gz
           if-no-files-found: error
@@ -168,7 +225,7 @@ jobs:
 
   publish:
     name: Publish binaries
-    needs: [linux, macos, windows]
+    needs: [linux, macos-x86-64, windows, macos-arm64]
     runs-on: ubuntu-20.04
     if: ${{ startsWith(github.ref_name, 'php/') && github.ref_type == 'branch' && !contains(github.event.head_commit.message, '[no release]') }}
 
@@ -217,7 +274,8 @@ jobs:
         with:
           artifacts: |
             ${{ github.workspace }}/Linux-PM*/*.tar.gz
-            ${{ github.workspace }}/MacOS-PM*/*.tar.gz
+            ${{ github.workspace }}/MacOS-x86_64-PM*/*.tar.gz
+            ${{ github.workspace }}/MacOS-ARM64-PM*/*.tar.gz
             ${{ github.workspace }}/Windows-PM*/*.zip
           makeLatest: ${{ github.ref_name == github.event.repository.default_branch }}
           name: PHP ${{ steps.version.outputs.PHP_VERSION }} - Latest (Build ${{ github.run_number }})
@@ -233,7 +291,8 @@ jobs:
         with:
           artifacts: |
             ${{ github.workspace }}/Linux-PM*/*.tar.gz
-            ${{ github.workspace }}/MacOS-PM*/*.tar.gz
+            ${{ github.workspace }}/MacOS-x86_64-PM*/*.tar.gz
+            ${{ github.workspace }}/MacOS-ARM64-PM*/*.tar.gz
             ${{ github.workspace }}/Windows-PM*/*.zip
           makeLatest: false
           name: PHP ${{ steps.version.outputs.PHP_VERSION }} (Build ${{ github.run_number }})
