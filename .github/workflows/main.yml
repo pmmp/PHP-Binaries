@@ -225,7 +225,7 @@ jobs:
         with:
           artifacts: |
             ${{ github.workspace }}/Linux-PM*/*.tar.gz
-            ${{ github.workspace }}/MacOS-PM*/*.tar.gz
+            ${{ github.workspace }}/MacOS-*-PM*/*.tar.gz
             ${{ github.workspace }}/Windows-PM*/*.zip
           makeLatest: ${{ github.ref_name == github.event.repository.default_branch }}
           name: PHP ${{ steps.version.outputs.PHP_VERSION }} - Latest (Build ${{ github.run_number }})
@@ -241,7 +241,7 @@ jobs:
         with:
           artifacts: |
             ${{ github.workspace }}/Linux-PM*/*.tar.gz
-            ${{ github.workspace }}/MacOS-PM*/*.tar.gz
+            ${{ github.workspace }}/MacOS-*-PM*/*.tar.gz
             ${{ github.workspace }}/Windows-PM*/*.zip
           makeLatest: false
           name: PHP ${{ steps.version.outputs.PHP_VERSION }} (Build ${{ github.run_number }})
