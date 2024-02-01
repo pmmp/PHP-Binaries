@@ -72,11 +72,19 @@ jobs:
           if-no-files-found: error
 
   macos:
-    name: MacOS (PM ${{ matrix.pm-version-major }})
-    runs-on: macos-11.0
+    name: MacOS ${{ matrix.artifact-name }} (PM ${{ matrix.pm-version-major }})
+    runs-on: ${{ matrix.image }}
     strategy:
       matrix:
         pm-version-major: [ 4, 5 ]
+        artifact-name: [x86_64, arm64]
+        include:
+          - target-name: mac-x86-64
+            artifact-name: x86_64
+            image: macos-12
+          - target-name: mac-arm64
+            artifact-name: arm64
+            image: macos-14
 
     steps:
       - uses: actions/checkout@v4
@@ -97,20 +105,20 @@ jobs:
           export PATH="/usr/local/opt/bison/bin:$PATH"
           set -ex
           trap "exit 1" ERR
-          ./compile.sh -t mac-x86-64 -j4 -g -P ${{ matrix.pm-version-major }} -c ./download_cache -D
+          ./compile.sh -t ${{ matrix.target-name }} -j4 -g -P ${{ matrix.pm-version-major }} -c ./download_cache -D
           
       - name: Create tarball
         run: |
-          tar -czf ./PHP-MacOS-x86_64-PM${{ matrix.pm-version-major }}.tar.gz bin
-          tar -czf ./PHP-MacOS-x86_64-PM${{ matrix.pm-version-major }}-debugging-symbols.tar.gz bin-debug
+          tar -czf ./PHP-MacOS-${{ matrix.artifact-name }}-PM${{ matrix.pm-version-major }}.tar.gz bin
+          tar -czf ./PHP-MacOS-${{ matrix.artifact-name }}-PM${{ matrix.pm-version-major }}-debugging-symbols.tar.gz bin-debug
         
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: MacOS-PM${{ matrix.pm-version-major }}
+          name: MacOS-${{ matrix.artifact-name }}-PM${{ matrix.pm-version-major }}
           path: |
-            ./PHP-MacOS-x86_64-PM${{ matrix.pm-version-major }}*.tar.gz
+            ./PHP-MacOS-${{ matrix.artifact-name}}-PM${{ matrix.pm-version-major }}*.tar.gz
             install.log
             compile.sh
           if-no-files-found: error
@@ -123,7 +131,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: MacOS-workspace-PM${{ matrix.pm-version-major }}
+          name: MacOS-${{ matrix.artifact-name }}-workspace-PM${{ matrix.pm-version-major }}
           path: |
             workspace.tar.gz
           if-no-files-found: error
