@@ -1,0 +1,164 @@
+name: Build PHP binaries
+
+on:
+  workflow_call:
+    inputs:
+      pm-version-major:
+        description: 'PocketMine-MP major version'
+        required: true
+        type: number
+
+jobs:
+  linux:
+    name: Linux
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools and dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install make autoconf automake libtool libtool-bin m4 wget libc-bin gzip bzip2 bison g++ git re2c
+
+      - name: Prepare compile.sh download cache
+        id: download-cache
+        uses: actions/cache@v4
+        with:
+          path: ./download_cache
+          key: compile-sh-cache-ssl-https-${{ hashFiles('./compile.sh') }}
+          restore-keys: compile-sh-cache-ssl-https-
+
+      - name: Compile PHP
+        run: |
+          # Used "set -ex" instead of hashbang since script isn't executed with hashbang
+          set -ex
+          trap "exit 1" ERR
+          ./compile.sh -t linux64 -j 4 -g -P ${{ inputs.pm-version-major }} -c ./download_cache -D
+
+      - name: Create tarball
+        run: |
+          tar -czf ./PHP-Linux-x86_64-PM${{ inputs.pm-version-major }}.tar.gz bin
+          tar -czf ./PHP-Linux-x86_64-PM${{ inputs.pm-version-major }}-debugging-symbols.tar.gz bin-debug
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Linux-PM${{ inputs.pm-version-major }}
+          path: |
+            ./PHP-Linux-x86_64-PM${{ inputs.pm-version-major }}*.tar.gz
+            install.log
+            compile.sh
+          if-no-files-found: error
+
+      - name: Prepare workspace for upload
+        if: failure()
+        run: tar -czf workspace.tar.gz install_data
+
+      - name: Upload workspace
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: Linux-workspace-PM${{ inputs.pm-version-major }}
+          path: |
+            workspace.tar.gz
+          if-no-files-found: error
+
+  macos:
+    name: MacOS ${{ matrix.artifact-name }}
+    runs-on: ${{ matrix.image }}
+    strategy:
+      matrix:
+        include:
+          - target-name: mac-x86-64
+            artifact-name: x86_64
+            image: macos-12
+          - target-name: mac-arm64
+            artifact-name: arm64
+            image: macos-14
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install tools and dependencies
+        run: brew install libtool autoconf automake pkg-config bison re2c
+        
+      - name: Prepare compile.sh download cache
+        id: download-cache
+        uses: actions/cache@v4
+        with:
+          path: ./download_cache
+          key: compile-sh-cache-ssl-https-${{ hashFiles('./compile.sh') }}
+          restore-keys: compile-sh-cache-ssl-https-
+
+      - name: Compile PHP
+        run: |
+          export PATH="/usr/local/opt/bison/bin:$PATH"
+          set -ex
+          trap "exit 1" ERR
+          ./compile.sh -t ${{ matrix.target-name }} -j4 -g -P ${{ inputs.pm-version-major }} -c ./download_cache -D
+          
+      - name: Create tarball
+        run: |
+          tar -czf ./PHP-MacOS-${{ matrix.artifact-name }}-PM${{ inputs.pm-version-major }}.tar.gz bin
+          tar -czf ./PHP-MacOS-${{ matrix.artifact-name }}-PM${{ inputs.pm-version-major }}-debugging-symbols.tar.gz bin-debug
+        
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: MacOS-${{ matrix.artifact-name }}-PM${{ inputs.pm-version-major }}
+          path: |
+            ./PHP-MacOS-${{ matrix.artifact-name}}-PM${{ inputs.pm-version-major }}*.tar.gz
+            install.log
+            compile.sh
+          if-no-files-found: error
+
+      - name: Prepare workspace for upload
+        if: failure()
+        run: tar -czf workspace.tar.gz install_data
+
+      - name: Upload workspace
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: MacOS-${{ matrix.artifact-name }}-workspace-PM${{ inputs.pm-version-major }}
+          path: |
+            workspace.tar.gz
+          if-no-files-found: error
+
+  windows:
+    name: Windows
+    runs-on: windows-2019
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install tools and dependencies
+        run: choco install wget --no-progress
+        
+      - name: Compile PHP
+        run: .\windows-compile-vs.bat
+        env:
+          VS_EDITION: Enterprise
+          SOURCES_PATH: ${{ github.workspace }}\pocketmine-php-sdk
+          PM_VERSION_MAJOR: ${{ inputs.pm-version-major }}
+
+      - name: Rename artifacts
+        run: |
+          mkdir temp
+          move php-debug-pack-*.zip temp/PHP-Windows-x64-PM${{ inputs.pm-version-major }}-debugging-symbols.zip
+          move php-*.zip temp/PHP-Windows-x64-PM${{ inputs.pm-version-major }}.zip
+          move temp\*.zip .
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Windows-PM${{ inputs.pm-version-major }}
+          path: |
+            PHP-Windows-x64*.zip
+            compile.log
+            windows-compile-vs.bat
+          if-no-files-found: error

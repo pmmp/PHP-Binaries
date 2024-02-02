@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-[ -z "$PHP_VERSION" ] && PHP_VERSION="8.3.0"
+[ -z "$PHP_VERSION" ] && PHP_VERSION="8.2.13"
 
 ZLIB_VERSION="1.3"
 GMP_VERSION="6.3.0"
@@ -236,6 +236,9 @@ done
 
 if [ "$PM_VERSION_MAJOR" == "" ]; then
 	write_error "Please specify PocketMine-MP major version target with -P (e.g. -P5)"
+	exit 1
+elif [ "$PM_VERSION_MAJOR" -lt 5 ]; then
+	write_error "PocketMine-MP 4.x and older are no longer supported"
 	exit 1
 fi
 
@@ -1035,6 +1038,7 @@ write_out "PHP" "Downloading additional extensions..."
 
 get_github_extension "pmmpthread" "$EXT_PMMPTHREAD_VERSION" "pmmp" "ext-pmmpthread"
 
+
 get_github_extension "yaml" "$EXT_YAML_VERSION" "php" "pecl-file_formats-yaml"
 #get_pecl_extension "yaml" "$EXT_YAML_VERSION"
 
@@ -1292,7 +1296,6 @@ if [[ "$HAVE_XDEBUG" == "yes" ]]; then
 	write_library "xdebug" "$EXT_XDEBUG_VERSION"
 	cd "$BUILD_DIR/php/ext/xdebug"
 	write_configure
-	sed -i".backup" 's{"80300"{"80400"{' ./config.m4
 	"$INSTALL_DIR/bin/phpize" >> "$DIR/install.log" 2>&1
 	./configure --with-php-config="$INSTALL_DIR/bin/php-config" >> "$DIR/install.log" 2>&1
 	write_compile

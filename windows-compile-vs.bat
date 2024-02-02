@@ -2,8 +2,8 @@
 
 REM For future users: This file MUST have CRLF line endings. If it doesn't, lots of inexplicable undesirable strange behaviour will result.
 REM Also: Don't modify this version with sed, or it will screw up your line endings.
-set PHP_MAJOR_VER=8.3
-set PHP_VER=%PHP_MAJOR_VER%.0
+set PHP_MAJOR_VER=8.2
+set PHP_VER=%PHP_MAJOR_VER%.13
 set PHP_GIT_REV=php-%PHP_VER%
 set PHP_DISPLAY_VER=%PHP_VER%
 set PHP_SDK_VER=2.2.0
@@ -73,6 +73,10 @@ if "%PHP_JIT_SUPPORT%"=="1" (
 
 if "%PM_VERSION_MAJOR%"=="" (
     call :pm-echo-error "Please specify PocketMine-MP major version by setting the PM_VERSION_MAJOR environment variable"
+    exit 1
+)
+if "%PM_VERSION_MAJOR%" lss "5" (
+    call :pm-echo-error "PocketMine-MP 4.x and older are no longer supported"
     exit 1
 )
 
@@ -218,7 +222,7 @@ cd /D ..
 call :pm-echo "Getting additional PHP extensions..."
 cd /D php-src\ext
 
-call :get-extension-zip-from-github "pmmpthread"            "%PHP_PMMPTHREAD_VER%"            "pmmp"     "ext-pmmpthread" || exit 1
+call :get-extension-zip-from-github "pmmpthread"            "%PHP_PMMPTHREAD_VER%"            "pmmp"     "ext-pmmpthread"          || exit 1
 call :get-extension-zip-from-github "yaml"                  "%PHP_YAML_VER%"                  "php"      "pecl-file_formats-yaml"  || exit 1
 call :get-extension-zip-from-github "chunkutils2"           "%PHP_CHUNKUTILS2_VER%"           "pmmp"     "ext-chunkutils2"         || exit 1
 call :get-extension-zip-from-github "igbinary"              "%PHP_IGBINARY_VER%"              "igbinary" "igbinary"                || exit 1
@@ -337,7 +341,11 @@ call :pm-echo "Generating php.ini..."
 (echo error_reporting=-1)>>"%php_ini%"
 (echo zend.assertions=-1)>>"%php_ini%"
 (echo extension_dir=ext)>>"%php_ini%"
-(echo extension=php_pmmpthread.dll)>>"%php_ini%"
+if "%PM_VERSION_MAJOR%" geq "5" (
+    (echo extension=php_pmmpthread.dll)>>"%php_ini%"
+) else (
+    (echo extension=php_pthreads.dll)>>"%php_ini%"
+)
 (echo extension=php_openssl.dll)>>"%php_ini%"
 (echo extension=php_chunkutils2.dll)>>"%php_ini%"
 (echo extension=php_igbinary.dll)>>"%php_ini%"
