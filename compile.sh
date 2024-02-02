@@ -14,7 +14,6 @@ LIBZIP_VERSION="1.10.1"
 SQLITE3_VERSION="3440200" #3.44.2
 LIBDEFLATE_VERSION="dd12ff2b36d603dbb7fa8838fe7e7176fcbd4f6f" #1.19
 
-EXT_PTHREADS_VERSION="4.2.2"
 EXT_PMMPTHREAD_VERSION="6.0.12"
 EXT_YAML_VERSION="2.2.3"
 EXT_LEVELDB_VERSION="317fdcd8415e1566fc2835ce2bdb8e19b890f9f3"
@@ -237,6 +236,9 @@ done
 
 if [ "$PM_VERSION_MAJOR" == "" ]; then
 	write_error "Please specify PocketMine-MP major version target with -P (e.g. -P5)"
+	exit 1
+elif [ "$PM_VERSION_MAJOR" -lt 5 ]; then
+	write_error "PocketMine-MP 4.x and older are no longer supported"
 	exit 1
 fi
 
@@ -1034,13 +1036,8 @@ function get_pecl_extension {
 cd "$BUILD_DIR/php"
 write_out "PHP" "Downloading additional extensions..."
 
-if [ "$PM_VERSION_MAJOR" -ge 5 ]; then
-	get_github_extension "pmmpthread" "$EXT_PMMPTHREAD_VERSION" "pmmp" "ext-pmmpthread"
-	THREAD_EXT_FLAGS="--enable-pmmpthread"
-else
-	get_github_extension "pthreads" "$EXT_PTHREADS_VERSION" "pmmp" "ext-pmmpthread" #"v" needed for release tags because github removes the "v"
-	THREAD_EXT_FLAGS="--enable-pthreads"
-fi
+get_github_extension "pmmpthread" "$EXT_PMMPTHREAD_VERSION" "pmmp" "ext-pmmpthread"
+
 
 get_github_extension "yaml" "$EXT_YAML_VERSION" "php" "pecl-file_formats-yaml"
 #get_pecl_extension "yaml" "$EXT_YAML_VERSION"
@@ -1160,7 +1157,7 @@ $HAS_DEBUG \
 --enable-mbstring \
 --disable-mbregex \
 --enable-calendar \
-$THREAD_EXT_FLAGS \
+--enable-pmmpthread \
 --enable-fileinfo \
 --with-libxml \
 --enable-xml \

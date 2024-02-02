@@ -16,7 +16,7 @@ jobs:
     name: PM${{ matrix.pm-version-major }}
     strategy:
       matrix:
-        pm-version-major: [4, 5]
+        pm-version-major: [5]
 
     uses: ./.github/workflows/main-pm-matrix.yml
     with:

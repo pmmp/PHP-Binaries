@@ -23,7 +23,6 @@ set PTHREAD_W32_VER=3.0.0
 set LEVELDB_MCPE_VER=1c7564468b41610da4f498430e795ca4de0931ff
 set LIBDEFLATE_VER=dd12ff2b36d603dbb7fa8838fe7e7176fcbd4f6f
 
-set PHP_PTHREADS_VER=4.2.2
 set PHP_PMMPTHREAD_VER=6.0.12
 set PHP_YAML_VER=2.2.3
 set PHP_CHUNKUTILS2_VER=0.3.5
@@ -74,6 +73,10 @@ if "%PHP_JIT_SUPPORT%"=="1" (
 
 if "%PM_VERSION_MAJOR%"=="" (
     call :pm-echo-error "Please specify PocketMine-MP major version by setting the PM_VERSION_MAJOR environment variable"
+    exit 1
+)
+if "%PM_VERSION_MAJOR%" lss "5" (
+    call :pm-echo-error "PocketMine-MP 4.x and older are no longer supported"
     exit 1
 )
 
@@ -219,14 +222,7 @@ cd /D ..
 call :pm-echo "Getting additional PHP extensions..."
 cd /D php-src\ext
 
-set THREAD_EXT_FLAGS=""
-if "%PM_VERSION_MAJOR%" geq "5" (
-    call :get-extension-zip-from-github "pmmpthread" "%PHP_PMMPTHREAD_VER%" "pmmp" "ext-pmmpthread" || exit 1
-    set THREAD_EXT_FLAGS="--with-pmmpthread=shared"
-) else (
-    call :get-extension-zip-from-github "pthreads" "%PHP_PTHREADS_VER%" "pmmp" "ext-pmmpthread" || exit 1
-    set THREAD_EXT_FLAGS="--with-pthreads=shared"
-)
+call :get-extension-zip-from-github "pmmpthread"            "%PHP_PMMPTHREAD_VER%"            "pmmp"     "ext-pmmpthread"          || exit 1
 call :get-extension-zip-from-github "yaml"                  "%PHP_YAML_VER%"                  "php"      "pecl-file_formats-yaml"  || exit 1
 call :get-extension-zip-from-github "chunkutils2"           "%PHP_CHUNKUTILS2_VER%"           "pmmp"     "ext-chunkutils2"         || exit 1
 call :get-extension-zip-from-github "igbinary"              "%PHP_IGBINARY_VER%"              "igbinary" "igbinary"                || exit 1
@@ -304,7 +300,7 @@ call configure^
  --with-mysqlnd^
  --with-openssl^
  --with-pcre-jit^
- %THREAD_EXT_FLAGS%^
+ --with-pmmpthread=shared^
  --with-simplexml^
  --with-sodium^
  --with-sqlite3=shared^
