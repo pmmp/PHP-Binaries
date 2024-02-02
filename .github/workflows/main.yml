@@ -14,7 +14,6 @@ concurrency:
 jobs:
   all-builds:
     name: PM${{ matrix.pm-version-major }}
-    runs-on: ubuntu-20.04
     strategy:
       matrix:
         pm-version-major: [4, 5]
