@@ -70,7 +70,7 @@ jobs:
           echo ":information_source: **Linux/MacOS users**: Please see [this page](https://doc.pmmp.io/en/rtfd/faq/installation/opcache.so.html) to fix extension loading errors. Also, check out the [PocketMine-MP Linux/MacOS installer](https://doc.pmmp.io/en/rtfd/installation/get-dot-pmmp-dot-io.html)." >> changelog.md
 
       - name: Update latest branch release
-        uses: ncipollo/release-action@v1.13.0
+        uses: ncipollo/release-action@v1.14.0
         with:
           artifacts: |
             ${{ github.workspace }}/Linux-PM*/*.tar.gz
@@ -86,7 +86,7 @@ jobs:
           prerelease: ${{ endsWith(github.ref_name, '-preview') }}
 
       - name: Publish unique release
-        uses: ncipollo/release-action@v1.13.0
+        uses: ncipollo/release-action@v1.14.0
         with:
           artifacts: |
             ${{ github.workspace }}/Linux-PM*/*.tar.gz
