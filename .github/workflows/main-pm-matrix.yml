@@ -334,7 +334,7 @@ jobs:
           echo DATE=$(date -u +'%d %b %Y') >> $GITHUB_OUTPUT
 
       - name: Update recommended PM release
-        uses: ncipollo/release-action@v1.15.0
+        uses: ncipollo/release-action@v1.16.0
         if: ${{ inputs.special-release != 'none' }}
         with:
           artifacts: |
@@ -351,7 +351,7 @@ jobs:
           prerelease: ${{ inputs.pm-preview == 'true' }}
 
       - name: Update php-version PM release
-        uses: ncipollo/release-action@v1.15.0
+        uses: ncipollo/release-action@v1.16.0
         with:
           artifacts: |
             ${{ github.workspace }}/*PHP-*-PM*/*.tar.gz
