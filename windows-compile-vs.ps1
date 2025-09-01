@@ -275,7 +275,7 @@ function sdk-command {
 
     New-Item task.bat -Value $command >> $log_file 2>&1
     echo "Running SDK command: $command" >> $log_file
-    $wrap = "`"$SOURCES_PATH\phpsdk-starter.bat -c $VC_VER -a $ARCH $TOOLSET_VER_FLAG`" -t task.bat 2>&1"
+    $wrap = "`"$SOURCES_PATH\phpsdk-starter.bat`" -c $VC_VER -a $ARCH $TOOLSET_VER_FLAG -t task.bat 2>&1"
     echo "SDK wrapper command: $wrap" >> $log_file
     (& cmd.exe /c $wrap) >> $log_file
     $result=$LASTEXITCODE
