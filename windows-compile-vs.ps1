@@ -184,6 +184,7 @@ $PHP_DISPLAY_VER="$PHP_VER"
 
 #TODO: these should be selected by PHP base version
 $VC_VER=""
+$TOOLSET_VER_FLAG=""
 $CMAKE_TARGET=""
 
 $PHP_VERSION_ID = php-version-id $PHP_VER
@@ -193,6 +194,7 @@ if ($PHP_VERSION_ID -ge 80400) {
 } else {
     $VC_VER="vs16"
     $CMAKE_TARGET="Visual Studio 16 2019"
+    $TOOLSET_VER_FLAG="-s 14.29" #workaround for phpsdk-starter not finding old toolset on newer VS 2022
 }
 
 pm-echo "Selected PHP $PHP_VER ($PHP_VERSION_ID) and toolset $VC_VER ($CMAKE_TARGET)"
@@ -273,7 +275,7 @@ function sdk-command {
 
     New-Item task.bat -Value $command >> $log_file 2>&1
     echo "Running SDK command: $command" >> $log_file
-    $wrap = "`"$SOURCES_PATH\phpsdk-$VC_VER-$ARCH.bat`" -t task.bat 2>&1"
+    $wrap = "`"$SOURCES_PATH\phpsdk-starter.bat -c $VC_VER -a $ARCH $TOOLSET_VER_FLAG`" -t task.bat 2>&1"
     echo "SDK wrapper command: $wrap" >> $log_file
     (& cmd.exe /c $wrap) >> $log_file
     $result=$LASTEXITCODE
