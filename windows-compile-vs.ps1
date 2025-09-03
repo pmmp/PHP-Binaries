@@ -182,22 +182,25 @@ if ($PHP_VER -eq "") {
 $PHP_GIT_REV="php-$PHP_VER"
 $PHP_DISPLAY_VER="$PHP_VER"
 
-#TODO: these should be selected by PHP base version
+$CMAKE_TARGET="Visual Studio 17 2022"
+
 $VC_VER=""
-$TOOLSET_VER_FLAG=""
-$CMAKE_TARGET=""
+$SDL_TOOLSET_FLAG=""
+$CMAKE_TOOLSET_FLAG=""
 
 $PHP_VERSION_ID = php-version-id $PHP_VER
 if ($PHP_VERSION_ID -ge 80400) {
     $VC_VER="vs17"
-    $CMAKE_TARGET="Visual Studio 17 2022"
+    $SDK_TOOLSET_FLAG=""
+    $CMAKE_TOOLSET_FLAG=""
 } else {
+    #technically it's fine to build <8.4 with vs17, but this would make the binaries ABI-incompatible with community prebuilt extensions
     $VC_VER="vs16"
-    $CMAKE_TARGET="Visual Studio 16 2019"
-    $TOOLSET_VER_FLAG="-s 14.29" #workaround for phpsdk-starter not finding old toolset on newer VS 2022
+    $SDK_TOOLSET_FLAG="-s=14.29"
+    $CMAKE_TOOLSET_FLAG="-T v142"
 }
 
-pm-echo "Selected PHP $PHP_VER ($PHP_VERSION_ID) and toolset $VC_VER ($CMAKE_TARGET)"
+pm-echo "Selected PHP $PHP_VER ($PHP_VERSION_ID), SDK target $VC_VER ($SDK_TOOLSET_FLAG), CMake target $CMAKE_TARGET ($CMAKE_TOOLSET_FLAG)"
 
 if ($env:SOURCES_PATH -ne $null) {
     $SOURCES_PATH=$env:SOURCES_PATH
@@ -275,7 +278,7 @@ function sdk-command {
 
     New-Item task.bat -Value $command >> $log_file 2>&1
     echo "Running SDK command: $command" >> $log_file
-    $wrap = "`"$SOURCES_PATH\phpsdk-starter.bat`" -c $VC_VER -a $ARCH $TOOLSET_VER_FLAG -t task.bat 2>&1"
+    $wrap = "`"$SOURCES_PATH\phpsdk-starter.bat`" -c $VC_VER -a $ARCH $SDK_TOOLSET_FLAG -t task.bat 2>&1"
     echo "SDK wrapper command: $wrap" >> $log_file
     (& cmd.exe /c $wrap) >> $log_file
     $result=$LASTEXITCODE
@@ -306,7 +309,7 @@ function build-yaml {
     Push-Location libyaml
 
     write-configure
-    sdk-command "cmake -G `"$CMAKE_TARGET`"^`
+    sdk-command "cmake -G `"$CMAKE_TARGET`" $CMAKE_TOOLSET_FLAG^`
         -DCMAKE_PREFIX_PATH=`"$DEPS_DIR`"^`
         -DCMAKE_INSTALL_PREFIX=`"$DEPS_DIR`"^`
         -DBUILD_SHARED_LIBS=ON^`
@@ -354,7 +357,7 @@ function build-leveldb {
     Push-Location leveldb
 
     write-configure
-    sdk-command "cmake -G `"$CMAKE_TARGET`"^`
+    sdk-command "cmake -G `"$CMAKE_TARGET`" $CMAKE_TOOLSET_FLAG^`
         -DCMAKE_PREFIX_PATH=`"$DEPS_DIR`"^`
         -DCMAKE_INSTALL_PREFIX=`"$DEPS_DIR`"^`
         -DBUILD_SHARED_LIBS=ON^`
@@ -383,7 +386,7 @@ function build-libdeflate {
 
     write-configure
     #TODO: not sure why we have arch here but not on other cmake targets
-    sdk-command "cmake -G `"$CMAKE_TARGET`" -A `"$ARCH`"^`
+    sdk-command "cmake -G `"$CMAKE_TARGET`" -A `"$ARCH`" $CMAKE_TOOLSET_FLAG^`
         -DCMAKE_PREFIX_PATH=`"$DEPS_DIR`"^`
         -DCMAKE_INSTALL_PREFIX=`"$DEPS_DIR`"^`
         -DLIBDEFLATE_BUILD_GZIP=OFF^`
