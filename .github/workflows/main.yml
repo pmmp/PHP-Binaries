@@ -39,7 +39,7 @@ jobs:
 
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: ${{ github.workspace }}
 
@@ -53,7 +53,7 @@ jobs:
           echo -e "\n\n\n" >> changelog.md
 
       - name: Create release
-        uses: ncipollo/release-action@v1.15.0
+        uses: ncipollo/release-action@v1.20.0
         with:
           artifacts: |
             ${{ github.workspace }}/*PHP-*-PM*/*.tar.gz
