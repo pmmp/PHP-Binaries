@@ -569,11 +569,11 @@ write-install
 sdk-command "nmake snap"
 
 #remove ICU DLLs copied unnecessarily by nmake snap - this needs to be removed if we ever have ext/intl as a dependency
-Remove-Item "$SOURCES_PATH\php-src\$ARCH\Release_TS\php-$PHP_DISPLAY_VER\icu*.dll" >> $log_file 2>&1
+Remove-Item "$SOURCES_PATH\php-src\$ARCH\$($OUT_PATH_REL)_TS\php-$PHP_DISPLAY_VER\icu*.dll" >> $log_file 2>&1
 #remove enchant dependencies which are unnecessarily copied - this needs to be removed if we ever have ext/enchant as a dependency
-Remove-Item "$SOURCES_PATH\php-src\$ARCH\Release_TS\php-$PHP_DISPLAY_VER\glib-*.dll" >> $log_file 2>&1
-Remove-Item "$SOURCES_PATH\php-src\$ARCH\Release_TS\php-$PHP_DISPLAY_VER\gmodule-*.dll" >> $log_file 2>&1
-Remove-Item -Recurse "$SOURCES_PATH\php-src\$ARCH\Release_TS\php-$PHP_DISPLAY_VER\lib\enchant\" >> $log_file 2>&1
+Remove-Item "$SOURCES_PATH\php-src\$ARCH\$($OUT_PATH_REL)_TS\php-$PHP_DISPLAY_VER\glib-*.dll" >> $log_file 2>&1
+Remove-Item "$SOURCES_PATH\php-src\$ARCH\$($OUT_PATH_REL)_TS\php-$PHP_DISPLAY_VER\gmodule-*.dll" >> $log_file 2>&1
+Remove-Item -Recurse "$SOURCES_PATH\php-src\$ARCH\$($OUT_PATH_REL)_TS\php-$PHP_DISPLAY_VER\lib\enchant\" >> $log_file 2>&1
 
 cd $outpath >> $log_file 2>&1
 Move-Item -Force "$SOURCES_PATH\php-src\$ARCH\$($OUT_PATH_REL)_TS\php-debug-pack-*.zip" $outpath
