@@ -84,7 +84,7 @@ jobs:
           tar -czf ./Z-PHP-${{ inputs.php-version-base }}-Android-arm64-PM${{ inputs.pm-version-major }}-debugging-symbols.tar.gz bin-debug
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always()
         with:
           name: PHP-${{ inputs.php-version-base }}-Android-PM${{ inputs.pm-version-major }}
@@ -99,7 +99,7 @@ jobs:
         run: tar -czf workspace.tar.gz install_data
 
       - name: Upload workspace
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: failure()
         with:
           name: PHP-${{ inputs.php-version-base }}-Android-workspace-PM${{ inputs.pm-version-major }}
@@ -140,7 +140,7 @@ jobs:
           tar -czf ./Z-PHP-${{ inputs.php-version-base }}-Linux-x86_64-PM${{ inputs.pm-version-major }}-debugging-symbols.tar.gz bin-debug
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always()
         with:
           name: PHP-${{ inputs.php-version-base }}-Linux-PM${{ inputs.pm-version-major }}
@@ -155,7 +155,7 @@ jobs:
         run: tar -czf workspace.tar.gz install_data
 
       - name: Upload workspace
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: failure()
         with:
           name: PHP-${{ inputs.php-version-base }}-Linux-workspace-PM${{ inputs.pm-version-major }}
@@ -206,7 +206,7 @@ jobs:
           tar -czf ./Z-PHP-${{ inputs.php-version-base }}-MacOS-${{ matrix.artifact-name }}-PM${{ inputs.pm-version-major }}-debugging-symbols.tar.gz bin-debug
         
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always()
         with:
           name: PHP-${{ inputs.php-version-base }}-MacOS-${{ matrix.artifact-name }}-PM${{ inputs.pm-version-major }}
@@ -221,7 +221,7 @@ jobs:
         run: tar -czf workspace.tar.gz install_data
 
       - name: Upload workspace
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: failure()
         with:
           name: PHP-${{ inputs.php-version-base }}-MacOS-${{ matrix.artifact-name }}-workspace-PM${{ inputs.pm-version-major }}
@@ -259,7 +259,7 @@ jobs:
           move temp\*.zip .
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always()
         with:
           name: PHP-${{ inputs.php-version-base }}-Windows-PM${{ inputs.pm-version-major }}
@@ -291,7 +291,7 @@ jobs:
           git push -f origin pm${{ inputs.pm-version-major }}-latest
 
       - name: Download artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           path: ${{ github.workspace }}
           pattern: "*PHP-${{ inputs.php-version-base }}-*-PM${{ inputs.pm-version-major }}"
@@ -301,7 +301,7 @@ jobs:
           curl -L https://raw.githubusercontent.com/php/php-src/refs/heads/PHP-${{ inputs.php-version-base }}/.gdbinit -o Z-PHP-${{ inputs.php-version-base }}.gdbinit
 
       - name: Upload .gdbinit artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: PHP-${{ inputs.php-version-base }}.gdbinit
           path: |
